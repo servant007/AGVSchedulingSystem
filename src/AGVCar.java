@@ -3,7 +3,8 @@ public class AGVCar{
 		private int x;
 		private int y;
 		private Edge edge;
-		
+		private int electricity;
+		private boolean keepAlived;
 		
 		public AGVCar(){
 		}
@@ -38,4 +39,19 @@ public class AGVCar{
 			y = edge.startNode.y;
 		}
 		
+		public void setElectricity(int electricity){
+			this.electricity = electricity;
+		}
+		
+		public int getElectricity(){
+			return electricity;
+		}
+		
+		public void setKeepAlived(boolean keepAlived){
+			this.keepAlived = keepAlived;
+		}
+		
+		public boolean getKeepAlived(){
+			return keepAlived;
+		}
 	}

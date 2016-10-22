@@ -1,5 +1,5 @@
 
-public class ToolKit {
+public class MyToolKit {
 	
 	public byte[] HexString2Bytes(String src) {
 		if (null == src || 0 == src.length()) {

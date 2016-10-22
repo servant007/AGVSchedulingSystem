@@ -18,6 +18,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -35,8 +36,7 @@ public class Mainwindow extends JFrame{
 	private boolean firstInit;
 	private static Timer timer;
 	private ServerSocket serverSocket;
-	private ExecutorService receiveExecutor;
-	private ToolKit toolKit;
+	private MyToolKit toolKit;
 	
 	public Mainwindow(){
 		super("AGV调度系统");
@@ -47,42 +47,45 @@ public class Mainwindow extends JFrame{
 			AGVArray.add(new AGVCar());
 		}
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		
 		windowSize = new Dimension(screenSize.width, (int)((int)screenSize.height*0.94));
 		panelSize = new Dimension(0, 0);
-		
-		JMenuBar menuBar = new JMenuBar();
-		  
-		JMenu fileMenu = new JMenu("文件");
-		JMenu editMenu = new JMenu("编辑");
-		JMenu formatMenu = new JMenu("格式");
-		JMenu checkMenu = new JMenu("查看");
-		JMenu helpMenu = new JMenu("帮助");
-		 
-		menuBar.add(fileMenu);
-		menuBar.add(editMenu);
-		menuBar.add(formatMenu);
-		menuBar.add(checkMenu);
-		menuBar.add(helpMenu);
-		
+		JPanel topPanel = new JPanel();
+		JButton schedulGuiBtn = new JButton("调度界面");
+		schedulGuiBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				
+			}
+		});
+		JButton setGuiBtn = new JButton("设置界面");
+		setGuiBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				
+			}
+		});
+		JButton graphGuiBtn = new JButton("画图界面");
+		graphGuiBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				
+			}
+		});
+		topPanel.add(schedulGuiBtn);
+		topPanel.add(setGuiBtn);
+		topPanel.add(graphGuiBtn);
 		mainPanel = new MainPanel();
 		timer = new Timer(100, new TimerListener());
-		
+		this.getContentPane().add(topPanel);
 		this.getContentPane().add(mainPanel);	  
-		this.setJMenuBar(menuBar);
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		  
-		//用来设置窗口随屏幕大小改变
 		this.setSize(windowSize);
 		this.setVisible(true);		   
 		
 		try{
-			serverSocket = new ServerSocket(8001);
+			serverSocket = new ServerSocket(8080);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		//receiveExecutor = Executors.newFixedThreadPool(7);
-		toolKit = new ToolKit();
+
+		toolKit = new MyToolKit();
 		new Thread(new Runnable(){
 			public void run(){
 				while(true){
@@ -96,7 +99,6 @@ public class Mainwindow extends JFrame{
 				}
 			}
 		}).start();
-		
 	}
 	
 	class HandleReceiveMessage implements Runnable{
@@ -106,19 +108,21 @@ public class Mainwindow extends JFrame{
 			try{
 				inputStream = socket.getInputStream();
 				outputStream = socket.getOutputStream();
-				outputStream.write(toolKit.HexString2Bytes("1234"));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
 			
 		}
 		public void run(){
-			try{
-				byte[] buff = new byte[4];
-				int len = inputStream.read(buff);
-				toolKit.printHexString(buff);
-			}catch(Exception e){
-				e.printStackTrace();
+			while(true){
+				try{
+					byte[] buff = new byte[4];
+					inputStream.read(buff);
+					toolKit.printHexString(buff);
+					outputStream.write(toolKit.HexString2Bytes("1234"));
+				}catch(Exception e){
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -175,7 +179,9 @@ public class Mainwindow extends JFrame{
 	}
 	
 	public static void main(String[] args) {
-		Mainwindow mainwidow = new Mainwindow();
+		Mainwindow mainWindow = new Mainwindow();
+		mainWindow.setLocationRelativeTo(null);
+		mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		timer.start();
 	}
 }
