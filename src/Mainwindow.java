@@ -6,7 +6,17 @@ import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -24,6 +34,9 @@ public class Mainwindow extends JFrame{
 	private Graph graph;
 	private boolean firstInit;
 	private static Timer timer;
+	private ServerSocket serverSocket;
+	private ExecutorService receiveExecutor;
+	private ToolKit toolKit;
 	
 	public Mainwindow(){
 		super("AGV调度系统");
@@ -62,7 +75,54 @@ public class Mainwindow extends JFrame{
 		//用来设置窗口随屏幕大小改变
 		this.setSize(windowSize);
 		this.setVisible(true);		   
+		
+		try{
+			serverSocket = new ServerSocket(8001);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		//receiveExecutor = Executors.newFixedThreadPool(7);
+		toolKit = new ToolKit();
+		new Thread(new Runnable(){
+			public void run(){
+				while(true){
+					Socket socket = null;
+					try{
+						socket = serverSocket.accept();
+						new Thread(new HandleReceiveMessage(socket)).start();
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+				}
+			}
+		}).start();
+		
 	}
+	
+	class HandleReceiveMessage implements Runnable{
+		private InputStream inputStream;
+		private OutputStream outputStream;
+		HandleReceiveMessage(Socket socket){
+			try{
+				inputStream = socket.getInputStream();
+				outputStream = socket.getOutputStream();
+				outputStream.write(toolKit.HexString2Bytes("1234"));
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			
+		}
+		public void run(){
+			try{
+				byte[] buff = new byte[4];
+				int len = inputStream.read(buff);
+				toolKit.printHexString(buff);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	
 	class MainPanel extends JPanel{
 		private static final long serialVersionUID = 1L;
@@ -73,14 +133,8 @@ public class Mainwindow extends JFrame{
 		protected void paintComponent(Graphics g){
 			super.paintComponents(g);
 			if(firstInit){
-				//draw graph
 				drawGraph(g);
-				//draw agv
-				//g.setColor(Color.red);
-				//g.setFont(new java.awt.Font("Dialog", 1, 20));
-				//g.drawString("00",AGVArray.get(0).getY(), AGVArray.get(0).getX()+25);
-				g.setColor(Color.green);
-				g.fillOval(AGVArray.get(0).getX() - 10, AGVArray.get(0).getY() - 10, 20, 20);
+				drawAGV(g);
 			}
 		}
 	}
@@ -94,6 +148,14 @@ public class Mainwindow extends JFrame{
 		g.setColor(Color.YELLOW);
 		for(int i = 0 ; i < graph.getNodeSize(); i++)
 			g.fillRect(graph.getNode(i).x - 5, graph.getNode(i).y - 5, 10, 10);
+	}
+	
+	public void drawAGV(Graphics g){
+		g.setColor(Color.green);
+		g.fillOval(AGVArray.get(0).getX() - 12, AGVArray.get(0).getY() - 12, 24, 24);
+		g.setColor(Color.red);
+		g.setFont(new java.awt.Font("Dialog", 1, 18));
+		g.drawString("0",AGVArray.get(0).getX() - 5, AGVArray.get(0).getY() + 5);
 	}
 	
 	class TimerListener implements ActionListener{
