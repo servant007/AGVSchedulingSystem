@@ -2,7 +2,7 @@ package schedulingSystem.component;
 
 import schedulingSystem.gui.GraphingGui;
 import schedulingSystem.gui.SchedulingGui;
-import schedulingSystem.toolKit.SetingGui;
+import schedulingSystem.gui.*;;
 
 public class Main {
 

@@ -1,19 +1,23 @@
-package schedulingSystem.toolKit;
+package schedulingSystem.gui;
+
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import schedulingSystem.gui.GraphingGui;
-import schedulingSystem.gui.RoundButton;
+import schedulingSystem.toolKit.*;
 import schedulingSystem.gui.SchedulingGui;
 
 public class SetingGui extends JFrame{
-	private Dimension windowSize;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private RoundButton schedulingGuiBtn;
 	private RoundButton setingGuiBtn;
 	private RoundButton graphGuiBtn;
@@ -21,27 +25,26 @@ public class SetingGui extends JFrame{
 	public SetingGui(){
 		super("AGV调度系统");
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		windowSize = new Dimension(screenSize.width, (int)((int)screenSize.height*0.94));
-		this.setSize(windowSize);
+		this.setExtendedState(Frame.MAXIMIZED_BOTH);
 		
 		JPanel mainPanel = new JPanel();
 
 		schedulingGuiBtn = new RoundButton("调度界面1");
-		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, 40);
+		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/15);
 		schedulingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				
 			}
 		});
 		setingGuiBtn = new RoundButton("设置界面1");
-		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, 40);
+		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/15);
 		setingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				
 			}
 		});
 		graphGuiBtn = new RoundButton("画图界面1");
-		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, 40);
+		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/15);
 		graphGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				

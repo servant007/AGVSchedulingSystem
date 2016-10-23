@@ -21,13 +21,15 @@ public class MyToolKit {
 			return ret; 
 	}
 
-	public void printHexString( byte[] b) {  
+	public String printHexString( byte[] b) { 
+		String buff = "";
 		for (int i = 0; i < b.length; i++) { 
 			String hex = Integer.toHexString(b[i] & 0xFF); 
 			if (hex.length() == 1) { 
 				hex = '0' + hex; 
 			} 
-			System.out.print(hex.toUpperCase() ); 
+			buff+=hex;
 		} 
+		return buff;
 	}
 }

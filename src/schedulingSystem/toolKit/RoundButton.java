@@ -1,12 +1,15 @@
-package schedulingSystem.gui;
+package schedulingSystem.toolKit;
 import java.awt.*;
 import java.awt.geom.*;
 import javax.swing.*;
-import java.net.*;
 
 public class RoundButton extends JButton {
     
-    public RoundButton(String label) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public RoundButton(String label) {
         super(label);
 
         // These statements enlarge the button so that it
@@ -20,7 +23,7 @@ public class RoundButton extends JButton {
         setContentAreaFilled(false);
         this.setBackground(Color.blue);
         this.setFocusPainted(false);
-        this.setFont(new Font("ËÎÌו", Font.BOLD, 16));
+        this.setFont(new Font("ËÎÌו", Font.BOLD, 25));
         this.setForeground(Color.WHITE);
     }
 

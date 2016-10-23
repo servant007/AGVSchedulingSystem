@@ -2,6 +2,7 @@ package schedulingSystem.gui;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
@@ -12,22 +13,17 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import schedulingSystem.component.AGVCar;
 import schedulingSystem.component.Graph;
 import schedulingSystem.toolKit.MyToolKit;
-import schedulingSystem.toolKit.SetingGui;
+import schedulingSystem.toolKit.RoundButton;
 
 public class SchedulingGui extends JFrame{
 	private static final long serialVersionUID = 1L;
-	private Dimension windowSize;
 	private Dimension panelSize;
 	private int numOfAGV;
 	private MainPanel mainPanel;
@@ -43,38 +39,14 @@ public class SchedulingGui extends JFrame{
 	public SchedulingGui(){
 		super("AGV调度系统");
 		graph = new Graph();
+		toolKit = new MyToolKit();
+		panelSize = new Dimension(0, 0);
 		numOfAGV = 10;
 		AGVArray = new ArrayList<AGVCar>();
+		
 		for(int i = 0; i < numOfAGV; i++){
 			AGVArray.add(new AGVCar());
 		}
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		windowSize = new Dimension(screenSize.width, (int)((int)screenSize.height*0.94));
-		panelSize = new Dimension(0, 0);
-		
-		schedulingGuiBtn = new RoundButton("调度界面");
-		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, 40);
-		
-		setingGuiBtn = new RoundButton("设置界面");
-		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, 40);
-		
-		graphGuiBtn = new RoundButton("画图界面");
-		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, 40);
-		
-		mainPanel = new MainPanel();
-		mainPanel.setLayout(null);
-		mainPanel.add(schedulingGuiBtn);
-		mainPanel.add(setingGuiBtn);
-		mainPanel.add(graphGuiBtn);
-		
-		
-		this.getContentPane().add(mainPanel);	  
-		//this.setJMenuBar(menuBar);
-		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		this.setSize(windowSize);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setLocationRelativeTo(null);
-		this.setVisible(true);		   
 		
 		try{
 			serverSocket = new ServerSocket(8080);
@@ -82,7 +54,6 @@ public class SchedulingGui extends JFrame{
 			e.printStackTrace();
 		}
 
-		toolKit = new MyToolKit();
 		new Thread(new Runnable(){
 			public void run(){
 				while(true){
@@ -96,6 +67,28 @@ public class SchedulingGui extends JFrame{
 				}
 			}
 		}).start();
+		
+		
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		schedulingGuiBtn = new RoundButton("调度界面");
+		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/15);
+		setingGuiBtn = new RoundButton("设置界面");
+		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/15);
+		graphGuiBtn = new RoundButton("画图界面");
+		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/15);
+		
+		mainPanel = new MainPanel();
+		mainPanel.setLayout(null);
+		mainPanel.add(schedulingGuiBtn);
+		mainPanel.add(setingGuiBtn);
+		mainPanel.add(graphGuiBtn);
+		
+		this.getContentPane().add(mainPanel);	  
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setExtendedState(Frame.MAXIMIZED_BOTH);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
 	}
 	
 	public void getGuiInstance(SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
@@ -139,7 +132,14 @@ public class SchedulingGui extends JFrame{
 				try{
 					byte[] buff = new byte[4];
 					inputStream.read(buff);
-					toolKit.printHexString(buff);
+					String message = toolKit.printHexString(buff);
+					if(message.startsWith("AA")&&message.endsWith("BB")){
+						int noOfAGV = Integer.parseInt(message.substring(2, 3), 16);
+						int noOfEdge = Integer.parseInt(message.substring(4, 5), 16);
+						int electricity = Integer.parseInt(message.substring(6, 7), 16);
+						AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge));
+						AGVArray.get(noOfAGV).setElectricity(electricity);
+					}
 					outputStream.write(toolKit.HexString2Bytes("1234"));
 				}catch(Exception e){
 					e.printStackTrace();
@@ -177,11 +177,13 @@ public class SchedulingGui extends JFrame{
 	}
 	
 	public void drawAGV(Graphics g){
-		g.setColor(Color.green);
-		g.fillOval(AGVArray.get(0).getX() - 12, AGVArray.get(0).getY() - 12, 24, 24);
-		g.setColor(Color.red);
-		g.setFont(new java.awt.Font("Dialog", 1, 18));
-		g.drawString("0",AGVArray.get(0).getX() - 5, AGVArray.get(0).getY() + 5);
+		for(int i = 0; i < AGVArray.size(); i++){
+			g.setColor(Color.green);
+			g.fillOval(AGVArray.get(i).getX() - 15, AGVArray.get(i).getY() - 15, 30, 30);
+			g.setColor(Color.red);
+			g.setFont(new java.awt.Font("Dialog", 1, 20));
+			g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 5, AGVArray.get(i).getY() + 5);
+		}
 	}
 	
 	class TimerListener implements ActionListener{
@@ -191,9 +193,16 @@ public class SchedulingGui extends JFrame{
 				panelSize.width = mainPanel.getWidth();
 				panelSize.height = mainPanel.getHeight();
 				graph.createGraph(panelSize);
-				AGVArray.get(0).setOnEdge(graph.getEdge(3));
+				/*
+				for(int i = 0; i < AGVArray.size(); i++){
+					AGVArray.get(i).setOnEdge(graph.getEdge(3));
+				}*/
 				firstInit = true;
 			}else {
+				/*
+				for(int i = 0; i < AGVArray.size(); i ++){
+					AGVArray.get(i).stepForward();
+				}*/
 				AGVArray.get(0).stepForward();
 			}
 						
