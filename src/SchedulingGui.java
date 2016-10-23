@@ -6,17 +6,11 @@ import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -25,7 +19,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class Mainwindow extends JFrame{
+public class SchedulingGui extends JFrame{
 	private static final long serialVersionUID = 1L;
 	private Dimension windowSize;
 	private Dimension panelSize;
@@ -34,11 +28,13 @@ public class Mainwindow extends JFrame{
 	private ArrayList<AGVCar> AGVArray;
 	private Graph graph;
 	private boolean firstInit;
-	private static Timer timer;
 	private ServerSocket serverSocket;
 	private MyToolKit toolKit;
+	private RoundButton schedulingGuiBtn;
+	private RoundButton setingGuiBtn;
+	private RoundButton graphGuiBtn;
 	
-	public Mainwindow(){
+	public SchedulingGui(){
 		super("AGV调度系统");
 		graph = new Graph();
 		numOfAGV = 10;
@@ -49,34 +45,29 @@ public class Mainwindow extends JFrame{
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		windowSize = new Dimension(screenSize.width, (int)((int)screenSize.height*0.94));
 		panelSize = new Dimension(0, 0);
-		JPanel topPanel = new JPanel();
-		JButton schedulGuiBtn = new JButton("调度界面");
-		schedulGuiBtn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				
-			}
-		});
-		JButton setGuiBtn = new JButton("设置界面");
-		setGuiBtn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				
-			}
-		});
-		JButton graphGuiBtn = new JButton("画图界面");
-		graphGuiBtn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				
-			}
-		});
-		topPanel.add(schedulGuiBtn);
-		topPanel.add(setGuiBtn);
-		topPanel.add(graphGuiBtn);
+		
+		schedulingGuiBtn = new RoundButton("调度界面");
+		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, 40);
+		
+		setingGuiBtn = new RoundButton("设置界面");
+		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, 40);
+		
+		graphGuiBtn = new RoundButton("画图界面");
+		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, 40);
+		
 		mainPanel = new MainPanel();
-		timer = new Timer(100, new TimerListener());
-		this.getContentPane().add(topPanel);
+		mainPanel.setLayout(null);
+		mainPanel.add(schedulingGuiBtn);
+		mainPanel.add(setingGuiBtn);
+		mainPanel.add(graphGuiBtn);
+		
+		
 		this.getContentPane().add(mainPanel);	  
+		//this.setJMenuBar(menuBar);
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setSize(windowSize);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setLocationRelativeTo(null);
 		this.setVisible(true);		   
 		
 		try{
@@ -99,6 +90,30 @@ public class Mainwindow extends JFrame{
 				}
 			}
 		}).start();
+	}
+	
+	public void getGuiInstance(SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
+		schedulingGuiBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				
+			}
+		});
+
+		setingGuiBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				schedulingGui.setVisible(false);
+				setingGui.setVisible(true);
+				graphingGui.setVisible(false);
+			}
+		});
+
+		graphGuiBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				schedulingGui.setVisible(false);
+				setingGui.setVisible(false);
+				graphingGui.setVisible(true);
+			}
+		});
 	}
 	
 	class HandleReceiveMessage implements Runnable{
@@ -132,7 +147,8 @@ public class Mainwindow extends JFrame{
 		private static final long serialVersionUID = 1L;
 		
 		public MainPanel(){
-			
+			Timer timer = new Timer(100, new TimerListener());
+			timer.start();
 		}
 		protected void paintComponent(Graphics g){
 			super.paintComponents(g);
@@ -176,12 +192,5 @@ public class Mainwindow extends JFrame{
 			}
 						
 		}
-	}
-	
-	public static void main(String[] args) {
-		Mainwindow mainWindow = new Mainwindow();
-		mainWindow.setLocationRelativeTo(null);
-		mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		timer.start();
 	}
 }
