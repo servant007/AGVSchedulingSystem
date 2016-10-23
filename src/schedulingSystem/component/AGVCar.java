@@ -5,8 +5,10 @@ public class AGVCar{
 		private Edge edge;
 		private int electricity;
 		private boolean keepAlived;
+		private boolean finishEdge;
 		
 		public AGVCar(){
+			finishEdge = true;
 		}
 		
 		public int getX(){
@@ -18,22 +20,41 @@ public class AGVCar{
 		}
 		
 		public void stepForward(){
-			if(edge.startNode.x == edge.endNode.x){
-				if(edge.startNode.y < edge.endNode.y && y < edge.endNode.y){
-					y +=5;
-				}else if(edge.startNode.y > edge.endNode.y && y > edge.endNode.y){
-					y -=5;
-				}
-			}else if(edge.startNode.y == edge.endNode.y){
-				if(edge.startNode.x < edge.endNode.x && x < edge.endNode.x){
-					x +=5;
-				}else if(edge.startNode.x > edge.endNode.x && x > edge.endNode.x){
-					x -=5;
+			if(!finishEdge){
+				if(edge.startNode.x == edge.endNode.x){
+					if(edge.startNode.y < edge.endNode.y ){
+						if(y < edge.endNode.y){
+							y +=5;
+						}else{
+							finishEdge = true;
+						}	
+					}else if(edge.startNode.y > edge.endNode.y ){
+						if(y > edge.endNode.y){
+							y -=5;
+						}else{
+							finishEdge = true;
+						}
+						
+					}
+				}else if(edge.startNode.y == edge.endNode.y){
+					if(edge.startNode.x < edge.endNode.x ){
+						if(x < edge.endNode.x)
+							x +=5;
+						else
+							finishEdge = true;
+					}else if(edge.startNode.x > edge.endNode.x){
+						if(x > edge.endNode.x)
+							x -=5;
+						else
+							finishEdge = true;
+					}
 				}
 			}
+			
 		} 
 		
 		public void setOnEdge(Edge edge){
+			finishEdge = false;
 			this.edge = edge;
 			x = edge.startNode.x;
 			y = edge.startNode.y;

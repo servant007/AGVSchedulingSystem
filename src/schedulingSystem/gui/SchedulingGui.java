@@ -49,7 +49,7 @@ public class SchedulingGui extends JFrame{
 		}
 		
 		try{
-			serverSocket = new ServerSocket(8080);
+			serverSocket = new ServerSocket(8001);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -122,6 +122,7 @@ public class SchedulingGui extends JFrame{
 			try{
 				inputStream = socket.getInputStream();
 				outputStream = socket.getOutputStream();
+				outputStream.write(toolKit.HexString2Bytes("1234"));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -130,13 +131,19 @@ public class SchedulingGui extends JFrame{
 		public void run(){
 			while(true){
 				try{
-					byte[] buff = new byte[4];
+					byte[] buff = new byte[5];
 					inputStream.read(buff);
 					String message = toolKit.printHexString(buff);
-					if(message.startsWith("AA")&&message.endsWith("BB")){
-						int noOfAGV = Integer.parseInt(message.substring(2, 3), 16);
-						int noOfEdge = Integer.parseInt(message.substring(4, 5), 16);
-						int electricity = Integer.parseInt(message.substring(6, 7), 16);
+					System.out.println(message);
+					if(message.startsWith("AA")&&message.endsWith("BB")){//
+						System.out.println(message.substring(2, 4) + "//" + message.substring(4, 6));
+						int noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
+						int noOfEdge = Integer.parseInt(message.substring(4, 6), 16);
+						int electricity = Integer.parseInt(message.substring(6, 8), 16);
+						
+						System.out.println("noofagV:" + String.valueOf(noOfAGV) + 
+								"noOfEdge:" + String.valueOf(noOfEdge) + 
+								"elec:" + String.valueOf(electricity));
 						AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge));
 						AGVArray.get(noOfAGV).setElectricity(electricity);
 					}
@@ -193,17 +200,18 @@ public class SchedulingGui extends JFrame{
 				panelSize.width = mainPanel.getWidth();
 				panelSize.height = mainPanel.getHeight();
 				graph.createGraph(panelSize);
+				//AGVArray.get(0).setOnEdge(graph.getEdge(3));
 				/*
 				for(int i = 0; i < AGVArray.size(); i++){
 					AGVArray.get(i).setOnEdge(graph.getEdge(3));
 				}*/
 				firstInit = true;
 			}else {
-				/*
+				
 				for(int i = 0; i < AGVArray.size(); i ++){
 					AGVArray.get(i).stepForward();
-				}*/
-				AGVArray.get(0).stepForward();
+				}
+				//AGVArray.get(0).stepForward();
 			}
 						
 		}

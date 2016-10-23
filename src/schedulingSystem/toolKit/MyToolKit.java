@@ -28,7 +28,8 @@ public class MyToolKit {
 			if (hex.length() == 1) { 
 				hex = '0' + hex; 
 			} 
-			buff+=hex;
+			buff+=hex.toUpperCase();
+			System.out.print(hex.toUpperCase());
 		} 
 		return buff;
 	}
