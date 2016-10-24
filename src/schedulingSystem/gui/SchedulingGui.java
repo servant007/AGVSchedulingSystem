@@ -35,6 +35,7 @@ public class SchedulingGui extends JFrame{
 	private RoundButton schedulingGuiBtn;
 	private RoundButton setingGuiBtn;
 	private RoundButton graphGuiBtn;
+	private Timer timer;
 	
 	public SchedulingGui(){
 		super("AGV调度系统");
@@ -72,6 +73,8 @@ public class SchedulingGui extends JFrame{
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		schedulingGuiBtn = new RoundButton("调度界面");
 		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/20);
+		schedulingGuiBtn.setForeground(new Color(30, 144, 255));
+		schedulingGuiBtn.setBackground(Color.WHITE);
 		setingGuiBtn = new RoundButton("设置界面");
 		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		graphGuiBtn = new RoundButton("画图界面");
@@ -92,16 +95,11 @@ public class SchedulingGui extends JFrame{
 	}
 	
 	public void getGuiInstance(SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
-		schedulingGuiBtn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				
-			}
-		});
-
 		setingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				schedulingGui.setVisible(false);
 				setingGui.setVisible(true);
+				setingGui.setBtnColor();
 				graphingGui.setVisible(false);
 			}
 		});
@@ -111,8 +109,11 @@ public class SchedulingGui extends JFrame{
 				schedulingGui.setVisible(false);
 				setingGui.setVisible(false);
 				graphingGui.setVisible(true);
+				graphingGui.setBtnColor();
 			}
 		});
+		timer = new Timer(100, new TimerListener());
+		timer.start();
 	}
 	
 	class HandleReceiveMessage implements Runnable{
@@ -141,6 +142,7 @@ public class SchedulingGui extends JFrame{
 							int electricity = Integer.parseInt(message.substring(6, 8), 16);
 							AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge));
 							AGVArray.get(noOfAGV).setElectricity(electricity);
+							System.out.println(String.valueOf(graph.getEdgeSize()));
 						}else{
 							AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
 							outputStream.write(toolKit.HexString2Bytes("AAC0FFEEBB"));
@@ -151,6 +153,7 @@ public class SchedulingGui extends JFrame{
 				}
 			}
 		}
+		
 	}
 	
 	
@@ -158,8 +161,7 @@ public class SchedulingGui extends JFrame{
 		private static final long serialVersionUID = 1L;
 		
 		public MainPanel(){
-			Timer timer = new Timer(100, new TimerListener());
-			timer.start();
+			
 		}
 		protected void paintComponent(Graphics g){
 			super.paintComponents(g);
@@ -189,12 +191,16 @@ public class SchedulingGui extends JFrame{
 				g.setColor(Color.black);
 				g.setFont(new java.awt.Font("Dialog", 1, 20));
 				g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 5, AGVArray.get(i).getY() + 5);
+				//System.out.println("X:"+String.valueOf(AGVArray.get(i).getX()));
+				//System.out.println("Y:"+String.valueOf(AGVArray.get(i).getX()));
 			}else{
 				g.setColor(Color.red);
 				g.fillOval(AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 34, 34);
 				g.setColor(Color.BLACK);
 				g.setFont(new java.awt.Font("Dialog", 1, 20));
 				g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 4, AGVArray.get(i).getY() + 8);
+				//System.out.println("X:"+String.valueOf(AGVArray.get(i).getX()));
+				//System.out.println("Y:"+String.valueOf(AGVArray.get(i).getX()));
 			}
 		}
 	}
@@ -213,5 +219,16 @@ public class SchedulingGui extends JFrame{
 				}
 			}		
 		}
+	}
+	
+	public void setNewGraph(Graph graph){
+		this.graph = graph;
+	}
+	
+	public void setBtnColor(){
+		schedulingGuiBtn.setBackground(Color.WHITE);
+		schedulingGuiBtn.setForeground(new Color(30, 144, 255));
+		setingGuiBtn.setBackground(new Color(30, 144, 255));
+		graphGuiBtn.setBackground(new Color(30, 144, 255));
 	}
 }

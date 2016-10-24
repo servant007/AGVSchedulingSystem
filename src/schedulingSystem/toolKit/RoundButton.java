@@ -21,7 +21,7 @@ public class RoundButton extends JButton {
         // This call causes the JButton not to paint the background.
         // This allows us to paint a round background.
         setContentAreaFilled(false);
-        this.setBackground(Color.blue);
+        this.setBackground(new Color(30, 144, 255));
         this.setFocusPainted(false);
         this.setFont(new Font("ËÎÌו", Font.BOLD, 30));
         this.setForeground(Color.WHITE);

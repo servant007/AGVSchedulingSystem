@@ -1,5 +1,6 @@
 package schedulingSystem.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Toolkit;
@@ -66,6 +67,7 @@ public class SetingGui extends JFrame{
 		schedulingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				schedulingGui.setVisible(true);
+				schedulingGui.setBtnColor();
 				setingGui.setVisible(false);
 				graphingGui.setVisible(false);
 			}
@@ -76,7 +78,15 @@ public class SetingGui extends JFrame{
 				schedulingGui.setVisible(false);
 				setingGui.setVisible(false);
 				graphingGui.setVisible(true);
+				graphingGui.setBtnColor();
 			}
 		});
+	}
+	
+	public void setBtnColor(){
+		schedulingGuiBtn.setBackground(new Color(30, 144, 255));
+		setingGuiBtn.setBackground(Color.WHITE);
+		setingGuiBtn.setForeground(new Color(30, 144, 255));
+		graphGuiBtn.setBackground(new Color(30, 144, 255));
 	}
 }
