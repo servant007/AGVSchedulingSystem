@@ -51,7 +51,7 @@ public class SchedulingGui extends JFrame{
 		try{
 			serverSocket = new ServerSocket(8001);
 		}catch(Exception e){
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		new Thread(new Runnable(){
@@ -62,7 +62,7 @@ public class SchedulingGui extends JFrame{
 						socket = serverSocket.accept();
 						new Thread(new HandleReceiveMessage(socket)).start();
 					}catch(Exception e){
-						e.printStackTrace();
+						//e.printStackTrace();
 					}
 				}
 			}
@@ -71,11 +71,11 @@ public class SchedulingGui extends JFrame{
 		
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		schedulingGuiBtn = new RoundButton("调度界面");
-		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/15);
+		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/20);
 		setingGuiBtn = new RoundButton("设置界面");
-		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/15);
+		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		graphGuiBtn = new RoundButton("画图界面");
-		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/15);
+		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
 		mainPanel = new MainPanel();
 		mainPanel.setLayout(null);
@@ -122,11 +122,10 @@ public class SchedulingGui extends JFrame{
 			try{
 				inputStream = socket.getInputStream();
 				outputStream = socket.getOutputStream();
-				outputStream.write(toolKit.HexString2Bytes("1234"));
+				outputStream.write(toolKit.HexString2Bytes("AAC0FFEEBB"));
 			}catch(Exception e){
 				e.printStackTrace();
 			}
-			
 		}
 		public void run(){
 			while(true){
@@ -134,20 +133,19 @@ public class SchedulingGui extends JFrame{
 					byte[] buff = new byte[5];
 					inputStream.read(buff);
 					String message = toolKit.printHexString(buff);
-					System.out.println(message);
-					if(message.startsWith("AA")&&message.endsWith("BB")){//
-						System.out.println(message.substring(2, 4) + "//" + message.substring(4, 6));
+					if(message.startsWith("AA")&&message.endsWith("BB")){
 						int noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
-						int noOfEdge = Integer.parseInt(message.substring(4, 6), 16);
-						int electricity = Integer.parseInt(message.substring(6, 8), 16);
-						
-						System.out.println("noofagV:" + String.valueOf(noOfAGV) + 
-								"noOfEdge:" + String.valueOf(noOfEdge) + 
-								"elec:" + String.valueOf(electricity));
-						AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge));
-						AGVArray.get(noOfAGV).setElectricity(electricity);
+						if(message.substring(4, 8) != "BABY"){
+							AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
+							int noOfEdge = Integer.parseInt(message.substring(4, 6), 16);
+							int electricity = Integer.parseInt(message.substring(6, 8), 16);
+							AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge));
+							AGVArray.get(noOfAGV).setElectricity(electricity);
+						}else{
+							AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
+							outputStream.write(toolKit.HexString2Bytes("AAC0FFEEBB"));
+						}
 					}
-					outputStream.write(toolKit.HexString2Bytes("1234"));
 				}catch(Exception e){
 					e.printStackTrace();
 				}
@@ -185,11 +183,19 @@ public class SchedulingGui extends JFrame{
 	
 	public void drawAGV(Graphics g){
 		for(int i = 0; i < AGVArray.size(); i++){
-			g.setColor(Color.green);
-			g.fillOval(AGVArray.get(i).getX() - 15, AGVArray.get(i).getY() - 15, 30, 30);
-			g.setColor(Color.red);
-			g.setFont(new java.awt.Font("Dialog", 1, 20));
-			g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 5, AGVArray.get(i).getY() + 5);
+			if(System.currentTimeMillis() - AGVArray.get(i).getLastTime() < 5000.0){
+				g.setColor(Color.green);
+				g.fillOval(AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 34, 34);
+				g.setColor(Color.black);
+				g.setFont(new java.awt.Font("Dialog", 1, 20));
+				g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 5, AGVArray.get(i).getY() + 5);
+			}else{
+				g.setColor(Color.red);
+				g.fillOval(AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 34, 34);
+				g.setColor(Color.BLACK);
+				g.setFont(new java.awt.Font("Dialog", 1, 20));
+				g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 4, AGVArray.get(i).getY() + 8);
+			}
 		}
 	}
 	
@@ -200,20 +206,12 @@ public class SchedulingGui extends JFrame{
 				panelSize.width = mainPanel.getWidth();
 				panelSize.height = mainPanel.getHeight();
 				graph.createGraph(panelSize);
-				//AGVArray.get(0).setOnEdge(graph.getEdge(3));
-				/*
-				for(int i = 0; i < AGVArray.size(); i++){
-					AGVArray.get(i).setOnEdge(graph.getEdge(3));
-				}*/
 				firstInit = true;
-			}else {
-				
+			}else {	
 				for(int i = 0; i < AGVArray.size(); i ++){
 					AGVArray.get(i).stepForward();
 				}
-				//AGVArray.get(0).stepForward();
-			}
-						
+			}		
 		}
 	}
 }

@@ -23,7 +23,7 @@ public class RoundButton extends JButton {
         setContentAreaFilled(false);
         this.setBackground(Color.blue);
         this.setFocusPainted(false);
-        this.setFont(new Font("ËÎÌו", Font.BOLD, 25));
+        this.setFont(new Font("ËÎÌו", Font.BOLD, 30));
         this.setForeground(Color.WHITE);
     }
 

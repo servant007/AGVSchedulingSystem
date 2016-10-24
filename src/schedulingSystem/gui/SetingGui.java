@@ -29,22 +29,22 @@ public class SetingGui extends JFrame{
 		
 		JPanel mainPanel = new JPanel();
 
-		schedulingGuiBtn = new RoundButton("调度界面1");
-		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/15);
+		schedulingGuiBtn = new RoundButton("调度界面");
+		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/20);
 		schedulingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				
 			}
 		});
-		setingGuiBtn = new RoundButton("设置界面1");
-		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/15);
+		setingGuiBtn = new RoundButton("设置界面");
+		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		setingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				
 			}
 		});
-		graphGuiBtn = new RoundButton("画图界面1");
-		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/15);
+		graphGuiBtn = new RoundButton("画图界面");
+		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		graphGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				

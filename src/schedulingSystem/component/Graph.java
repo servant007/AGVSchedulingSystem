@@ -19,10 +19,13 @@ public class Graph {
 		edgeArray.add(new Edge(nodeArray.get(0) , nodeArray.get(3)));
 		edgeArray.add(new Edge(nodeArray.get(3) , nodeArray.get(2)));
 		edgeArray.add(new Edge(nodeArray.get(2) , nodeArray.get(1)));
-		
-		
 	}
 	
+	public void addEdge(Node strNode, Node endNode){
+		nodeArray.add(new Node(strNode.x, strNode.y));
+		nodeArray.add(new Node(endNode.x, endNode.y));
+		edgeArray.add(new Edge(nodeArray.get(nodeArray.size()-2), nodeArray.get(nodeArray.size()-1)));
+	} 
 	public Edge getEdge(int num){
 		return edgeArray.get(num);
 	}

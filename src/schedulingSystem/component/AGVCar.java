@@ -6,6 +6,7 @@ public class AGVCar{
 		private int electricity;
 		private boolean keepAlived;
 		private boolean finishEdge;
+		private long lastCommunicationTime;
 		
 		public AGVCar(){
 			finishEdge = true;
@@ -74,5 +75,13 @@ public class AGVCar{
 		
 		public boolean getKeepAlived(){
 			return keepAlived;
+		}
+		
+		public void setTime(long time){
+			lastCommunicationTime = time;
+		}
+		
+		public long getLastTime(){
+			return lastCommunicationTime;
 		}
 	}
