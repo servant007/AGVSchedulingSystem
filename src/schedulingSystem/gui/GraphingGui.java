@@ -91,6 +91,7 @@ public class GraphingGui extends JFrame{
 				if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1){
 					if(!addStrNode){
 						tempStrNode = new Node(e.getX() - 16, e.getY() - 58);
+						tempEndNode = new Node(e.getX() - 16, e.getY() - 58);
 						mouseClicked = true;
 						addStrNode = true;
 					}else {
@@ -115,6 +116,18 @@ public class GraphingGui extends JFrame{
 						tempNodeArray.add(tempNode);
 						repaint();
 					}*/
+				}
+				
+				if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2){
+					Node node = graph.searchNode(new Node(e.getX(), e.getY()));
+					if(node != null){
+						if(!addStrNode){
+							tempStrNode = new Node(node.x, node.y);
+							tempEndNode = new Node(node.x, node.y);
+							mouseClicked = true;
+							addStrNode = true;
+						}
+					}
 				}
 			}
 		});

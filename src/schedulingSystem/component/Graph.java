@@ -41,4 +41,13 @@ public class Graph {
 	public int getNodeSize(){
 		return nodeArray.size();		
 	}
+	
+	public Node searchNode(Node searchNode){
+		for(int i = 0; i < nodeArray.size(); i++){
+			if(Math.pow(searchNode.x - nodeArray.get(i).x, 2) < 900){
+				return nodeArray.get(i);
+			}
+		}
+		return null;
+	}
 }
