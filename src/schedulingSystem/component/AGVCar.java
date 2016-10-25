@@ -25,13 +25,13 @@ public class AGVCar{
 				if(edge.startNode.x == edge.endNode.x){
 					if(edge.startNode.y < edge.endNode.y ){
 						if(y < edge.endNode.y){
-							y +=5;
+							y +=13;
 						}else{
 							finishEdge = true;
 						}	
 					}else if(edge.startNode.y > edge.endNode.y ){
 						if(y > edge.endNode.y){
-							y -=5;
+							y -=13;
 						}else{
 							finishEdge = true;
 						}
@@ -40,12 +40,12 @@ public class AGVCar{
 				}else if(edge.startNode.y == edge.endNode.y){
 					if(edge.startNode.x < edge.endNode.x ){
 						if(x < edge.endNode.x)
-							x +=5;
+							x +=13;
 						else
 							finishEdge = true;
 					}else if(edge.startNode.x > edge.endNode.x){
 						if(x > edge.endNode.x)
-							x -=5;
+							x -=13;
 						else
 							finishEdge = true;
 					}

@@ -35,6 +35,7 @@ public class GraphingGui extends JFrame{
 	private boolean mouseClicked;
 	private boolean addStrNode;
 	private Graph graph;
+	private int countNode = 0;
 	
 	public GraphingGui(){
 		super("AGV调度系统");
@@ -76,53 +77,69 @@ public class GraphingGui extends JFrame{
 		});
 		this.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent e){
-				if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1){
-					Node node = graph.searchNode(new Node(e.getX(), e.getY()));
+				if(e.getButton() == MouseEvent.BUTTON1){
+					Node node = graph.searchNode(new Node(e.getX(), e.getY(), 0));
 					if(node != null){
 						if(!addStrNode){
-							tempStrNode = new Node(node.x, node.y);
-							tempEndNode = new Node(node.x, node.y);
+							tempStrNode = new Node(node.x, node.y, node.num);
+							tempStrNode.setOldNode();
+							tempEndNode = new Node(node.x, node.y, 0);
 							mouseClicked = true;
 							addStrNode = true;
 						}else{
 							//弹出对话框判断是否添加
-							graph.addEdge(tempStrNode, node);
+							if(tempStrNode.getNewNode()){
+								graph.addNode(tempStrNode);
+								graph.addEdge(tempStrNode.num, node.num);
+							}else{
+								graph.addEdge(tempStrNode.num, node.num);
+							}
 							mouseClicked = false;
 							addStrNode = false;
-							tempStrNode.x = 0;
-							tempStrNode.y = 0;
-							tempEndNode.x = 0;
-							tempEndNode.y = 0;
 						}
 					}
 					if(node ==null){
 						if(!addStrNode){
-							tempStrNode = new Node(e.getX() - 16, e.getY() - 58);
-							tempEndNode = new Node(e.getX() - 16, e.getY() - 58);
+							countNode++;
+							tempStrNode = new Node(e.getX() - 16, e.getY() - 58, countNode);
+							tempEndNode = new Node(e.getX() - 16, e.getY() - 58, 0);
 							mouseClicked = true;
 							addStrNode = true;
+							System.out.println("clicked-1/" + String.valueOf(countNode));
 						}else {
+							
+							countNode++;
 							if(Math.abs(e.getX() - tempStrNode.x) > Math.abs(e.getY() - tempStrNode.y)){
 								int searchX = graph.searchHorizontal(e.getX());
-								if(searchX != 0)
-									tempEndNode = new Node(searchX, tempStrNode.y);
-								else
-									tempEndNode = new Node(e.getX() - 16, tempStrNode.y);
+								System.out.println("searchX:"+ String.valueOf(searchX));
+								if(searchX != 0){
+									System.out.println("clicked-2-x-!=" + String.valueOf(countNode));
+									tempEndNode = new Node(searchX, tempStrNode.y, countNode);
+								}else{
+									tempEndNode = new Node(e.getX() - 16, tempStrNode.y, countNode);
+									System.out.println("clicked-2-x-=" + String.valueOf(countNode));
+								}
+									
 							}else {
+								System.out.println("clicked-2-y");
 								int searchY = graph.searchVertical(e.getY());
 								if(searchY != 0)
-									tempEndNode = new Node(tempStrNode.x, searchY);
+									tempEndNode = new Node(tempStrNode.x, searchY, countNode);
 								else
-									tempEndNode = new Node(tempStrNode.x, e.getY() - 58);
+									tempEndNode = new Node(tempStrNode.x, e.getY() - 58, countNode);
 							}
 							//弹出对话框判断是否添加
-							graph.addEdge(tempStrNode, tempEndNode);
+							if(tempStrNode.getNewNode()){
+								graph.addNode(tempStrNode);
+								graph.addNode(tempEndNode);
+								graph.addEdge(tempStrNode.num, tempEndNode.num);
+							}else{
+								graph.addNode(tempEndNode);
+								graph.addEdge(tempStrNode.num, tempEndNode.num);
+							}
+							
 							mouseClicked = false;
 							addStrNode = false;
-							tempStrNode.x = 0;
-							tempStrNode.y = 0;
-							tempEndNode.x = 0;
-							tempEndNode.y = 0;
 						}
 					}
 					repaint();
@@ -165,8 +182,6 @@ public class GraphingGui extends JFrame{
 		private static final long serialVersionUID = 1L;
 		
 		public MainPanel(){
-			Timer timer = new Timer(100, new TimerListener());
-			//timer.start();
 		}
 		protected void paintComponent(Graphics g){
 			super.paintComponents(g);

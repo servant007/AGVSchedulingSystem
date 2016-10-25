@@ -31,6 +31,7 @@ public class MyToolKit {
 			buff+=hex.toUpperCase();
 			System.out.print(hex.toUpperCase());
 		} 
+		System.out.println();
 		return buff;
 	}
 }

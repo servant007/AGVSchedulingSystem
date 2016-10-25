@@ -140,7 +140,7 @@ public class SchedulingGui extends JFrame{
 		private OutputStream outputStream;
 		private Socket socket;
 		private long lastCommunicationTime;
-		private long reciveDelayTime = 5000;
+		private long reciveDelayTime = 30000;
 		
 		HandleReceiveMessage(Socket socket){
 			System.out.println("socket connect:"+socket.toString());
@@ -169,9 +169,9 @@ public class SchedulingGui extends JFrame{
 									AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
 									int noOfEdge = Integer.parseInt(message.substring(4, 6), 16);
 									int electricity = Integer.parseInt(message.substring(6, 8), 16);
-									AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge));
+									AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge - 1));
 									AGVArray.get(noOfAGV).setElectricity(electricity);
-									System.out.println(String.valueOf(graph.getEdgeSize()));
+									//System.out.println(String.valueOf(graph.getEdgeSize()));
 								}else{
 									AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
 									outputStream.write(toolKit.HexString2Bytes("AAC0FFEEBB"));
