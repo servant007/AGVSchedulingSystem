@@ -2,6 +2,7 @@ package schedulingSystem.gui;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -14,6 +15,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -36,9 +38,12 @@ public class SchedulingGui extends JFrame{
 	private RoundButton setingGuiBtn;
 	private RoundButton graphGuiBtn;
 	private Timer timer;
+	private JLabel stateLabel;
+	private StringBuffer stateString;
 	
 	public SchedulingGui(){
 		super("AGV调度系统");
+		stateString = new StringBuffer();
 		graph = new Graph();
 		toolKit = new MyToolKit();
 		panelSize = new Dimension(0, 0);
@@ -48,43 +53,29 @@ public class SchedulingGui extends JFrame{
 		for(int i = 0; i < numOfAGV; i++){
 			AGVArray.add(new AGVCar());
 		}
-		
-		try{
-			serverSocket = new ServerSocket(8001);
-		}catch(Exception e){
-			//e.printStackTrace();
-		}
 
-		new Thread(new Runnable(){
-			public void run(){
-				while(true){
-					Socket socket = null;
-					try{
-						socket = serverSocket.accept();
-						new Thread(new HandleReceiveMessage(socket)).start();
-					}catch(Exception e){
-						//e.printStackTrace();
-					}
-				}
-			}
-		}).start();
-		
-		
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		schedulingGuiBtn = new RoundButton("调度界面");
 		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/20);
 		schedulingGuiBtn.setForeground(new Color(30, 144, 255));
 		schedulingGuiBtn.setBackground(Color.WHITE);
+		
 		setingGuiBtn = new RoundButton("设置界面");
 		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
-		graphGuiBtn = new RoundButton("画图界面");
+		
+		graphGuiBtn = new RoundButton("管理界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
+		
+		stateLabel = new JLabel();
+		stateLabel.setBounds(0, 22*screenSize.height/25, screenSize.width, screenSize.height/25);
+		stateLabel.setFont(new Font("宋体", Font.BOLD, 25));
 		
 		mainPanel = new MainPanel();
 		mainPanel.setLayout(null);
 		mainPanel.add(schedulingGuiBtn);
 		mainPanel.add(setingGuiBtn);
 		mainPanel.add(graphGuiBtn);
+		mainPanel.add(stateLabel);
 		
 		this.getContentPane().add(mainPanel);	  
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -92,6 +83,34 @@ public class SchedulingGui extends JFrame{
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
+		
+		try{
+			serverSocket = new ServerSocket(8001);
+		}catch(Exception e){
+			e.printStackTrace();
+			stateString.append(e.toString()).append("//");
+			stateLabel.setText(stateString.toString());
+		}
+
+		new Thread(new Runnable(){
+			public void run(){
+				while(true){
+					Socket socket = null;
+					try{
+						if(serverSocket != null){
+							socket = serverSocket.accept();
+							new Thread(new HandleReceiveMessage(socket)).start();
+						}else{
+							stateString.append("serverSocket nullPointer//");
+							stateLabel.setText(stateString.toString());
+						}
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+				}
+			}
+		}).start();
+		
 	}
 	
 	public void getGuiInstance(SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
@@ -119,7 +138,13 @@ public class SchedulingGui extends JFrame{
 	class HandleReceiveMessage implements Runnable{
 		private InputStream inputStream;
 		private OutputStream outputStream;
+		private Socket socket;
+		private long lastCommunicationTime;
+		private long reciveDelayTime = 5000;
+		
 		HandleReceiveMessage(Socket socket){
+			System.out.println("socket connect:"+socket.toString());
+			this.socket = socket;
 			try{
 				inputStream = socket.getInputStream();
 				outputStream = socket.getOutputStream();
@@ -127,30 +152,54 @@ public class SchedulingGui extends JFrame{
 			}catch(Exception e){
 				e.printStackTrace();
 			}
+			lastCommunicationTime = System.currentTimeMillis();
 		}
 		public void run(){
 			while(true){
-				try{
-					byte[] buff = new byte[5];
-					inputStream.read(buff);
-					String message = toolKit.printHexString(buff);
-					if(message.startsWith("AA")&&message.endsWith("BB")){
-						int noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
-						if(message.substring(4, 8) != "BABY"){
-							AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
-							int noOfEdge = Integer.parseInt(message.substring(4, 6), 16);
-							int electricity = Integer.parseInt(message.substring(6, 8), 16);
-							AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge));
-							AGVArray.get(noOfAGV).setElectricity(electricity);
-							System.out.println(String.valueOf(graph.getEdgeSize()));
-						}else{
-							AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
-							outputStream.write(toolKit.HexString2Bytes("AAC0FFEEBB"));
+				if(System.currentTimeMillis() - lastCommunicationTime < reciveDelayTime){//			
+					try{
+						if(inputStream.available() > 0){
+							lastCommunicationTime = System.currentTimeMillis();
+							byte[] buff = new byte[5];
+							inputStream.read(buff);
+							String message = toolKit.printHexString(buff);
+							if(message.startsWith("AA")&&message.endsWith("BB")){
+								int noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
+								if(message.substring(4, 8) != "BABY"){
+									AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
+									int noOfEdge = Integer.parseInt(message.substring(4, 6), 16);
+									int electricity = Integer.parseInt(message.substring(6, 8), 16);
+									AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge));
+									AGVArray.get(noOfAGV).setElectricity(electricity);
+									System.out.println(String.valueOf(graph.getEdgeSize()));
+								}else{
+									AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
+									outputStream.write(toolKit.HexString2Bytes("AAC0FFEEBB"));
+								}
+							}
+						}else {
+							Thread.sleep(10);
 						}
+						
+						
+						
+					}catch(Exception e){
+						e.printStackTrace();
 					}
-				}catch(Exception e){
-					e.printStackTrace();
-				}
+				}else{
+					try{
+						if(inputStream != null)
+							inputStream.close();
+						if(outputStream != null)
+							outputStream.close();
+						if(socket != null)
+							socket.close();
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+					
+					break;//退出while循环
+				}				
 			}
 		}
 		

@@ -52,7 +52,7 @@ public class GraphingGui extends JFrame{
 		setingGuiBtn = new RoundButton("设置界面");
 		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
-		graphGuiBtn = new RoundButton("画图界面");
+		graphGuiBtn = new RoundButton("管理界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
 		comfirmBtn = new RoundButton("确认使用");

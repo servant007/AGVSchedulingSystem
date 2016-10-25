@@ -44,7 +44,7 @@ public class SetingGui extends JFrame{
 				
 			}
 		});
-		graphGuiBtn = new RoundButton("画图界面");
+		graphGuiBtn = new RoundButton("管理界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		graphGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
