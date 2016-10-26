@@ -21,7 +21,7 @@ public class Graph {
 		edgeArray.add(new Edge(nodeArray.get(2) , nodeArray.get(1)));
 	}
 	
-	public void addEdge(int strNodeNum, int endNodeNum){
+	public void addEdge(int strNodeNum, int endNodeNum, int dis){
 		for(int i = 0; i < nodeArray.size(); i++){
 			if(nodeArray.get(i).num == strNodeNum)
 				strNodeNum = i;
@@ -31,10 +31,14 @@ public class Graph {
 				endNodeNum = i;
 		}
 		
-		edgeArray.add(new Edge(nodeArray.get(strNodeNum), nodeArray.get(endNodeNum)));
+		edgeArray.add(new Edge(nodeArray.get(strNodeNum), nodeArray.get(endNodeNum), dis));
 	} 
+	
 	public void addNode(Node node){
 		nodeArray.add(new Node(node.x, node.y, node.num));
+	}
+	public void addImportNode(int x , int y, int num){
+		nodeArray.add(new Node(x, y, num));
 	}
 	public Edge getEdge(int num){
 		return edgeArray.get(num);
@@ -76,5 +80,9 @@ public class Graph {
 				return nodeArray.get(i).y;
 		}
 		return 0;
+	}
+	
+	public ArrayList<Node> getNodeArray(){
+		return nodeArray;
 	}
 }

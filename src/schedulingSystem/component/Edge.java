@@ -10,4 +10,10 @@ public class Edge {
 	public void setRealDis(int dis){
 		realDis = dis;
 	}
+	
+	public Edge(Node str, Node end, int dis){
+		startNode = str;
+		endNode = end;
+		realDis = dis;
+	}
 }

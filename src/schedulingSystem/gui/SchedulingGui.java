@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
@@ -19,6 +20,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import jxl.Cell;
+import jxl.CellType;
+import jxl.Sheet;
+import jxl.Workbook;
 import schedulingSystem.component.AGVCar;
 import schedulingSystem.component.Graph;
 import schedulingSystem.toolKit.MyToolKit;
@@ -37,6 +42,7 @@ public class SchedulingGui extends JFrame{
 	private RoundButton schedulingGuiBtn;
 	private RoundButton setingGuiBtn;
 	private RoundButton graphGuiBtn;
+	private RoundButton importGraphBtn;
 	private Timer timer;
 	private JLabel stateLabel;
 	private StringBuffer stateString;
@@ -62,10 +68,18 @@ public class SchedulingGui extends JFrame{
 		
 		setingGuiBtn = new RoundButton("设置界面");
 		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
-		
+
 		graphGuiBtn = new RoundButton("管理界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
+		importGraphBtn = new RoundButton("导入地图");
+		importGraphBtn.setBounds(9*screenSize.width/10, 17*screenSize.height/20, screenSize.width/10, screenSize.height/20);
+		importGraphBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				
+				importNewGraph();
+			}
+		});
 		stateLabel = new JLabel();
 		stateLabel.setBounds(0, 22*screenSize.height/25, screenSize.width, screenSize.height/25);
 		stateLabel.setFont(new Font("宋体", Font.BOLD, 25));
@@ -76,6 +90,7 @@ public class SchedulingGui extends JFrame{
 		mainPanel.add(setingGuiBtn);
 		mainPanel.add(graphGuiBtn);
 		mainPanel.add(stateLabel);
+		mainPanel.add(importGraphBtn);
 		
 		this.getContentPane().add(mainPanel);	  
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -140,7 +155,7 @@ public class SchedulingGui extends JFrame{
 		private OutputStream outputStream;
 		private Socket socket;
 		private long lastCommunicationTime;
-		private long reciveDelayTime = 30000;
+		private long reciveDelayTime = 6000;
 		
 		HandleReceiveMessage(Socket socket){
 			System.out.println("socket connect:"+socket.toString());
@@ -165,13 +180,15 @@ public class SchedulingGui extends JFrame{
 							String message = toolKit.printHexString(buff);
 							if(message.startsWith("AA")&&message.endsWith("BB")){
 								int noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
-								if(message.substring(4, 8) != "BABY"){
+								if(!message.substring(4, 8).equals("BABA")){
+									//System.out.println("4-8:"+message.substring(4, 8));
 									AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
 									int noOfEdge = Integer.parseInt(message.substring(4, 6), 16);
 									int electricity = Integer.parseInt(message.substring(6, 8), 16);
+									//System.out.println("noOfEdge:"+String.valueOf(noOfEdge)+"//"+String.valueOf(electricity));
 									AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge - 1));
 									AGVArray.get(noOfAGV).setElectricity(electricity);
-									//System.out.println(String.valueOf(graph.getEdgeSize()));
+									
 								}else{
 									AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
 									outputStream.write(toolKit.HexString2Bytes("AAC0FFEEBB"));
@@ -234,7 +251,7 @@ public class SchedulingGui extends JFrame{
 	
 	public void drawAGV(Graphics g){
 		for(int i = 0; i < AGVArray.size(); i++){
-			if(System.currentTimeMillis() - AGVArray.get(i).getLastTime() < 5000.0){
+			if(System.currentTimeMillis() - AGVArray.get(i).getLastTime() < 6000.0){
 				g.setColor(Color.green);
 				g.fillOval(AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 34, 34);
 				g.setColor(Color.black);
@@ -270,8 +287,50 @@ public class SchedulingGui extends JFrame{
 		}
 	}
 	
-	public void setNewGraph(Graph graph){
+	public Graph importNewGraph(){
+		Graph graph = new Graph();
+		try{
+			InputStream is = new FileInputStream("C:/graph.xls");
+			Workbook wb = Workbook.getWorkbook(is);
+			
+			Sheet sheetNodes = wb.getSheet("nodes");
+			for(int i = 0; i < sheetNodes.getRows(); i++){
+				int x=0, y=0, num=0;
+				for(int j = 0; j < 3; j++){
+					Cell cell0 = sheetNodes.getCell(j,i);
+						String str = cell0.getContents();
+						if(j == 0)
+							num = Integer.parseInt(str);
+						if(j == 1)
+							x = Integer.parseInt(str);
+						if(j == 2)
+							y = Integer.parseInt(str);
+						System.out.println("++:"+str);						
+				}
+				graph.addImportNode(x, y, num);
+			}
+			
+			Sheet sheetEdges = wb.getSheet("edges");
+			for(int i = 0; i < sheetEdges.getRows(); i++){
+				int start=0, end=0, dis=0;
+				for(int j = 0; j < 3; j++){
+					Cell cell0 = sheetEdges.getCell(j,i);
+						String str = cell0.getContents();
+						if(j == 0)
+							start = Integer.parseInt(str);
+						if(j == 1)
+							end = Integer.parseInt(str);
+						if(j == 2)
+							dis = Integer.parseInt(str);
+						System.out.println("++:"+str);						
+				}
+				graph.addEdge(start, end, dis);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		this.graph = graph;
+		return graph;
 	}
 	
 	public void setBtnColor(){

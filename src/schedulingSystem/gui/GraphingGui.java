@@ -10,13 +10,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
 import javax.swing.JFrame;
-
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import jxl.Workbook;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.Number;   
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Node;
 import schedulingSystem.toolKit.*;;
@@ -90,12 +99,13 @@ public class GraphingGui extends JFrame{
 							//弹出对话框判断是否添加
 							if(tempStrNode.getNewNode()){
 								graph.addNode(tempStrNode);
-								graph.addEdge(tempStrNode.num, node.num);
+								graph.addEdge(tempStrNode.num, node.num, 0);
 							}else{
-								graph.addEdge(tempStrNode.num, node.num);
+								graph.addEdge(tempStrNode.num, node.num, 0);
 							}
 							mouseClicked = false;
 							addStrNode = false;
+							initNode();
 						}
 					}
 					if(node ==null){
@@ -107,7 +117,6 @@ public class GraphingGui extends JFrame{
 							addStrNode = true;
 							System.out.println("clicked-1/" + String.valueOf(countNode));
 						}else {
-							
 							countNode++;
 							if(Math.abs(e.getX() - tempStrNode.x) > Math.abs(e.getY() - tempStrNode.y)){
 								int searchX = graph.searchHorizontal(e.getX());
@@ -132,14 +141,14 @@ public class GraphingGui extends JFrame{
 							if(tempStrNode.getNewNode()){
 								graph.addNode(tempStrNode);
 								graph.addNode(tempEndNode);
-								graph.addEdge(tempStrNode.num, tempEndNode.num);
+								graph.addEdge(tempStrNode.num, tempEndNode.num, 0);
 							}else{
 								graph.addNode(tempEndNode);
-								graph.addEdge(tempStrNode.num, tempEndNode.num);
-							}
-							
+								graph.addEdge(tempStrNode.num, tempEndNode.num, 0);
+							}							
 							mouseClicked = false;
 							addStrNode = false;
+							initNode();
 						}
 					}
 					repaint();
@@ -172,11 +181,31 @@ public class GraphingGui extends JFrame{
 		
 		comfirmBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				schedulingGui.setNewGraph(graph);
+				MyDialog dialog = new MyDialog("请输入文件名：");
+				dialog.setOnDialogListener(new DialogListener(){
+					@Override
+					public void getInputString(String fileName){
+						System.out.println(fileName);
+						dialog.dispose();
+						if(fileName.length() > 0 ){
+							try{
+								StringBuffer filePath = new StringBuffer();
+								File graphExcelFile = new File(filePath.append("C:/").append(fileName).append(".xls").toString());//
+								graphExcelFile.createNewFile();
+								OutputStream os = new FileOutputStream(graphExcelFile);
+								writeExcel(os, graph);
+							}catch(Exception ex){
+								ex.printStackTrace();
+							}
+						}
+					}
+				});
 			}
 		});
 		
 	}
+	
+	
 	
 	class MainPanel extends JPanel{
 		private static final long serialVersionUID = 1L;
@@ -221,5 +250,39 @@ public class GraphingGui extends JFrame{
 		graphGuiBtn.setForeground(new Color(30, 144, 255));
 	}
 	
+	public static void writeExcel(OutputStream os, Graph graph){
+		try{
+			WritableWorkbook wwb = Workbook.createWorkbook(os);
+			WritableSheet wsNode = wwb.createSheet("nodes", 0);
+			for(int i = 0; i < graph.getNodeSize(); i++){				
+				Number numberNum = new Number(0, i, graph.getNode(i).num);
+				Number numberX = new Number(1, i, graph.getNode(i).x);
+				Number numberY = new Number(2, i, graph.getNode(i).y);
+				wsNode.addCell(numberX);
+				wsNode.addCell(numberY);
+				wsNode.addCell(numberNum);					
+			}
+			WritableSheet wsEdge = wwb.createSheet("edges", 1);
+			for(int i = 0; i < graph.getEdgeSize(); i++){
+				Number numberStrNode = new Number(0, i, graph.getEdge(i).startNode.num);
+				Number numberEndNode = new Number(1, i, graph.getEdge(i).endNode.num);
+				Number numberDis = new Number(2, i, graph.getEdge(i).realDis);
+				wsEdge.addCell(numberStrNode);
+				wsEdge.addCell(numberEndNode);
+				wsEdge.addCell(numberDis);
+			}
+			wwb.write();
+			wwb.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	} 
+	
+	public void initNode(){
+		tempStrNode.x = 0;
+		tempStrNode.y = 0;
+		tempEndNode.x = 0;
+		tempEndNode.y = 0;
+	}
 	
 }
