@@ -16,7 +16,11 @@ public class Node {
 		newNode = false;
 	}
 	
-	public boolean getNewNode(){
+	public void setNewNode(){
+		newNode = true;
+	}
+	
+	public boolean questIsNewNode(){
 		return newNode;
 	}
 }

@@ -43,7 +43,8 @@ public class GraphingGui extends JFrame{
 	private boolean addStrNode;
 	private Graph graph;
 	private int countNode = 0;
-	
+	private static final int CORRECTX = 16;
+	private static final int CORRECTY = 58;
 	public GraphingGui(){
 		super("AGV调度系统");
 		tempStrNode = new Node();
@@ -77,41 +78,40 @@ public class GraphingGui extends JFrame{
 			public void mouseMoved(MouseEvent e){
 				repaint();
 				if(mouseClicked){
-					tempEndNode.x = e.getX() - 16;
-					tempEndNode.y = e.getY() - 58;
+					tempEndNode.x = e.getX() - CORRECTX;
+					tempEndNode.y = e.getY() - CORRECTY;
 				}
 			}
 		});
 		this.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent e){
 				if(e.getButton() == MouseEvent.BUTTON1){
-					Node node = graph.searchNode(new Node(e.getX() - 16, e.getY() - 58, 0));
+					Node node = graph.searchNode(e.getX() - CORRECTX, e.getY() - CORRECTY);
 					if(node != null){
 						if(!addStrNode){
-							tempStrNode = new Node(node.x, node.y, node.num);
+							setStrNode(node.x, node.y, node.num);
 							tempStrNode.setOldNode();
-							tempEndNode = new Node(node.x, node.y, 0);
+							setEndNode(node.x, node.y, 0);
 							mouseClicked = true;
 							addStrNode = true;
 						}else{
-							tempEndNode.x = node.x;
-							tempEndNode.y = node.y;
+							setEndNode(node.x, node.y, node.num);
 							mouseClicked = false;
 							addStrNode = false;
 							MyDialog dialog = new MyDialog("请输入实际长度（cm）：");
 							dialog.setOnDialogListener(new DialogListener(){
 								@Override
-								public void getInputString(String fileName, boolean buttonState){
+								public void getInputString(String realDis, boolean buttonState){
 									dialog.dispose();
-									if(buttonState){
+									if(buttonState && realDis.length() > 0){
 										//弹出对话框判断是否添加
-										if(tempStrNode.getNewNode()){
+										if(tempStrNode.questIsNewNode()){
 											graph.addNode(tempStrNode);
-											graph.addEdge(tempStrNode.num, node.num, 0);
+											graph.addEdge(tempStrNode.num, node.num, Integer.parseInt(realDis));
 											initNode();
 											repaint();
 										}else{
-											graph.addEdge(tempStrNode.num, node.num, 0);
+											graph.addEdge(tempStrNode.num, node.num, Integer.parseInt(realDis));
 											initNode();
 											repaint();
 										}
@@ -128,31 +128,30 @@ public class GraphingGui extends JFrame{
 					if(node ==null){
 						if(!addStrNode){
 							countNode++;
-							tempStrNode = new Node(e.getX() - 16, e.getY() - 58, countNode);
-							tempEndNode = new Node(e.getX() - 16, e.getY() - 58, 0);
+							setStrNode(e.getX() - CORRECTX, e.getY() - CORRECTY, countNode);
+							setEndNode(e.getX() - CORRECTX, e.getY() - CORRECTY, 0);
 							mouseClicked = true;
 							addStrNode = true;
 							System.out.println("clicked-1/" + String.valueOf(countNode));
 						}else {
 							countNode++;
-							if(Math.abs(e.getX() - 16 - tempStrNode.x) > Math.abs(e.getY() - 58 - tempStrNode.y)){
-								int searchX = graph.searchHorizontal(e.getX() - 16);
-								//System.out.println("searchX:"+ String.valueOf(searchX));
+							if(Math.abs(e.getX() - CORRECTX - tempStrNode.x) > Math.abs(e.getY() - CORRECTY - tempStrNode.y)){
+								int searchX = graph.searchHorizontal(e.getX() - CORRECTX);
 								if(searchX != 0){
 									System.out.println("clicked-2-x-!=" + String.valueOf(countNode));
-									tempEndNode = new Node(searchX, tempStrNode.y, countNode);
+									setEndNode(searchX, tempStrNode.y, countNode);
 								}else{
-									tempEndNode = new Node(e.getX() - 16, tempStrNode.y, countNode);
+									setEndNode(e.getX() - CORRECTX, tempStrNode.y, countNode);
 									System.out.println("clicked-2-x-=" + String.valueOf(countNode));
 								}
 									
 							}else {
 								System.out.println("clicked-2-y");
-								int searchY = graph.searchVertical(e.getY() - 58);
+								int searchY = graph.searchVertical(e.getY() - CORRECTY);
 								if(searchY != 0)
-									tempEndNode = new Node(tempStrNode.x, searchY, countNode);
+									setEndNode(tempStrNode.x, searchY, countNode);
 								else
-									tempEndNode = new Node(tempStrNode.x, e.getY() - 58, countNode);
+									setEndNode(tempStrNode.x, e.getY() - CORRECTY, countNode);
 							}
 							
 							mouseClicked = false;
@@ -160,24 +159,22 @@ public class GraphingGui extends JFrame{
 							MyDialog dialog = new MyDialog("请输入实际长度（cm）：");
 							dialog.setOnDialogListener(new DialogListener(){
 								@Override
-								public void getInputString(String fileName, boolean buttonState){
+								public void getInputString(String realDis, boolean buttonState){
 									dialog.dispose();
-									if(buttonState){
+									if(buttonState && realDis.length() > 0){
 										System.out.println("comfirmed");
 										//弹出对话框判断是否添加
-										if(tempStrNode.getNewNode()){
+										if(tempStrNode.questIsNewNode()){
 											graph.addNode(tempStrNode);
 											graph.addNode(tempEndNode);
 											System.out.println("tempStrNode"+tempStrNode.x+tempStrNode.y);
-											graph.addEdge(tempStrNode.num, tempEndNode.num, 0);
+											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis));
 											initNode();
-											System.out.println("comfirmed"+tempEndNode.x);
 											repaint();
 										}else{
 											graph.addNode(tempEndNode);
-											graph.addEdge(tempStrNode.num, tempEndNode.num, 0);
+											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis));
 											initNode();
-											System.out.println("comfirmed"+tempEndNode.x);
 											repaint();
 										}
 										
@@ -259,7 +256,6 @@ public class GraphingGui extends JFrame{
 			g.setColor(Color.YELLOW);
 			g.fillRect(tempStrNode.x - 5, tempStrNode.y - 5, 10, 10);
 			g.fillRect(tempEndNode.x - 5, tempEndNode.y - 5, 10, 10);
-			System.out.println("tempEndNode:"+tempEndNode.x);
 			drawGraph(g);
 		}
 	}
@@ -334,11 +330,13 @@ public class GraphingGui extends JFrame{
 		tempStrNode.x = x;
 		tempStrNode.y = y;
 		tempStrNode.num = num;
+		tempStrNode.setNewNode();
 	}
 	
 	public void setEndNode(int x, int y, int num){
 		tempEndNode.x = x;
 		tempEndNode.y = y;
 		tempEndNode.num = num;
+		tempEndNode.setNewNode();
 	}
 }

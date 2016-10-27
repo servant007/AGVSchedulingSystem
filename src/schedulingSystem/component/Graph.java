@@ -56,10 +56,10 @@ public class Graph {
 		return nodeArray.size();		
 	}
 	
-	public Node searchNode(Node searchNode){
+	public Node searchNode( int x, int y){
 		for(int i = 0; i < nodeArray.size(); i++){
-			if(Math.pow(searchNode.x - nodeArray.get(i).x, 2) + 
-					Math.pow(searchNode.y - nodeArray.get(i).y, 2) < 7000){
+			if(Math.pow(x - nodeArray.get(i).x, 2) + 
+					Math.pow(y - nodeArray.get(i).y, 2) < 7000){
 				return nodeArray.get(i);
 			}
 		}
