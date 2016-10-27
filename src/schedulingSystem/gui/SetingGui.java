@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.apache.log4j.Logger;
+
 import schedulingSystem.gui.GraphingGui;
 import schedulingSystem.toolKit.*;
 import schedulingSystem.gui.SchedulingGui;
@@ -19,6 +21,7 @@ public class SetingGui extends JFrame{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private static Logger logger = Logger.getLogger(SetingGui.class.getName());
 	private RoundButton schedulingGuiBtn;
 	private RoundButton setingGuiBtn;
 	private RoundButton graphGuiBtn;

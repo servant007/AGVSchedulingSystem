@@ -13,16 +13,13 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.concurrent.Callable;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.Timer;
+
+import org.apache.log4j.Logger;
 
 import jxl.Workbook;
-import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.Number;   
@@ -35,6 +32,7 @@ public class GraphingGui extends JFrame{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private static Logger logger = Logger.getLogger(GraphingGui.class.getName());
 	private RoundButton schedulingGuiBtn;
 	private RoundButton setingGuiBtn;
 	private RoundButton graphGuiBtn;
@@ -196,6 +194,7 @@ public class GraphingGui extends JFrame{
 								writeExcel(os, graph);
 							}catch(Exception ex){
 								ex.printStackTrace();
+								logger.error(ex);
 							}
 						}
 					}
@@ -275,6 +274,7 @@ public class GraphingGui extends JFrame{
 			wwb.close();
 		}catch(Exception e){
 			e.printStackTrace();
+			logger.error(e);
 		}
 	} 
 	

@@ -20,8 +20,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import org.apache.log4j.Logger;
+
 import jxl.Cell;
-import jxl.CellType;
 import jxl.Sheet;
 import jxl.Workbook;
 import schedulingSystem.component.AGVCar;
@@ -31,6 +32,7 @@ import schedulingSystem.toolKit.RoundButton;
 
 public class SchedulingGui extends JFrame{
 	private static final long serialVersionUID = 1L;
+	private static Logger logger = Logger.getLogger(SchedulingGui.class.getName());
 	private Dimension panelSize;
 	private int numOfAGV;
 	private MainPanel mainPanel;
@@ -46,6 +48,7 @@ public class SchedulingGui extends JFrame{
 	private Timer timer;
 	private JLabel stateLabel;
 	private StringBuffer stateString;
+	
 	
 	public SchedulingGui(){
 		super("AGV调度系统");
@@ -105,6 +108,7 @@ public class SchedulingGui extends JFrame{
 			e.printStackTrace();
 			stateString.append(e.toString()).append("//");
 			stateLabel.setText(stateString.toString());
+			logger.error(e);
 		}
 
 		new Thread(new Runnable(){
@@ -121,6 +125,7 @@ public class SchedulingGui extends JFrame{
 						}
 					}catch(Exception e){
 						e.printStackTrace();
+						logger.error(e);
 					}
 				}
 			}
@@ -166,6 +171,7 @@ public class SchedulingGui extends JFrame{
 				outputStream.write(toolKit.HexString2Bytes("AAC0FFEEBB"));
 			}catch(Exception e){
 				e.printStackTrace();
+				logger.error(e);
 			}
 			lastCommunicationTime = System.currentTimeMillis();
 		}
@@ -202,6 +208,7 @@ public class SchedulingGui extends JFrame{
 						
 					}catch(Exception e){
 						e.printStackTrace();
+						logger.error(e);
 					}
 				}else{
 					try{
@@ -213,6 +220,7 @@ public class SchedulingGui extends JFrame{
 							socket.close();
 					}catch(Exception e){
 						e.printStackTrace();
+						logger.error(e);
 					}
 					
 					break;//退出while循环
@@ -328,6 +336,7 @@ public class SchedulingGui extends JFrame{
 			}
 		}catch(Exception e){
 			e.printStackTrace();
+			logger.error(e);
 		}
 		this.graph = graph;
 		return graph;
