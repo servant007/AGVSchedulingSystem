@@ -24,10 +24,11 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.Number;   
 import schedulingSystem.component.Graph;
+import schedulingSystem.component.Main;
 import schedulingSystem.component.Node;
 import schedulingSystem.toolKit.*;;
 
-public class GraphingGui extends JFrame{
+public class GraphingGui extends JPanel{
 	/**
 	 * 
 	 */
@@ -43,17 +44,23 @@ public class GraphingGui extends JFrame{
 	private boolean addStrNode;
 	private Graph graph;
 	private int countNode = 0;
-	private static final int CORRECTX = 16;
-	private static final int CORRECTY = 58;
-	public GraphingGui(){
-		super("AGV调度系统");
+	private static GraphingGui instance;
+	private Main main;
+	
+	public static GraphingGui getInstance(){
+		if(instance == null){
+			instance = new GraphingGui();
+		}
+		
+		return instance;
+	}
+	
+	private GraphingGui(){
 		tempStrNode = new Node();
 		tempEndNode = new Node();
 		graph = new Graph();
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setExtendedState(Frame.MAXIMIZED_BOTH);
 		
-		MainPanel mainPanel = new MainPanel();
 
 		schedulingGuiBtn = new RoundButton("调度界面");
 		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/20);
@@ -66,27 +73,26 @@ public class GraphingGui extends JFrame{
 		
 		comfirmBtn = new RoundButton("确认使用");
 		comfirmBtn.setBounds(9*screenSize.width/10, 17*screenSize.height/20, screenSize.width/10, screenSize.height/20);
-		
-		mainPanel.setLayout(null);
-		mainPanel.add(schedulingGuiBtn);
-		mainPanel.add(setingGuiBtn);
-		mainPanel.add(graphGuiBtn);
-		mainPanel.add(comfirmBtn);
+		setBtnColor();
+		this.setLayout(null);
+		this.add(schedulingGuiBtn);
+		this.add(setingGuiBtn);
+		this.add(graphGuiBtn);
+		this.add(comfirmBtn);
 
-		this.getContentPane().add(mainPanel);
 		this.addMouseMotionListener(new MouseAdapter(){
 			public void mouseMoved(MouseEvent e){
 				repaint();
 				if(mouseClicked){
-					tempEndNode.x = e.getX() - CORRECTX;
-					tempEndNode.y = e.getY() - CORRECTY;
+					tempEndNode.x = e.getX();
+					tempEndNode.y = e.getY();
 				}
 			}
 		});
 		this.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent e){
 				if(e.getButton() == MouseEvent.BUTTON1){
-					Node node = graph.searchNode(e.getX() - CORRECTX, e.getY() - CORRECTY);
+					Node node = graph.searchNode(e.getX(), e.getY());
 					if(node != null){
 						if(!addStrNode){
 							setStrNode(node.x, node.y, node.num);
@@ -128,30 +134,30 @@ public class GraphingGui extends JFrame{
 					if(node ==null){
 						if(!addStrNode){
 							countNode++;
-							setStrNode(e.getX() - CORRECTX, e.getY() - CORRECTY, countNode);
-							setEndNode(e.getX() - CORRECTX, e.getY() - CORRECTY, 0);
+							setStrNode(e.getX(), e.getY(), countNode);
+							setEndNode(e.getX() , e.getY(), 0);
 							mouseClicked = true;
 							addStrNode = true;
 							System.out.println("clicked-1/" + String.valueOf(countNode));
 						}else {
 							countNode++;
-							if(Math.abs(e.getX() - CORRECTX - tempStrNode.x) > Math.abs(e.getY() - CORRECTY - tempStrNode.y)){
-								int searchX = graph.searchHorizontal(e.getX() - CORRECTX);
+							if(Math.abs(e.getX() - tempStrNode.x) > Math.abs(e.getY()  - tempStrNode.y)){
+								int searchX = graph.searchHorizontal(e.getX());
 								if(searchX != 0){
 									System.out.println("clicked-2-x-!=" + String.valueOf(countNode));
 									setEndNode(searchX, tempStrNode.y, countNode);
 								}else{
-									setEndNode(e.getX() - CORRECTX, tempStrNode.y, countNode);
+									setEndNode(e.getX(), tempStrNode.y, countNode);
 									System.out.println("clicked-2-x-=" + String.valueOf(countNode));
 								}
 									
 							}else {
 								System.out.println("clicked-2-y");
-								int searchY = graph.searchVertical(e.getY() - CORRECTY);
+								int searchY = graph.searchVertical(e.getY());
 								if(searchY != 0)
 									setEndNode(tempStrNode.x, searchY, countNode);
 								else
-									setEndNode(tempStrNode.x, e.getY() - CORRECTY, countNode);
+									setEndNode(tempStrNode.x, e.getY(), countNode);
 							}
 							
 							mouseClicked = false;
@@ -196,22 +202,22 @@ public class GraphingGui extends JFrame{
 		});
 	}
 	
-	public void getGuiInstance(SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
+	public void getGuiInstance(Main main , SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
 		schedulingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				schedulingGui.setVisible(true);
-				schedulingGui.setBtnColor();
-				setingGui.setVisible(false);
-				graphingGui.setVisible(false);
+				main.getContentPane().removeAll();
+				main.getContentPane().add(schedulingGui);
+				main.repaint();
+				main.validate();
 			}
 		});
 
 		setingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				schedulingGui.setVisible(false);
-				setingGui.setVisible(true);
-				setingGui.setBtnColor();
-				graphingGui.setVisible(false);
+				main.getContentPane().removeAll();
+				main.getContentPane().add(setingGui);
+				main.repaint();
+				main.validate();
 			}
 		});
 		
@@ -241,23 +247,17 @@ public class GraphingGui extends JFrame{
 		
 	}
 	
-	
-	
-	class MainPanel extends JPanel{
-		private static final long serialVersionUID = 1L;
-		
-		public MainPanel(){
-		}
-		protected void paintComponent(Graphics g){
-			super.paintComponents(g);
-			((Graphics2D)g).setStroke(new BasicStroke(6.0f));
-			g.setColor(Color.BLACK);
-			g.drawLine(tempStrNode.x , tempStrNode.y , tempEndNode.x , tempEndNode.y );
-			g.setColor(Color.YELLOW);
-			g.fillRect(tempStrNode.x - 5, tempStrNode.y - 5, 10, 10);
-			g.fillRect(tempEndNode.x - 5, tempEndNode.y - 5, 10, 10);
-			drawGraph(g);
-		}
+	@Override
+	public void paint(Graphics g){
+		super.paint(g);
+		//super.paintComponents(g);
+		((Graphics2D)g).setStroke(new BasicStroke(6.0f));
+		g.setColor(Color.BLACK);
+		g.drawLine(tempStrNode.x , tempStrNode.y , tempEndNode.x , tempEndNode.y );
+		g.setColor(Color.YELLOW);
+		g.fillRect(tempStrNode.x - 5, tempStrNode.y - 5, 10, 10);
+		g.fillRect(tempEndNode.x - 5, tempEndNode.y - 5, 10, 10);
+		drawGraph(g);
 	}
 	
 	public void drawGraph(Graphics g){
@@ -272,14 +272,6 @@ public class GraphingGui extends JFrame{
 		g.setColor(Color.YELLOW);
 		for(int i = 0 ; i < graph.getNodeSize(); i++)
 			g.fillRect(graph.getNode(i).x - 5, graph.getNode(i).y - 5, 10, 10);
-	}
-	
-	
-	class TimerListener implements ActionListener{
-		public void actionPerformed(ActionEvent e){
-			repaint();
-			
-		}
 	}
 	
 	public void setBtnColor(){

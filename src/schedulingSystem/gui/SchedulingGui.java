@@ -31,15 +31,16 @@ import jxl.Sheet;
 import jxl.Workbook;
 import schedulingSystem.component.AGVCar;
 import schedulingSystem.component.Graph;
+import schedulingSystem.component.Main;
 import schedulingSystem.toolKit.MyToolKit;
 import schedulingSystem.toolKit.RoundButton;
 
-public class SchedulingGui extends JFrame{
+public class SchedulingGui extends JPanel{
 	private static final long serialVersionUID = 1L;
+	private static SchedulingGui instance;
 	private static Logger logger = Logger.getLogger(SchedulingGui.class.getName());
 	private Dimension panelSize;
 	private int numOfAGV;
-	private MainPanel mainPanel;
 	private ArrayList<AGVCar> AGVArray;
 	private Graph graph;
 	private boolean firstInit;
@@ -52,10 +53,18 @@ public class SchedulingGui extends JFrame{
 	private Timer timer;
 	private JLabel stateLabel;
 	private StringBuffer stateString;
+	private Dimension screenSize;
+	private Main main;
 	
 	
-	public SchedulingGui(){
-		super("AGV调度系统");
+	public static SchedulingGui getInstance(){
+		if(instance == null){
+			instance = new SchedulingGui();
+		}
+		return instance;
+	}
+	
+	private SchedulingGui(){
 		stateString = new StringBuffer();
 		graph = new Graph();
 		toolKit = new MyToolKit();
@@ -67,7 +76,7 @@ public class SchedulingGui extends JFrame{
 			AGVArray.add(new AGVCar());
 		}
 
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		schedulingGuiBtn = new RoundButton("调度界面");
 		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/20);
 		schedulingGuiBtn.setForeground(new Color(30, 144, 255));
@@ -91,20 +100,15 @@ public class SchedulingGui extends JFrame{
 		stateLabel.setBounds(0, 22*screenSize.height/25, screenSize.width, screenSize.height/25);
 		stateLabel.setFont(new Font("宋体", Font.BOLD, 25));
 		
-		mainPanel = new MainPanel();
-		mainPanel.setLayout(null);
-		mainPanel.add(schedulingGuiBtn);
-		mainPanel.add(setingGuiBtn);
-		mainPanel.add(graphGuiBtn);
-		mainPanel.add(stateLabel);
-		mainPanel.add(importGraphBtn);
+
+		this.setLayout(null);
+		this.add(schedulingGuiBtn);
+		this.add(setingGuiBtn);
+		this.add(graphGuiBtn);
+		this.add(stateLabel);
+		this.add(importGraphBtn);
 		
-		this.getContentPane().add(mainPanel);	  
-		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		this.setExtendedState(Frame.MAXIMIZED_BOTH);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setLocationRelativeTo(null);
-		this.setVisible(true);
+		
 		
 		try{
 			serverSocket = new ServerSocket(8001);
@@ -134,29 +138,39 @@ public class SchedulingGui extends JFrame{
 				}
 			}
 		}).start();
-		
+		timer = new Timer(100, new TimerListener());
+		timer.start();
+	}//init
+	
+	@Override
+	public void paint(Graphics g){
+		super.paint(g);
+		//super.paintComponents(g);
+		if(firstInit){
+			drawGraph(g);
+			drawAGV(g);
+		}
 	}
 	
-	public void getGuiInstance(SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
+	public void getGuiInstance(Main main, SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
 		setingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				schedulingGui.setVisible(false);
-				setingGui.setVisible(true);
-				setingGui.setBtnColor();
-				graphingGui.setVisible(false);
+				main.getContentPane().removeAll();
+				main.getContentPane().add(setingGui);
+				main.repaint();
+				main.validate();
 			}
 		});
 
 		graphGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				schedulingGui.setVisible(false);
-				setingGui.setVisible(false);
-				graphingGui.setVisible(true);
-				graphingGui.setBtnColor();
+				main.getContentPane().removeAll();
+				main.getContentPane().add(graphingGui);
+				main.repaint();
+				main.validate();
 			}
 		});
-		timer = new Timer(100, new TimerListener());
-		timer.start();
+		
 	}
 	
 	class HandleReceiveMessage implements Runnable{
@@ -226,7 +240,6 @@ public class SchedulingGui extends JFrame{
 						e.printStackTrace();
 						logger.error(e);
 					}
-					
 					break;//退出while循环
 				}				
 			}
@@ -234,21 +247,6 @@ public class SchedulingGui extends JFrame{
 		
 	}
 	
-	
-	class MainPanel extends JPanel{
-		private static final long serialVersionUID = 1L;
-		
-		public MainPanel(){
-			
-		}
-		protected void paintComponent(Graphics g){
-			super.paintComponents(g);
-			if(firstInit){
-				drawGraph(g);
-				drawAGV(g);
-			}
-		}
-	}
 	
 	public void drawGraph(Graphics g){
 		((Graphics2D)g).setStroke(new BasicStroke(6.0f));
@@ -287,8 +285,8 @@ public class SchedulingGui extends JFrame{
 		public void actionPerformed(ActionEvent e){
 			repaint();
 			if(!firstInit){
-				panelSize.width = mainPanel.getWidth();
-				panelSize.height = mainPanel.getHeight();
+				panelSize.width = screenSize.width;
+				panelSize.height = screenSize.height;
 				graph.createGraph(panelSize);
 				firstInit = true;
 			}else {	

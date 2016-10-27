@@ -12,11 +12,12 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
 
+import schedulingSystem.component.Main;
 import schedulingSystem.gui.GraphingGui;
 import schedulingSystem.toolKit.*;
 import schedulingSystem.gui.SchedulingGui;
 
-public class SetingGui extends JFrame{
+public class SetingGui extends JPanel{
 	/**
 	 * 
 	 */
@@ -25,13 +26,16 @@ public class SetingGui extends JFrame{
 	private RoundButton schedulingGuiBtn;
 	private RoundButton setingGuiBtn;
 	private RoundButton graphGuiBtn;
-	
-	public SetingGui(){
-		super("AGV调度系统");
+	private static SetingGui instance;
+	public static SetingGui getInstance(){
+		if(instance == null){
+			instance = new SetingGui();
+		}
+		return instance;
+	}
+	private SetingGui(){
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setExtendedState(Frame.MAXIMIZED_BOTH);
 		
-		JPanel mainPanel = new JPanel();
 
 		schedulingGuiBtn = new RoundButton("调度界面");
 		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/20);
@@ -54,34 +58,29 @@ public class SetingGui extends JFrame{
 				
 			}
 		});
-		mainPanel.setLayout(null);
-		mainPanel.add(schedulingGuiBtn);
-		mainPanel.add(setingGuiBtn);
-		mainPanel.add(graphGuiBtn);
-		
-		
-		
-		
-		
-		this.getContentPane().add(mainPanel);
+		setBtnColor();
+		this.setLayout(null);
+		this.add(schedulingGuiBtn);
+		this.add(setingGuiBtn);
+		this.add(graphGuiBtn);
 	}
 	
-	public void getGuiInstance(SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
+	public void getGuiInstance(Main main, SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
 		schedulingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				schedulingGui.setVisible(true);
-				schedulingGui.setBtnColor();
-				setingGui.setVisible(false);
-				graphingGui.setVisible(false);
+				main.getContentPane().removeAll();
+				main.getContentPane().add(schedulingGui);
+				main.repaint();
+				main.validate();
 			}
 		});
 
 		graphGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				schedulingGui.setVisible(false);
-				setingGui.setVisible(false);
-				graphingGui.setVisible(true);
-				graphingGui.setBtnColor();
+				main.getContentPane().removeAll();
+				main.getContentPane().add(graphingGui);
+				main.repaint();
+				main.validate();
 			}
 		});
 	}
