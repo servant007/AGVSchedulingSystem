@@ -6,15 +6,19 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Label;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -295,51 +299,58 @@ public class SchedulingGui extends JFrame{
 		}
 	}
 	
-	public Graph importNewGraph(){
+	public void importNewGraph(){
 		Graph graph = new Graph();
 		try{
-			InputStream is = new FileInputStream("C:/graph.xls");
-			Workbook wb = Workbook.getWorkbook(is);
-			
-			Sheet sheetNodes = wb.getSheet("nodes");
-			for(int i = 0; i < sheetNodes.getRows(); i++){
-				int x=0, y=0, num=0;
-				for(int j = 0; j < 3; j++){
-					Cell cell0 = sheetNodes.getCell(j,i);
-						String str = cell0.getContents();
-						if(j == 0)
-							num = Integer.parseInt(str);
-						if(j == 1)
-							x = Integer.parseInt(str);
-						if(j == 2)
-							y = Integer.parseInt(str);
-						System.out.println("++:"+str);						
+			JFileChooser jfc = new JFileChooser();
+			jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			jfc.showDialog(new Label(), "Ñ¡ÔñµØÍ¼");
+			File file = jfc.getSelectedFile();
+			if(file != null){
+				System.out.println(file.getPath());
+				InputStream is = new FileInputStream(file.getPath());
+				Workbook wb = Workbook.getWorkbook(is);
+				
+				Sheet sheetNodes = wb.getSheet("nodes");
+				for(int i = 0; i < sheetNodes.getRows(); i++){
+					int x=0, y=0, num=0;
+					for(int j = 0; j < 3; j++){
+						Cell cell0 = sheetNodes.getCell(j,i);
+							String str = cell0.getContents();
+							if(j == 0)
+								num = Integer.parseInt(str);
+							if(j == 1)
+								x = Integer.parseInt(str);
+							if(j == 2)
+								y = Integer.parseInt(str);
+							System.out.println("++:"+str);						
+					}
+					graph.addImportNode(x, y, num);
 				}
-				graph.addImportNode(x, y, num);
-			}
-			
-			Sheet sheetEdges = wb.getSheet("edges");
-			for(int i = 0; i < sheetEdges.getRows(); i++){
-				int start=0, end=0, dis=0;
-				for(int j = 0; j < 3; j++){
-					Cell cell0 = sheetEdges.getCell(j,i);
-						String str = cell0.getContents();
-						if(j == 0)
-							start = Integer.parseInt(str);
-						if(j == 1)
-							end = Integer.parseInt(str);
-						if(j == 2)
-							dis = Integer.parseInt(str);
-						System.out.println("++:"+str);						
+				
+				Sheet sheetEdges = wb.getSheet("edges");
+				for(int i = 0; i < sheetEdges.getRows(); i++){
+					int start=0, end=0, dis=0;
+					for(int j = 0; j < 3; j++){
+						Cell cell0 = sheetEdges.getCell(j,i);
+							String str = cell0.getContents();
+							if(j == 0)
+								start = Integer.parseInt(str);
+							if(j == 1)
+								end = Integer.parseInt(str);
+							if(j == 2)
+								dis = Integer.parseInt(str);
+							System.out.println("++:"+str);						
+					}
+					graph.addEdge(start, end, dis);
 				}
-				graph.addEdge(start, end, dis);
-			}
+				this.graph = graph;
+			}			
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error(e);
 		}
-		this.graph = graph;
-		return graph;
+		
 	}
 	
 	public void setBtnColor(){

@@ -38,13 +38,13 @@ public class MyDialog extends JDialog {
 		cancelBtn = new RoundButton("È¡Ïû");
 		comfirmBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				dialogListener.getInputString(inputField.getText());
+				dialogListener.getInputString(inputField.getText(), true);
 			}
 		});
 		
 		cancelBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				dialogListener.getInputString("");
+				dialogListener.getInputString("", false);
 			}
 		});
 		btnPanel.add(comfirmBtn);
@@ -56,6 +56,7 @@ public class MyDialog extends JDialog {
 		this.getContentPane().add(mainPanel);
 		this.setVisible(true);
 		this.setAlwaysOnTop(true);
+		//this.setUndecorated(true);
 	}
 	
 	public void setOnDialogListener(DialogListener listener){

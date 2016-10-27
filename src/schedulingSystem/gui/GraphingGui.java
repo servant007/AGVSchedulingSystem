@@ -75,17 +75,17 @@ public class GraphingGui extends JFrame{
 		this.getContentPane().add(mainPanel);
 		this.addMouseMotionListener(new MouseAdapter(){
 			public void mouseMoved(MouseEvent e){
+				repaint();
 				if(mouseClicked){
 					tempEndNode.x = e.getX() - 16;
 					tempEndNode.y = e.getY() - 58;
-					repaint();
 				}
 			}
 		});
 		this.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent e){
 				if(e.getButton() == MouseEvent.BUTTON1){
-					Node node = graph.searchNode(new Node(e.getX(), e.getY(), 0));
+					Node node = graph.searchNode(new Node(e.getX() - 16, e.getY() - 58, 0));
 					if(node != null){
 						if(!addStrNode){
 							tempStrNode = new Node(node.x, node.y, node.num);
@@ -94,16 +94,35 @@ public class GraphingGui extends JFrame{
 							mouseClicked = true;
 							addStrNode = true;
 						}else{
-							//弹出对话框判断是否添加
-							if(tempStrNode.getNewNode()){
-								graph.addNode(tempStrNode);
-								graph.addEdge(tempStrNode.num, node.num, 0);
-							}else{
-								graph.addEdge(tempStrNode.num, node.num, 0);
-							}
+							tempEndNode.x = node.x;
+							tempEndNode.y = node.y;
 							mouseClicked = false;
 							addStrNode = false;
-							initNode();
+							MyDialog dialog = new MyDialog("请输入实际长度（cm）：");
+							dialog.setOnDialogListener(new DialogListener(){
+								@Override
+								public void getInputString(String fileName, boolean buttonState){
+									dialog.dispose();
+									if(buttonState){
+										//弹出对话框判断是否添加
+										if(tempStrNode.getNewNode()){
+											graph.addNode(tempStrNode);
+											graph.addEdge(tempStrNode.num, node.num, 0);
+											initNode();
+											repaint();
+										}else{
+											graph.addEdge(tempStrNode.num, node.num, 0);
+											initNode();
+											repaint();
+										}
+										
+									}else{
+										initNode();
+										repaint();
+									}
+								}
+							});	
+							
 						}
 					}
 					if(node ==null){
@@ -116,9 +135,9 @@ public class GraphingGui extends JFrame{
 							System.out.println("clicked-1/" + String.valueOf(countNode));
 						}else {
 							countNode++;
-							if(Math.abs(e.getX() - tempStrNode.x) > Math.abs(e.getY() - tempStrNode.y)){
-								int searchX = graph.searchHorizontal(e.getX());
-								System.out.println("searchX:"+ String.valueOf(searchX));
+							if(Math.abs(e.getX() - 16 - tempStrNode.x) > Math.abs(e.getY() - 58 - tempStrNode.y)){
+								int searchX = graph.searchHorizontal(e.getX() - 16);
+								//System.out.println("searchX:"+ String.valueOf(searchX));
 								if(searchX != 0){
 									System.out.println("clicked-2-x-!=" + String.valueOf(countNode));
 									tempEndNode = new Node(searchX, tempStrNode.y, countNode);
@@ -129,24 +148,46 @@ public class GraphingGui extends JFrame{
 									
 							}else {
 								System.out.println("clicked-2-y");
-								int searchY = graph.searchVertical(e.getY());
+								int searchY = graph.searchVertical(e.getY() - 58);
 								if(searchY != 0)
 									tempEndNode = new Node(tempStrNode.x, searchY, countNode);
 								else
 									tempEndNode = new Node(tempStrNode.x, e.getY() - 58, countNode);
 							}
-							//弹出对话框判断是否添加
-							if(tempStrNode.getNewNode()){
-								graph.addNode(tempStrNode);
-								graph.addNode(tempEndNode);
-								graph.addEdge(tempStrNode.num, tempEndNode.num, 0);
-							}else{
-								graph.addNode(tempEndNode);
-								graph.addEdge(tempStrNode.num, tempEndNode.num, 0);
-							}							
+							
 							mouseClicked = false;
 							addStrNode = false;
-							initNode();
+							MyDialog dialog = new MyDialog("请输入实际长度（cm）：");
+							dialog.setOnDialogListener(new DialogListener(){
+								@Override
+								public void getInputString(String fileName, boolean buttonState){
+									dialog.dispose();
+									if(buttonState){
+										System.out.println("comfirmed");
+										//弹出对话框判断是否添加
+										if(tempStrNode.getNewNode()){
+											graph.addNode(tempStrNode);
+											graph.addNode(tempEndNode);
+											System.out.println("tempStrNode"+tempStrNode.x+tempStrNode.y);
+											graph.addEdge(tempStrNode.num, tempEndNode.num, 0);
+											initNode();
+											System.out.println("comfirmed"+tempEndNode.x);
+											repaint();
+										}else{
+											graph.addNode(tempEndNode);
+											graph.addEdge(tempStrNode.num, tempEndNode.num, 0);
+											initNode();
+											System.out.println("comfirmed"+tempEndNode.x);
+											repaint();
+										}
+										
+									}else{
+										initNode();
+										repaint();
+									}
+								}
+							});					
+							
 						}
 					}
 					repaint();
@@ -182,10 +223,9 @@ public class GraphingGui extends JFrame{
 				MyDialog dialog = new MyDialog("请输入文件名：");
 				dialog.setOnDialogListener(new DialogListener(){
 					@Override
-					public void getInputString(String fileName){
-						System.out.println(fileName);
+					public void getInputString(String fileName, boolean buttonState){
 						dialog.dispose();
-						if(fileName.length() > 0 ){
+						if(buttonState){
 							try{
 								StringBuffer filePath = new StringBuffer();
 								File graphExcelFile = new File(filePath.append("C:/").append(fileName).append(".xls").toString());//
@@ -219,6 +259,7 @@ public class GraphingGui extends JFrame{
 			g.setColor(Color.YELLOW);
 			g.fillRect(tempStrNode.x - 5, tempStrNode.y - 5, 10, 10);
 			g.fillRect(tempEndNode.x - 5, tempEndNode.y - 5, 10, 10);
+			System.out.println("tempEndNode:"+tempEndNode.x);
 			drawGraph(g);
 		}
 	}
@@ -226,8 +267,11 @@ public class GraphingGui extends JFrame{
 	public void drawGraph(Graphics g){
 		((Graphics2D)g).setStroke(new BasicStroke(6.0f));
 		g.setColor(Color.BLACK);
-		for(int i = 0 ; i < graph.getEdgeSize(); i++)
+		
+		for(int i = 0 ; i < graph.getEdgeSize(); i++){
 			g.drawLine(graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y, graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y);
+		}
+			
 		
 		g.setColor(Color.YELLOW);
 		for(int i = 0 ; i < graph.getNodeSize(); i++)
@@ -283,6 +327,18 @@ public class GraphingGui extends JFrame{
 		tempStrNode.y = 0;
 		tempEndNode.x = 0;
 		tempEndNode.y = 0;
+		tempEndNode.num = 0;
+		tempStrNode.num = 0;
+	}
+	public void setStrNode(int x, int y, int num){
+		tempStrNode.x = x;
+		tempStrNode.y = y;
+		tempStrNode.num = num;
 	}
 	
+	public void setEndNode(int x, int y, int num){
+		tempEndNode.x = x;
+		tempEndNode.y = y;
+		tempEndNode.num = num;
+	}
 }
