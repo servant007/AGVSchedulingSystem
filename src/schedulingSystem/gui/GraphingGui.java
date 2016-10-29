@@ -104,20 +104,23 @@ public class GraphingGui extends JPanel{
 							setEndNode(node.x, node.y, node.num);
 							mouseClicked = false;
 							addStrNode = false;
-							MyDialog dialog = new MyDialog("请输入实际长度（cm）：");
-							dialog.setOnDialogListener(new DialogListener(){
+							GraphDialog dialog = new GraphDialog();
+							dialog.setOnDialogListener(new GraphDialogListener(){
 								@Override
-								public void getInputString(String realDis, boolean buttonState){
+								public void getInputString(String realDis, String strCard, String endCard, boolean buttonState){
 									dialog.dispose();
-									if(buttonState && realDis.length() > 0){
+									if(buttonState && realDis.length() > 0
+											&& strCard.length() > 0  && endCard.length() > 0){
 										//弹出对话框判断是否添加
 										if(tempStrNode.questIsNewNode()){
 											graph.addNode(tempStrNode);
-											graph.addEdge(tempStrNode.num, node.num, Integer.parseInt(realDis));
+											graph.addEdge(tempStrNode.num, node.num, Integer.parseInt(realDis)
+													,Integer.parseInt(strCard), Integer.parseInt(endCard));
 											initNode();
 											repaint();
 										}else{
-											graph.addEdge(tempStrNode.num, node.num, Integer.parseInt(realDis));
+											graph.addEdge(tempStrNode.num, node.num, Integer.parseInt(realDis)
+													,Integer.parseInt(strCard), Integer.parseInt(endCard));
 											initNode();
 											repaint();
 										}
@@ -162,24 +165,27 @@ public class GraphingGui extends JPanel{
 							
 							mouseClicked = false;
 							addStrNode = false;
-							MyDialog dialog = new MyDialog("请输入实际长度（cm）：");
-							dialog.setOnDialogListener(new DialogListener(){
+							GraphDialog dialog = new GraphDialog();
+							dialog.setOnDialogListener(new GraphDialogListener(){
 								@Override
-								public void getInputString(String realDis, boolean buttonState){
+								public void getInputString(String realDis,String strCard, String endCard, boolean buttonState){
 									dialog.dispose();
-									if(buttonState && realDis.length() > 0){
+									if(buttonState && realDis.length() > 0 
+											&& strCard.length() > 0  && endCard.length() > 0){
 										System.out.println("comfirmed");
 										//弹出对话框判断是否添加
 										if(tempStrNode.questIsNewNode()){
 											graph.addNode(tempStrNode);
 											graph.addNode(tempEndNode);
 											System.out.println("tempStrNode"+tempStrNode.x+tempStrNode.y);
-											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis));
+											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis)
+													,Integer.parseInt(strCard), Integer.parseInt(endCard));
 											initNode();
 											repaint();
 										}else{
 											graph.addNode(tempEndNode);
-											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis));
+											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis)
+													,Integer.parseInt(strCard), Integer.parseInt(endCard));
 											initNode();
 											repaint();
 										}
@@ -223,10 +229,10 @@ public class GraphingGui extends JPanel{
 		
 		comfirmBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				MyDialog dialog = new MyDialog("请输入文件名：");
-				dialog.setOnDialogListener(new DialogListener(){
+				FileNameDialog dialog = new FileNameDialog();
+				dialog.setOnDialogListener(new FileNameDialogListener(){
 					@Override
-					public void getInputString(String fileName, boolean buttonState){
+					public void getFileName(String fileName, boolean buttonState){
 						dialog.dispose();
 						if(buttonState){
 							try{

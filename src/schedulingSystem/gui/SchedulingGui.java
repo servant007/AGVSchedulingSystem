@@ -30,6 +30,7 @@ import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
 import schedulingSystem.component.AGVCar;
+import schedulingSystem.component.Edge;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Main;
 import schedulingSystem.toolKit.MyToolKit;
@@ -55,6 +56,8 @@ public class SchedulingGui extends JPanel{
 	private StringBuffer stateString;
 	private Dimension screenSize;
 	private Main main;
+	private InputStream inputStream;
+	private OutputStream outputStream;
 	
 	
 	public static SchedulingGui getInstance(){
@@ -153,6 +156,17 @@ public class SchedulingGui extends JPanel{
 	}
 	
 	public void getGuiInstance(Main main, SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
+		schedulingGuiBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				try{
+					outputStream.write(toolKit.HexString2Bytes("AA040000000000000000000000BB"));
+					System.out.println("AA030000010000002000000000BB");
+				}catch (Exception e1){
+					e1.printStackTrace();
+				}
+				
+			}
+		});
 		setingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				main.getContentPane().removeAll();
@@ -174,11 +188,10 @@ public class SchedulingGui extends JPanel{
 	}
 	
 	class HandleReceiveMessage implements Runnable{
-		private InputStream inputStream;
-		private OutputStream outputStream;
+		
 		private Socket socket;
 		private long lastCommunicationTime;
-		private long reciveDelayTime = 6000;
+		private long reciveDelayTime = 10000;
 		
 		HandleReceiveMessage(Socket socket){
 			System.out.println("socket connect:"+socket.toString());
@@ -207,10 +220,11 @@ public class SchedulingGui extends JPanel{
 								if(!message.substring(4, 8).equals("BABA")){
 									//System.out.println("4-8:"+message.substring(4, 8));
 									AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
-									int noOfEdge = Integer.parseInt(message.substring(4, 6), 16);
+									int NOOfCard = Integer.parseInt(message.substring(4, 6), 16);
 									int electricity = Integer.parseInt(message.substring(6, 8), 16);
-									//System.out.println("noOfEdge:"+String.valueOf(noOfEdge)+"//"+String.valueOf(electricity));
-									AGVArray.get(noOfAGV).setOnEdge(graph.getEdge(noOfEdge - 1));
+									Edge edge = null;
+									if((edge = graph.searchCard(NOOfCard)) != null)
+										AGVArray.get(noOfAGV).setOnEdge(edge);
 									AGVArray.get(noOfAGV).setElectricity(electricity);
 									
 								}else{
@@ -328,8 +342,8 @@ public class SchedulingGui extends JPanel{
 				
 				Sheet sheetEdges = wb.getSheet("edges");
 				for(int i = 0; i < sheetEdges.getRows(); i++){
-					int start=0, end=0, dis=0;
-					for(int j = 0; j < 3; j++){
+					int start=0, end=0, dis=0, strCardNum=0, endCardNum=0;
+					for(int j = 0; j < 5; j++){
 						Cell cell0 = sheetEdges.getCell(j,i);
 							String str = cell0.getContents();
 							if(j == 0)
@@ -338,9 +352,13 @@ public class SchedulingGui extends JPanel{
 								end = Integer.parseInt(str);
 							if(j == 2)
 								dis = Integer.parseInt(str);
+							if(j == 3)
+								strCardNum = Integer.parseInt(str);
+							if(j == 4)
+								endCardNum = Integer.parseInt(str);
 							System.out.println("++:"+str);						
 					}
-					graph.addEdge(start, end, dis);
+					graph.addEdge(start, end, dis, strCardNum, endCardNum);
 				}
 				this.graph = graph;
 			}			
