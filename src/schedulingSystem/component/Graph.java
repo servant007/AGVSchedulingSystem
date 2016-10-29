@@ -60,7 +60,7 @@ public class Graph {
 	public Node searchNode( int x, int y){
 		for(int i = 0; i < nodeArray.size(); i++){
 			if(Math.pow(x - nodeArray.get(i).x, 2) + 
-					Math.pow(y - nodeArray.get(i).y, 2) < 7000){
+					Math.pow(y - nodeArray.get(i).y, 2) < 300){
 				return nodeArray.get(i);
 			}
 		}
@@ -69,7 +69,7 @@ public class Graph {
 	
 	public int searchHorizontal(int horizontal){
 		for(int i = 0; i < nodeArray.size(); i++){
-			if(Math.abs(horizontal - nodeArray.get(i).x) < 84)
+			if(Math.abs(horizontal - nodeArray.get(i).x) < 30)
 				return nodeArray.get(i).x;
 		}
 		return 0;
@@ -77,7 +77,7 @@ public class Graph {
 	
 	public int searchVertical(int vertical){
 		for(int i = 0; i < nodeArray.size(); i++){
-			if(Math.abs(vertical - nodeArray.get(i).y) < 84)
+			if(Math.abs(vertical - nodeArray.get(i).y) < 30)
 				return nodeArray.get(i).y;
 		}
 		return 0;

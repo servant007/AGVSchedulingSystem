@@ -2,6 +2,7 @@ package schedulingSystem.gui;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -38,6 +39,7 @@ public class GraphingGui extends JPanel{
 	private RoundButton setingGuiBtn;
 	private RoundButton graphGuiBtn;
 	private RoundButton comfirmBtn;
+	private RoundButton importGraphBtn;
 	private Node tempStrNode;
 	private Node tempEndNode;
 	private boolean mouseClicked;
@@ -45,7 +47,9 @@ public class GraphingGui extends JPanel{
 	private Graph graph;
 	private int countNode = 0;
 	private static GraphingGui instance;
-	private Main main;
+	private MyToolKit myToolKit;
+	private Dimension screenSize;
+	private Node mousePosition;
 	
 	public static GraphingGui getInstance(){
 		if(instance == null){
@@ -59,8 +63,9 @@ public class GraphingGui extends JPanel{
 		tempStrNode = new Node();
 		tempEndNode = new Node();
 		graph = new Graph();
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		
+		myToolKit = new MyToolKit();
+		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		mousePosition = new Node();
 
 		schedulingGuiBtn = new RoundButton("调度界面");
 		schedulingGuiBtn.setBounds(0, 0, screenSize.width/3, screenSize.height/20);
@@ -72,17 +77,31 @@ public class GraphingGui extends JPanel{
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
 		comfirmBtn = new RoundButton("确认使用");
-		comfirmBtn.setBounds(9*screenSize.width/10, 17*screenSize.height/20, screenSize.width/10, screenSize.height/20);
+		comfirmBtn.setFont(new Font("宋体", Font.BOLD, 23));
+		comfirmBtn.setBounds(13*screenSize.width/14, 19*screenSize.height/22, screenSize.width/14, screenSize.height/22);
+		
+		importGraphBtn = new RoundButton("导入地图");
+		importGraphBtn.setFont(new Font("宋体", Font.BOLD, 23));
+		importGraphBtn.setBounds(13*screenSize.width/14, 18*screenSize.height/22, screenSize.width/14, screenSize.height/22);
+		importGraphBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				graph = myToolKit.importNewGraph(null);
+				repaint();
+			}
+		});
 		setBtnColor();
 		this.setLayout(null);
 		this.add(schedulingGuiBtn);
 		this.add(setingGuiBtn);
 		this.add(graphGuiBtn);
 		this.add(comfirmBtn);
+		this.add(importGraphBtn);
 
 		this.addMouseMotionListener(new MouseAdapter(){
 			public void mouseMoved(MouseEvent e){
 				repaint();
+				mousePosition.x = e.getX();
+				mousePosition.y = e.getY(); 
 				if(mouseClicked){
 					tempEndNode.x = e.getX();
 					tempEndNode.y = e.getY();
@@ -136,26 +155,38 @@ public class GraphingGui extends JPanel{
 					}
 					if(node ==null){
 						if(!addStrNode){
-							countNode++;
-							setStrNode(e.getX(), e.getY(), countNode);
-							setEndNode(e.getX() , e.getY(), 0);
+							countNode++;					
+							int searchX = graph.searchHorizontal(e.getX());
+							int searchY = graph.searchVertical(e.getY());
+							
+							if(searchX != 0 && searchY == 0){
+								setStrNode(searchX, e.getY(), countNode);
+								setEndNode(searchX, e.getY(), 0);
+								System.out.println("hasx");
+							}else if(searchX == 0 && searchY != 0){
+								setStrNode(e.getX(), searchY, countNode);
+								setEndNode(e.getX(), searchY, 0);
+								System.out.println("hasy");
+							}else if(searchX != 0 && searchY != 0){
+								System.out.println("hasxy");
+							}else{
+								setStrNode(e.getX(), e.getY(), countNode);
+								setEndNode(e.getX(), e.getY(), 0);
+								System.out.println("null");
+							}							
 							mouseClicked = true;
 							addStrNode = true;
-							System.out.println("clicked-1/" + String.valueOf(countNode));
+							//System.out.println("clicked-1/" + String.valueOf(countNode));
 						}else {
 							countNode++;
 							if(Math.abs(e.getX() - tempStrNode.x) > Math.abs(e.getY()  - tempStrNode.y)){
 								int searchX = graph.searchHorizontal(e.getX());
-								if(searchX != 0){
-									System.out.println("clicked-2-x-!=" + String.valueOf(countNode));
+								if(searchX != 0)
 									setEndNode(searchX, tempStrNode.y, countNode);
-								}else{
+								else
 									setEndNode(e.getX(), tempStrNode.y, countNode);
-									System.out.println("clicked-2-x-=" + String.valueOf(countNode));
-								}
 									
 							}else {
-								System.out.println("clicked-2-y");
 								int searchY = graph.searchVertical(e.getY());
 								if(searchY != 0)
 									setEndNode(tempStrNode.x, searchY, countNode);
@@ -177,7 +208,7 @@ public class GraphingGui extends JPanel{
 										if(tempStrNode.questIsNewNode()){
 											graph.addNode(tempStrNode);
 											graph.addNode(tempEndNode);
-											System.out.println("tempStrNode"+tempStrNode.x+tempStrNode.y);
+											//System.out.println("tempStrNode"+tempStrNode.x+tempStrNode.y);
 											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis)
 													,Integer.parseInt(strCard), Integer.parseInt(endCard));
 											initNode();
@@ -263,6 +294,12 @@ public class GraphingGui extends JPanel{
 		g.setColor(Color.YELLOW);
 		g.fillRect(tempStrNode.x - 5, tempStrNode.y - 5, 10, 10);
 		g.fillRect(tempEndNode.x - 5, tempEndNode.y - 5, 10, 10);
+		
+		((Graphics2D)g).setStroke(new BasicStroke(2.0f));
+		g.setColor(Color.GRAY);
+		g.drawLine(mousePosition.x, 0, mousePosition.x,screenSize.height);
+		g.drawLine(0, mousePosition.y, screenSize.width, mousePosition.y);
+
 		drawGraph(g);
 	}
 	
@@ -304,9 +341,13 @@ public class GraphingGui extends JPanel{
 				Number numberStrNode = new Number(0, i, graph.getEdge(i).startNode.num);
 				Number numberEndNode = new Number(1, i, graph.getEdge(i).endNode.num);
 				Number numberDis = new Number(2, i, graph.getEdge(i).realDis);
+				Number numberStrCard = new Number(3, i, graph.getEdge(i).strCardNum);
+				Number numberEndCard = new Number(4, i, graph.getEdge(i).endCardNum);
 				wsEdge.addCell(numberStrNode);
 				wsEdge.addCell(numberEndNode);
 				wsEdge.addCell(numberDis);
+				wsEdge.addCell(numberStrCard);
+				wsEdge.addCell(numberEndCard);
 			}
 			wwb.write();
 			wwb.close();

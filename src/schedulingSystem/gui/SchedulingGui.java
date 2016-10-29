@@ -1,11 +1,9 @@
 package schedulingSystem.gui;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
+
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Label;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -13,13 +11,13 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -30,9 +28,9 @@ import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
 import schedulingSystem.component.AGVCar;
-import schedulingSystem.component.Edge;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Main;
+import schedulingSystem.toolKit.HandleReceiveMessage;
 import schedulingSystem.toolKit.MyToolKit;
 import schedulingSystem.toolKit.RoundButton;
 
@@ -46,7 +44,7 @@ public class SchedulingGui extends JPanel{
 	private Graph graph;
 	private boolean firstInit;
 	private ServerSocket serverSocket;
-	private MyToolKit toolKit;
+	private MyToolKit myToolKit;
 	private RoundButton schedulingGuiBtn;
 	private RoundButton setingGuiBtn;
 	private RoundButton graphGuiBtn;
@@ -55,11 +53,8 @@ public class SchedulingGui extends JPanel{
 	private JLabel stateLabel;
 	private StringBuffer stateString;
 	private Dimension screenSize;
-	private Main main;
-	private InputStream inputStream;
-	private OutputStream outputStream;
-	
-	
+	private ExecutorService executorService;
+
 	public static SchedulingGui getInstance(){
 		if(instance == null){
 			instance = new SchedulingGui();
@@ -70,11 +65,11 @@ public class SchedulingGui extends JPanel{
 	private SchedulingGui(){
 		stateString = new StringBuffer();
 		graph = new Graph();
-		toolKit = new MyToolKit();
+		myToolKit = new MyToolKit();
 		panelSize = new Dimension(0, 0);
+		executorService = Executors.newFixedThreadPool(15);
 		numOfAGV = 10;
 		AGVArray = new ArrayList<AGVCar>();
-		
 		for(int i = 0; i < numOfAGV; i++){
 			AGVArray.add(new AGVCar());
 		}
@@ -92,27 +87,25 @@ public class SchedulingGui extends JPanel{
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
 		importGraphBtn = new RoundButton("导入地图");
-		importGraphBtn.setBounds(9*screenSize.width/10, 17*screenSize.height/20, screenSize.width/10, screenSize.height/20);
+		importGraphBtn.setFont(new Font("宋体",Font.BOLD, 23));
+		importGraphBtn.setBounds(13*screenSize.width/14, 19*screenSize.height/22, screenSize.width/14, screenSize.height/22);
 		importGraphBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				
-				importNewGraph();
+				graph = myToolKit.importNewGraph(null);
 			}
 		});
 		stateLabel = new JLabel();
 		stateLabel.setBounds(0, 22*screenSize.height/25, screenSize.width, screenSize.height/25);
 		stateLabel.setFont(new Font("宋体", Font.BOLD, 25));
 		
-
 		this.setLayout(null);
 		this.add(schedulingGuiBtn);
 		this.add(setingGuiBtn);
 		this.add(graphGuiBtn);
 		this.add(stateLabel);
 		this.add(importGraphBtn);
-		
-		
-		
+
 		try{
 			serverSocket = new ServerSocket(8001);
 		}catch(Exception e){
@@ -129,7 +122,7 @@ public class SchedulingGui extends JPanel{
 					try{
 						if(serverSocket != null){
 							socket = serverSocket.accept();
-							new Thread(new HandleReceiveMessage(socket)).start();
+							executorService.execute(new HandleReceiveMessage(socket, AGVArray, graph));
 						}else{
 							stateString.append("serverSocket nullPointer//");
 							stateLabel.setText(stateString.toString());
@@ -143,6 +136,7 @@ public class SchedulingGui extends JPanel{
 		}).start();
 		timer = new Timer(100, new TimerListener());
 		timer.start();
+		graph = myToolKit.importNewGraph("C:/testGraph.xls");
 	}//init
 	
 	@Override
@@ -150,16 +144,15 @@ public class SchedulingGui extends JPanel{
 		super.paint(g);
 		//super.paintComponents(g);
 		if(firstInit){
-			drawGraph(g);
-			drawAGV(g);
+			myToolKit.drawGraph(g, graph);
+			myToolKit.drawAGV(g, AGVArray);
 		}
 	}
 	
 	public void getGuiInstance(Main main, SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
 		schedulingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				try{
-					outputStream.write(toolKit.HexString2Bytes("AA040000000000000000000000BB"));
+				try{					
 					System.out.println("AA030000010000002000000000BB");
 				}catch (Exception e1){
 					e1.printStackTrace();
@@ -187,114 +180,6 @@ public class SchedulingGui extends JPanel{
 		
 	}
 	
-	class HandleReceiveMessage implements Runnable{
-		
-		private Socket socket;
-		private long lastCommunicationTime;
-		private long reciveDelayTime = 10000;
-		
-		HandleReceiveMessage(Socket socket){
-			System.out.println("socket connect:"+socket.toString());
-			this.socket = socket;
-			try{
-				inputStream = socket.getInputStream();
-				outputStream = socket.getOutputStream();
-				outputStream.write(toolKit.HexString2Bytes("AAC0FFEEBB"));
-			}catch(Exception e){
-				e.printStackTrace();
-				logger.error(e);
-			}
-			lastCommunicationTime = System.currentTimeMillis();
-		}
-		public void run(){
-			while(true){
-				if(System.currentTimeMillis() - lastCommunicationTime < reciveDelayTime){//			
-					try{
-						if(inputStream.available() > 0){
-							lastCommunicationTime = System.currentTimeMillis();
-							byte[] buff = new byte[5];
-							inputStream.read(buff);
-							String message = toolKit.printHexString(buff);
-							if(message.startsWith("AA")&&message.endsWith("BB")){
-								int noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
-								if(!message.substring(4, 8).equals("BABA")){
-									//System.out.println("4-8:"+message.substring(4, 8));
-									AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
-									int NOOfCard = Integer.parseInt(message.substring(4, 6), 16);
-									int electricity = Integer.parseInt(message.substring(6, 8), 16);
-									Edge edge = null;
-									if((edge = graph.searchCard(NOOfCard)) != null)
-										AGVArray.get(noOfAGV).setOnEdge(edge);
-									AGVArray.get(noOfAGV).setElectricity(electricity);
-									
-								}else{
-									AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
-									outputStream.write(toolKit.HexString2Bytes("AAC0FFEEBB"));
-								}
-							}
-						}else {
-							Thread.sleep(10);
-						}
-						
-						
-						
-					}catch(Exception e){
-						e.printStackTrace();
-						logger.error(e);
-					}
-				}else{
-					try{
-						if(inputStream != null)
-							inputStream.close();
-						if(outputStream != null)
-							outputStream.close();
-						if(socket != null)
-							socket.close();
-					}catch(Exception e){
-						e.printStackTrace();
-						logger.error(e);
-					}
-					break;//退出while循环
-				}				
-			}
-		}
-		
-	}
-	
-	
-	public void drawGraph(Graphics g){
-		((Graphics2D)g).setStroke(new BasicStroke(6.0f));
-		g.setColor(Color.BLACK);
-		for(int i = 0 ; i < graph.getEdgeSize(); i++)
-			g.drawLine(graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y, graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y);
-		
-		g.setColor(Color.YELLOW);
-		for(int i = 0 ; i < graph.getNodeSize(); i++)
-			g.fillRect(graph.getNode(i).x - 5, graph.getNode(i).y - 5, 10, 10);
-	}
-	
-	public void drawAGV(Graphics g){
-		for(int i = 0; i < AGVArray.size(); i++){
-			if(System.currentTimeMillis() - AGVArray.get(i).getLastTime() < 6000.0){
-				g.setColor(Color.green);
-				g.fillOval(AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 34, 34);
-				g.setColor(Color.black);
-				g.setFont(new java.awt.Font("Dialog", 1, 20));
-				g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 5, AGVArray.get(i).getY() + 5);
-				//System.out.println("X:"+String.valueOf(AGVArray.get(i).getX()));
-				//System.out.println("Y:"+String.valueOf(AGVArray.get(i).getX()));
-			}else{
-				g.setColor(Color.red);
-				g.fillOval(AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 34, 34);
-				g.setColor(Color.BLACK);
-				g.setFont(new java.awt.Font("Dialog", 1, 20));
-				g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 4, AGVArray.get(i).getY() + 8);
-				//System.out.println("X:"+String.valueOf(AGVArray.get(i).getX()));
-				//System.out.println("Y:"+String.valueOf(AGVArray.get(i).getX()));
-			}
-		}
-	}
-	
 	class TimerListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			repaint();
@@ -311,63 +196,7 @@ public class SchedulingGui extends JPanel{
 		}
 	}
 	
-	public void importNewGraph(){
-		Graph graph = new Graph();
-		try{
-			JFileChooser jfc = new JFileChooser();
-			jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			jfc.showDialog(new Label(), "选择地图");
-			File file = jfc.getSelectedFile();
-			if(file != null){
-				System.out.println(file.getPath());
-				InputStream is = new FileInputStream(file.getPath());
-				Workbook wb = Workbook.getWorkbook(is);
-				
-				Sheet sheetNodes = wb.getSheet("nodes");
-				for(int i = 0; i < sheetNodes.getRows(); i++){
-					int x=0, y=0, num=0;
-					for(int j = 0; j < 3; j++){
-						Cell cell0 = sheetNodes.getCell(j,i);
-							String str = cell0.getContents();
-							if(j == 0)
-								num = Integer.parseInt(str);
-							if(j == 1)
-								x = Integer.parseInt(str);
-							if(j == 2)
-								y = Integer.parseInt(str);
-							System.out.println("++:"+str);						
-					}
-					graph.addImportNode(x, y, num);
-				}
-				
-				Sheet sheetEdges = wb.getSheet("edges");
-				for(int i = 0; i < sheetEdges.getRows(); i++){
-					int start=0, end=0, dis=0, strCardNum=0, endCardNum=0;
-					for(int j = 0; j < 5; j++){
-						Cell cell0 = sheetEdges.getCell(j,i);
-							String str = cell0.getContents();
-							if(j == 0)
-								start = Integer.parseInt(str);
-							if(j == 1)
-								end = Integer.parseInt(str);
-							if(j == 2)
-								dis = Integer.parseInt(str);
-							if(j == 3)
-								strCardNum = Integer.parseInt(str);
-							if(j == 4)
-								endCardNum = Integer.parseInt(str);
-							System.out.println("++:"+str);						
-					}
-					graph.addEdge(start, end, dis, strCardNum, endCardNum);
-				}
-				this.graph = graph;
-			}			
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error(e);
-		}
-		
-	}
+	
 	
 	public void setBtnColor(){
 		schedulingGuiBtn.setBackground(Color.WHITE);
