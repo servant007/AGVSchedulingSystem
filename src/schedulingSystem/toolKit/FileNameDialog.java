@@ -60,6 +60,7 @@ public class FileNameDialog extends JDialog{
 		mainPanel.add(btnPanel);
 		this.getContentPane().add(mainPanel);
 		this.setVisible(true);
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		this.setAlwaysOnTop(true);
 		//this.setUndecorated(true);
 	}

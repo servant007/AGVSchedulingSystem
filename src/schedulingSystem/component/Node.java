@@ -4,12 +4,18 @@ public class Node {
 	public int x;
 	public int y;
 	public boolean newNode = true;
+	public int orientation; 
 	public Node(){}
 	
 	public Node(int x, int y, int num){
 		this.x = x;
 		this.y = y;
 		this.num = num;
+	}
+	
+	public Node(int num, int orientation){
+		this.num = num;
+		this.orientation = orientation;
 	}
 	
 	public void setOldNode(){

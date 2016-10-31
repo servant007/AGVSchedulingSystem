@@ -5,17 +5,19 @@ public class Edge {
 	public int realDis;
 	public int strCardNum;
 	public int endCardNum;
+	public boolean twoWay;
 	public Edge(Node str, Node end){
 		startNode = str;
 		endNode = end;
 	}
 	
-	public Edge(Node str, Node end, int dis, int strCardNum, int endCardNum){
+	public Edge(Node str, Node end, int dis, int strCardNum, int endCardNum, boolean twoWay){
 		startNode = str;
 		endNode = end;
 		realDis = dis;
 		this.strCardNum = strCardNum;
 		this.endCardNum = endCardNum;
+		this.twoWay = twoWay;
 	}
 	
 	public void setRealDis(int dis){
@@ -27,5 +29,8 @@ public class Edge {
 		this.endCardNum = endCardNum;
 	}
 	
+	public boolean getTwoWay(){
+		return twoWay;
+	}
 	
 }

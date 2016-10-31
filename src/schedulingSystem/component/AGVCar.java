@@ -1,7 +1,7 @@
 package schedulingSystem.component;
 public class AGVCar{
-		private int x;
-		private int y;
+		private int x = -15;
+		private int y = -15;
 		private Edge edge;
 		private int electricity;
 		private boolean keepAlived;

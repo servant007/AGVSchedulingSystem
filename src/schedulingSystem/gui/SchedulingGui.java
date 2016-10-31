@@ -28,8 +28,11 @@ import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
 import schedulingSystem.component.AGVCar;
+import schedulingSystem.component.Dijkstra;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Main;
+import schedulingSystem.component.Node;
+import schedulingSystem.component.Path;
 import schedulingSystem.toolKit.HandleReceiveMessage;
 import schedulingSystem.toolKit.MyToolKit;
 import schedulingSystem.toolKit.RoundButton;
@@ -54,7 +57,7 @@ public class SchedulingGui extends JPanel{
 	private StringBuffer stateString;
 	private Dimension screenSize;
 	private ExecutorService executorService;
-
+	private Dijkstra dijkstra;
 	public static SchedulingGui getInstance(){
 		if(instance == null){
 			instance = new SchedulingGui();
@@ -63,9 +66,11 @@ public class SchedulingGui extends JPanel{
 	}
 	
 	private SchedulingGui(){
-		stateString = new StringBuffer();
-		graph = new Graph();
 		myToolKit = new MyToolKit();
+		graph = new Graph();
+		graph = myToolKit.importNewGraph("C:/testGraph.xls");
+		dijkstra = new Dijkstra(graph);
+		stateString = new StringBuffer();
 		panelSize = new Dimension(0, 0);
 		executorService = Executors.newFixedThreadPool(15);
 		numOfAGV = 10;
@@ -91,8 +96,8 @@ public class SchedulingGui extends JPanel{
 		importGraphBtn.setBounds(13*screenSize.width/14, 19*screenSize.height/22, screenSize.width/14, screenSize.height/22);
 		importGraphBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				
 				graph = myToolKit.importNewGraph(null);
+				dijkstra = new Dijkstra(graph);
 			}
 		});
 		stateLabel = new JLabel();
@@ -136,7 +141,7 @@ public class SchedulingGui extends JPanel{
 		}).start();
 		timer = new Timer(100, new TimerListener());
 		timer.start();
-		graph = myToolKit.importNewGraph("C:/testGraph.xls");
+		
 	}//init
 	
 	@Override
@@ -153,7 +158,17 @@ public class SchedulingGui extends JPanel{
 		schedulingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				try{					
-					System.out.println("AA030000010000002000000000BB");
+					ArrayList<Integer> route = dijkstra.findRoute(9, 10);
+					System.out.print("result:"+route);
+					ArrayList<Node> instructions = myToolKit.routeToOrientation(graph, route);
+					for(Node i : instructions){
+						if(i.orientation == 1)
+							System.out.println(i.num + "£º×ó   ");
+						if(i.orientation == 2)
+							System.out.println(i.num + "£ºÓÒ   ");
+						if(i.orientation == 3)
+							System.out.println(i.num + "£ºÇ°   ");
+					}
 				}catch (Exception e1){
 					e1.printStackTrace();
 				}
@@ -186,7 +201,7 @@ public class SchedulingGui extends JPanel{
 			if(!firstInit){
 				panelSize.width = screenSize.width;
 				panelSize.height = screenSize.height;
-				graph.createGraph(panelSize);
+				//graph.createGraph(panelSize);
 				firstInit = true;
 			}else {	
 				for(int i = 0; i < AGVArray.size(); i ++){

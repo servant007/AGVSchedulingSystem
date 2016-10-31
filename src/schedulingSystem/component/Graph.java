@@ -5,9 +5,17 @@ import java.util.ArrayList;
 public class Graph {
 	private ArrayList<Node> nodeArray;
 	private ArrayList<Edge> edgeArray;
+	private ArrayList<FunctionNode> shipmentNodeArray;
+	private ArrayList<FunctionNode> unloadingNodeArray;
+	private ArrayList<FunctionNode> emptyCarNodeArray;
+	private ArrayList<FunctionNode> tagArray;
 	public Graph(){
 		nodeArray = new ArrayList<Node>();
 		edgeArray = new ArrayList<Edge>();
+		shipmentNodeArray = new ArrayList<FunctionNode>();
+		unloadingNodeArray = new ArrayList<FunctionNode>();
+		emptyCarNodeArray = new ArrayList<FunctionNode>();
+		tagArray = new ArrayList<FunctionNode>();
 	}
 	public void createGraph(Dimension panelSize){
 		nodeArray.add(new Node(panelSize.width/5, panelSize.height/4 ,1));
@@ -21,7 +29,7 @@ public class Graph {
 		edgeArray.add(new Edge(nodeArray.get(2) , nodeArray.get(1)));
 	}
 	
-	public void addEdge(int strNodeNum, int endNodeNum, int dis, int strCardNum, int endCardNum){
+	public void addEdge(int strNodeNum, int endNodeNum, int dis, int strCardNum, int endCardNum, boolean twoWay){
 		for(int i = 0; i < nodeArray.size(); i++){
 			if(nodeArray.get(i).num == strNodeNum)
 				strNodeNum = i;
@@ -32,7 +40,7 @@ public class Graph {
 		}
 		
 		edgeArray.add(new Edge(nodeArray.get(strNodeNum), nodeArray.get(endNodeNum)
-				, dis, strCardNum, endCardNum));
+				, dis, strCardNum, endCardNum, twoWay));
 	} 
 	
 	public void addNode(Node node){
@@ -98,5 +106,36 @@ public class Graph {
 		}
 		
 		return returnEdge;
+	}
+	
+	public void addShipmentNode(int nodeNum, int comNum){
+		shipmentNodeArray.add(new FunctionNode(nodeNum, comNum));
+	}
+	
+	public void addUnloadingNode(int nodeNum, int comNum){
+		unloadingNodeArray.add(new FunctionNode(nodeNum, comNum));
+	}
+	
+	public void addEmptyCarNode(int nodeNum, int comNum){
+		emptyCarNodeArray.add(new FunctionNode(nodeNum, comNum));
+	}
+	
+	public void addTagArray(int x , int y, String tag){
+		tagArray.add(new FunctionNode(new Node(x, y,0), tag));
+	}
+	public ArrayList<FunctionNode> getShipmentNode(){
+		return shipmentNodeArray;
+	}
+	
+	public ArrayList<FunctionNode> getUnloadingNode(){
+		return unloadingNodeArray;
+	}
+	
+	public ArrayList<FunctionNode> getEmptyCarNode(){
+		return emptyCarNodeArray;
+	}
+	
+	public ArrayList<FunctionNode> getTagArray(){
+		return tagArray;
 	}
 }

@@ -2,6 +2,7 @@ package schedulingSystem.toolKit;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Label;
@@ -15,10 +16,13 @@ import javax.swing.JFileChooser;
 import org.apache.log4j.Logger;
 
 import jxl.Cell;
+import jxl.CellType;
+import jxl.LabelCell;
 import jxl.Sheet;
 import jxl.Workbook;
 import schedulingSystem.component.AGVCar;
 import schedulingSystem.component.Graph;
+import schedulingSystem.component.Node;
 import schedulingSystem.gui.SchedulingGui;
 
 public class MyToolKit {
@@ -58,15 +62,39 @@ public class MyToolKit {
 	}
 	
 	
-	public void drawGraph(Graphics g, Graph graph){
+	public void drawGraph(Graphics g, Graph graph){		
 		((Graphics2D)g).setStroke(new BasicStroke(6.0f));
 		g.setColor(Color.BLACK);
-		for(int i = 0 ; i < graph.getEdgeSize(); i++)
+		
+		for(int i = 0 ; i < graph.getEdgeSize(); i++){
 			g.drawLine(graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y, graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y);
+		}
+			
 		
 		g.setColor(Color.YELLOW);
 		for(int i = 0 ; i < graph.getNodeSize(); i++)
 			g.fillRect(graph.getNode(i).x - 5, graph.getNode(i).y - 5, 10, 10);
+		
+		g.setColor(Color.blue);
+		for(int i = 0; i < graph.getShipmentNode().size(); i++)
+			g.fillOval(graph.getNode(graph.getShipmentNode().get(i).nodeNum-1).x-20
+					, graph.getNode(graph.getShipmentNode().get(i).nodeNum-1).y-20, 40, 40);
+		
+		g.setColor(Color.green);
+		for(int i = 0; i < graph.getUnloadingNode().size(); i++)
+			g.fillOval(graph.getNode(graph.getUnloadingNode().get(i).nodeNum-1).x-20
+					, graph.getNode(graph.getUnloadingNode().get(i).nodeNum-1).y-20, 40, 40);
+		
+		g.setColor(Color.ORANGE);
+		for(int i = 0; i < graph.getEmptyCarNode().size(); i++)
+			g.fillOval(graph.getNode(graph.getEmptyCarNode().get(i).nodeNum-1).x-20
+					, graph.getNode(graph.getEmptyCarNode().get(i).nodeNum-1).y-20, 40, 40);
+		
+		g.setColor(Color.gray);
+		g.setFont(new Font("ËÎÌå", Font.BOLD, 30));
+		for(int i = 0; i < graph.getTagArray().size(); i++)
+			g.drawString(graph.getTagArray().get(i).tag, graph.getTagArray().get(i).position.x
+					, graph.getTagArray().get(i).position.y);
 	}
 	
 	public void drawAGV(Graphics g, ArrayList<AGVCar> AGVArray){
@@ -77,16 +105,12 @@ public class MyToolKit {
 				g.setColor(Color.black);
 				g.setFont(new java.awt.Font("Dialog", 1, 20));
 				g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 5, AGVArray.get(i).getY() + 5);
-				//System.out.println("X:"+String.valueOf(AGVArray.get(i).getX()));
-				//System.out.println("Y:"+String.valueOf(AGVArray.get(i).getX()));
 			}else{
 				g.setColor(Color.red);
 				g.fillOval(AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 34, 34);
 				g.setColor(Color.BLACK);
 				g.setFont(new java.awt.Font("Dialog", 1, 20));
 				g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 4, AGVArray.get(i).getY() + 8);
-				//System.out.println("X:"+String.valueOf(AGVArray.get(i).getX()));
-				//System.out.println("Y:"+String.valueOf(AGVArray.get(i).getX()));
 			}
 		}
 	}
@@ -121,15 +145,15 @@ public class MyToolKit {
 								x = Integer.parseInt(str);
 							if(j == 2)
 								y = Integer.parseInt(str);
-							//System.out.println("++:"+str);						
+							//System.out.println("nodes:"+str);					
 					}
 					graph.addImportNode(x, y, num);
 				}
 				
 				Sheet sheetEdges = wb.getSheet("edges");
 				for(int i = 0; i < sheetEdges.getRows(); i++){
-					int start=0, end=0, dis=0, strCardNum=0, endCardNum=0;
-					for(int j = 0; j < 5; j++){
+					int start=0, end=0, dis=0, strCardNum=0, endCardNum=0, twoWay = 0;
+					for(int j = 0; j < 6; j++){
 						Cell cell0 = sheetEdges.getCell(j,i);
 							String str = cell0.getContents();
 							if(j == 0)
@@ -142,17 +166,184 @@ public class MyToolKit {
 								strCardNum = Integer.parseInt(str);
 							if(j == 4)
 								endCardNum = Integer.parseInt(str);
-							//System.out.println("++:"+str);						
+							if(j == 5)
+								twoWay = Integer.parseInt(str);
+							//System.out.println("edges:"+str);						
 					}
-					graph.addEdge(start, end, dis, strCardNum, endCardNum);
+					if(twoWay == 1)
+						graph.addEdge(start, end, dis, strCardNum, endCardNum, true);
+					if(twoWay == 0)
+						graph.addEdge(start, end, dis, strCardNum, endCardNum, false);
 				}
 				
+				
+				
+				Sheet sheetShipment = wb.getSheet("shipment");
+				for(int i = 0; i < sheetShipment.getRows(); i++){
+					int x=0, y=0, num=0;
+					for(int j = 0; j < 2; j++){
+						Cell cell0 = sheetShipment.getCell(j,i);
+							String str = cell0.getContents();
+							if(j == 0)
+								num = Integer.parseInt(str);
+							if(j == 1)
+								x = Integer.parseInt(str);
+							//System.out.println("sheetShipment:"+str);					
+					}
+					graph.addShipmentNode(num, x);
+				}
+				
+				
+				
+				Sheet sheetUnloading = wb.getSheet("unloading");
+				for(int i = 0; i < sheetUnloading.getRows(); i++){
+					int x=0, y=0, num=0;
+					for(int j = 0; j < 2; j++){
+						Cell cell0 = sheetUnloading.getCell(j,i);
+							String str = cell0.getContents();
+							if(j == 0)
+								num = Integer.parseInt(str);
+							if(j == 1)
+								x = Integer.parseInt(str);
+							//System.out.println("unloading:"+str);					
+					}
+					graph.addUnloadingNode(num, x);
+				}
+				
+				
+				/*
+				
+				Sheet sheetShipment = wb.getSheet("shipment");
+				for(int i = 0; i < sheetShipment.getRows(); i++){
+					int  nodeNum=0, comNum=0;
+					for(int j = 0; j < 2; j++){
+						Cell cell0 = sheetEdges.getCell(j,i);
+						String str = cell0.getContents();
+							if(j == 0)
+								nodeNum = Integer.parseInt(str);
+							if(j == 1)
+								comNum = Integer.parseInt(str);
+							System.out.println("shipment:"+str);						
+					}
+					graph.addShipmentNode(nodeNum, comNum);
+				}
+				
+				Sheet sheetUnloading = wb.getSheet("unloading");
+				for(int i = 0; i < sheetUnloading.getRows(); i++){
+					int  nodeNum=0, comNum=0;
+					for(int j = 0; j < 2; j++){
+						Cell cell0 = sheetEdges.getCell(j,i);
+						String str = cell0.getContents();
+							if(j == 0)
+								nodeNum = Integer.parseInt(str);
+							if(j == 1)
+								comNum = Integer.parseInt(str);
+							System.out.println("unloading:"+str);						
+					}
+					graph.addUnloadingNode(nodeNum, comNum);
+				}*/
+				
+				Sheet sheetEmptyCar = wb.getSheet("emptyCar");
+				for(int i = 0; i < sheetEmptyCar.getRows(); i++){
+					int  nodeNum=0, comNum=0;
+					for(int j = 0; j < 2; j++){
+						Cell cell0 = sheetEdges.getCell(j,i);
+						String str = cell0.getContents();
+							if(j == 0)
+								nodeNum = Integer.parseInt(str);
+							if(j == 1)
+								comNum = Integer.parseInt(str);
+							//System.out.println("emptyCar:"+str);						
+					}
+					graph.addEmptyCarNode(nodeNum, comNum);
+				}	
+				
+				Sheet sheetTag = wb.getSheet("tag");
+				for(int i = 0; i < sheetTag.getRows(); i++){
+					int x=0, y=0;
+					String tag = "";
+					for(int j = 0; j < 3; j++){
+						Cell cell0 = sheetTag.getCell(j,i);
+							String str = cell0.getContents();
+							if(j == 0)
+								x = Integer.parseInt(str);
+							if(j == 1)
+								y = Integer.parseInt(str);
+							if(j == 2)
+								tag = str;
+							//System.out.println("tag:"+str);					
+					}
+					graph.addTagArray(x, y, tag);
+				}
 			}			
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error(e);
 		}
 		return graph;
+	}
+	
+	
+	public ArrayList<Node> routeToOrientation(Graph graph, ArrayList<Integer> route){
+		ArrayList<Node> result = new ArrayList<Node>();
+		for(int i = 0; i+2 < route.size(); i++){
+			if(graph.getNode(route.get(i)-1).x == graph.getNode(route.get(i+1)-1).x){
+				System.out.println("x=");
+				if(graph.getNode(route.get(i)-1).y < graph.getNode(route.get(i+1)-1).y){//down
+					System.out.println("ÏÂ");
+					if(graph.getNode(route.get(i+2)-1).x > graph.getNode(route.get(i+1)-1).x){
+						//×ó1
+						result.add(new Node(route.get(i+1), 1));
+					}else if(graph.getNode(route.get(i+2)-1).x == graph.getNode(route.get(i+1)-1).x){
+						//Ç°3
+						result.add(new Node(route.get(i+1), 3));
+					}else{
+						//ÓÒ2
+						result.add(new Node(route.get(i+1), 2));
+					}
+				}else if(graph.getNode(route.get(i)-1).y > graph.getNode(route.get(i+1)-1).y){//up
+					System.out.println("ÉÏ");
+					if(graph.getNode(route.get(i+2)-1).x > graph.getNode(route.get(i+1)-1).x){
+						//ÓÒ
+						result.add(new Node(route.get(i+1), 2));
+					}else if(graph.getNode(route.get(i+2)-1).x == graph.getNode(route.get(i+1)-1).x){
+						//Ç°
+						result.add(new Node(route.get(i+1), 3));
+					}else{
+						//×ó
+						result.add(new Node(route.get(i+1), 1));
+					}
+				}
+			}else if(graph.getNode(route.get(i)-1).y == graph.getNode(route.get(i+1)-1).y){//right and left
+				System.out.println("y=");
+				if(graph.getNode(route.get(i)-1).x < graph.getNode(route.get(i+1)-1).x){//right
+					System.out.println("ÓÒ");
+					if(graph.getNode(route.get(i+2)-1).y > graph.getNode(route.get(i+1)-1).y){
+						//ÓÒ
+						result.add(new Node(route.get(i+1), 2));
+					}else if(graph.getNode(route.get(i+2)-1).y == graph.getNode(route.get(i+1)-1).y){
+						//Ç°
+						result.add(new Node(route.get(i+1), 3));
+					}else {
+						//×ó
+						result.add(new Node(route.get(i+1), 1));
+					}
+				}else if(graph.getNode(route.get(i)-1).x > graph.getNode(route.get(i+1)-1).x){//left
+					System.out.println("×ó");
+					if(graph.getNode(route.get(i+2)-1).y > graph.getNode(route.get(i+1)-1).y){
+						//×ó
+						result.add(new Node(route.get(i+1), 1));
+					}else if(graph.getNode(route.get(i+2)-1).y == graph.getNode(route.get(i+1)-1).y){
+						//Ç°
+						result.add(new Node(route.get(i+1), 3));
+					}else {
+						//ÓÒ
+						result.add(new Node(route.get(i+1), 2));
+					}
+				}
+			}
+		}
+		return result;
 	}
 }
 

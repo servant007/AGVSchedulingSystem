@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 public class GraphDialog extends JDialog {
@@ -23,13 +24,14 @@ public class GraphDialog extends JDialog {
 	private JTextField inputStrCard;
 	private JTextField inputEndCard;
 	private GraphDialogListener dialogListener;
+	private boolean twoWay;
 	
 	public GraphDialog( ){
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setSize(screenSize.width/4, screenSize.height/4);
 		this.setLocation(3*screenSize.width/8, 3*screenSize.height/8);
 
-		JPanel mainPanel = new JPanel(new GridLayout(5,1, 10,10));
+		JPanel mainPanel = new JPanel(new GridLayout(5,1, 5,5));
 
 		JPanel disPanel = new JPanel(new GridLayout(1, 2, 0 ,0));
 		JLabel label = new JLabel("实际距离：");
@@ -55,19 +57,31 @@ public class GraphDialog extends JDialog {
 		endCardPanel.add(label2);
 		endCardPanel.add(inputEndCard);
 		
+		JPanel twoWayPanel = new JPanel();
+		//JLabel label3 = new JLabel("是否双向:");
+		JRadioButton twoWayBtn = new JRadioButton("双向路径");
+		twoWayBtn.setFont(new Font("宋体", Font.BOLD, 30));
+		twoWayBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				if(e.getActionCommand().equals("双向路径"))
+					twoWay = true;
+			}
+		});
+		twoWayPanel.add(twoWayBtn);
 		JPanel btnPanel = new JPanel(new GridLayout(1,2,20,20));
 		comfirmBtn = new RoundButton("确认");
 		cancelBtn = new RoundButton("取消");
 		comfirmBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				dialogListener.getInputString(inputDis.getText(), inputStrCard.getText()
-						,inputEndCard.getText(), true);
+						,inputEndCard.getText(), twoWay, true);
+				twoWay = false;
 			}
 		});
 		
 		cancelBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				dialogListener.getInputString("", "","",false);
+				dialogListener.getInputString("", "","",false,false);
 			}
 		});
 		btnPanel.add(comfirmBtn);
@@ -76,10 +90,12 @@ public class GraphDialog extends JDialog {
 		mainPanel.add(disPanel);
 		mainPanel.add(strCardPanel);
 		mainPanel.add(endCardPanel);
+		mainPanel.add(twoWayPanel);
 		mainPanel.add(btnPanel);
 		this.getContentPane().add(mainPanel);
 		this.setVisible(true);
 		this.setAlwaysOnTop(true);
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		//this.setUndecorated(true);
 	}
 	
