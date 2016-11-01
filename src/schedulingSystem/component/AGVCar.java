@@ -1,4 +1,7 @@
 package schedulingSystem.component;
+
+import schedulingSystem.toolKit.HandleReceiveMessage;
+
 public class AGVCar{
 		private int x = -15;
 		private int y = -15;
@@ -7,9 +10,11 @@ public class AGVCar{
 		private boolean keepAlived;
 		private boolean finishEdge;
 		private long lastCommunicationTime;
+		private HandleReceiveMessage handleReceiveMessage;
 		
 		public AGVCar(){
 			finishEdge = true;
+			edge = new Edge(new Node(0,0),new Node(0,0));
 		}
 		
 		public int getX(){
@@ -35,7 +40,6 @@ public class AGVCar{
 						}else{
 							finishEdge = true;
 						}
-						
 					}
 				}else if(edge.startNode.y == edge.endNode.y){
 					if(edge.startNode.x < edge.endNode.x ){
@@ -51,12 +55,11 @@ public class AGVCar{
 					}
 				}
 			}
-			
 		} 
 		
 		public void setOnEdge(Edge edge){
 			finishEdge = false;
-			this.edge = edge;
+			this.edge = new Edge( edge.startNode, edge.endNode,edge.realDis, edge.strCardNum, edge.endCardNum, edge.twoWay);
 			x = edge.startNode.x;
 			y = edge.startNode.y;
 		}
@@ -68,10 +71,6 @@ public class AGVCar{
 		public int getElectricity(){
 			return electricity;
 		}
-		
-		//public void setKeepAlived(boolean keepAlived){
-			//this.keepAlived = keepAlived;
-		//}
 		
 		public boolean getKeepAlived(){
 			return keepAlived;
@@ -91,4 +90,20 @@ public class AGVCar{
 			else 
 				return false;
 		}
-	}
+		
+		public int getStartNode(){
+			if(edge.twoWay){
+				return edge.endNode.num;
+			}else{
+				return edge.startNode.num;
+			}
+		}
+		
+		public void setRunnabel(HandleReceiveMessage handleReceiveMessage){
+			this.handleReceiveMessage = handleReceiveMessage;
+		}
+		
+		public HandleReceiveMessage getRunnable(){
+			return handleReceiveMessage;
+		}
+}

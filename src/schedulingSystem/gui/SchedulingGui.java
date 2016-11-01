@@ -32,6 +32,7 @@ import schedulingSystem.component.Node;
 import schedulingSystem.toolKit.HandleReceiveMessage;
 import schedulingSystem.toolKit.MyToolKit;
 import schedulingSystem.toolKit.RoundButton;
+import schedulingSystem.toolKit.RunnableListener;
 
 public class SchedulingGui extends JPanel{
 	private static final long serialVersionUID = 1L;
@@ -98,6 +99,7 @@ public class SchedulingGui extends JPanel{
 				dijkstra = new Dijkstra(graph);
 			}
 		});
+
 		stateLabel = new JLabel();
 		stateLabel.setBounds(0, 22*screenSize.height/25, screenSize.width, screenSize.height/25);
 		stateLabel.setFont(new Font("宋体", Font.BOLD, 25));
@@ -119,6 +121,12 @@ public class SchedulingGui extends JPanel{
 						if(serverSocket != null){
 							socket = serverSocket.accept();
 							handleReceiveMessage = new HandleReceiveMessage(socket, AGVArray, graph);
+							handleReceiveMessage.setOnRunnableListener(new RunnableListener(){
+								public void getAGVNum(int NOOfAGV){
+									AGVArray.get(NOOfAGV).setRunnabel(handleReceiveMessage);
+									System.out.println(NOOfAGV+"号AGV返回HandleReceiveMessage");
+								}
+							});
 							executorService.execute(handleReceiveMessage);
 						}else{
 							stateString.append("serverSocket nullPointer//");
@@ -142,36 +150,41 @@ public class SchedulingGui extends JPanel{
 					if(node != null){
 						for(int i = 0; i < graph.getShipmentNode().size(); i++){
 							if(graph.getShipmentNode().get(i).nodeNum  == node.num){
-								ArrayList<Integer> route = dijkstra.findRoute(1, 10);
-								System.out.print("result:"+route);	
-								//myToolKit.routeToOrientation(graph, route);
-								handleReceiveMessage.SendMessage(myToolKit.routeToOrientation(graph, route));
+								if(AGVArray.get(1).getStartNode()!=0){
+									ArrayList<Integer> route = dijkstra.findRoute(AGVArray.get(1).getStartNode(), node.num);
+									System.out.println("result:"+route);
+									//myToolKit.routeToOrientation(graph, route);
+									AGVArray.get(1).getRunnable().SendMessage(myToolKit.routeToOrientation(graph, route));
+								}else{
+									System.out.println("没有定位agv");
+								}
 							}
 						}
 						
 						for(int i = 0; i < graph.getUnloadingNode().size(); i++){
 							if(graph.getUnloadingNode().get(i).nodeNum  == node.num){
-								ArrayList<Integer> route = dijkstra.findRoute(1, node.num);
-								System.out.print("result:"+route);
-								//myToolKit.routeToOrientation(graph, route);
-								handleReceiveMessage.SendMessage(myToolKit.routeToOrientation(graph, route));
+								if(AGVArray.get(1).getStartNode()!=0){
+									ArrayList<Integer> route = dijkstra.findRoute(AGVArray.get(1).getStartNode(), node.num);
+									System.out.println("result:"+route);
+									//myToolKit.routeToOrientation(graph, route);
+									AGVArray.get(1).getRunnable().SendMessage(myToolKit.routeToOrientation(graph, route));
+								}else{
+									System.out.println("没有定位agv");
+								}
+								
 							}
 						}	
 					}
 				}
 			}
 		});
-
-		
+	
 		this.setLayout(null);
 		this.add(schedulingGuiBtn);
 		this.add(setingGuiBtn);
 		this.add(graphGuiBtn);
 		this.add(stateLabel);
 		this.add(importGraphBtn);
-
-		
-		
 	}//init
 	
 	@Override
@@ -203,7 +216,6 @@ public class SchedulingGui extends JPanel{
 				main.validate();
 			}
 		});
-
 		graphGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				main.getContentPane().removeAll();
@@ -230,8 +242,6 @@ public class SchedulingGui extends JPanel{
 			}		
 		}
 	}
-	
-	
 	
 	public void setBtnColor(){
 		schedulingGuiBtn.setBackground(Color.WHITE);

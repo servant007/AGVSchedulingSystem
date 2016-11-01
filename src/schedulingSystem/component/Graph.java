@@ -1,5 +1,5 @@
 package schedulingSystem.component;
-import java.awt.Dimension;
+
 import java.util.ArrayList;
 
 public class Graph {
@@ -9,6 +9,8 @@ public class Graph {
 	private ArrayList<FunctionNode> unloadingNodeArray;
 	private ArrayList<FunctionNode> emptyCarNodeArray;
 	private ArrayList<FunctionNode> tagArray;
+	private Edge lastReturnEdge;
+	
 	public Graph(){
 		nodeArray = new ArrayList<Node>();
 		edgeArray = new ArrayList<Edge>();
@@ -16,17 +18,7 @@ public class Graph {
 		unloadingNodeArray = new ArrayList<FunctionNode>();
 		emptyCarNodeArray = new ArrayList<FunctionNode>();
 		tagArray = new ArrayList<FunctionNode>();
-	}
-	public void createGraph(Dimension panelSize){
-		nodeArray.add(new Node(panelSize.width/5, panelSize.height/4 ,1));
-		nodeArray.add(new Node(panelSize.width/5, 3*panelSize.height/4, 2));
-		nodeArray.add(new Node(4*panelSize.width/5, 3*panelSize.height/4, 3));
-		nodeArray.add(new Node(4*panelSize.width/5, panelSize.height/4, 4));
-		
-		edgeArray.add(new Edge(nodeArray.get(1) , nodeArray.get(0)));
-		edgeArray.add(new Edge(nodeArray.get(0) , nodeArray.get(3)));
-		edgeArray.add(new Edge(nodeArray.get(3) , nodeArray.get(2)));
-		edgeArray.add(new Edge(nodeArray.get(2) , nodeArray.get(1)));
+		lastReturnEdge = new Edge(new Node(0,0,0), new Node(0,0,0));
 	}
 	
 	public void addEdge(int strNodeNum, int endNodeNum, int dis, int strCardNum, int endCardNum, boolean twoWay){
@@ -46,9 +38,11 @@ public class Graph {
 	public void addNode(Node node){
 		nodeArray.add(new Node(node.x, node.y, node.num));
 	}
+	
 	public void addImportNode(int x , int y, int num){
 		nodeArray.add(new Node(x, y, num));
 	}
+
 	public Edge getEdge(int num){
 		return edgeArray.get(num);
 	}
@@ -110,11 +104,18 @@ public class Graph {
 		for(Edge edge : edgeArray){
 			if(edge.strCardNum == cardNum){
 				returnEdge = edge;
-			}else if(edge.endCardNum == cardNum){
-				returnEdge = new Edge(edge.endNode, edge.startNode);
+			}else if(edge.endCardNum == cardNum && edge.twoWay){
+				returnEdge = new Edge(edge.endNode, edge.startNode, edge.realDis, edge.strCardNum, edge.endCardNum, true);
 			}
 		}
+		//避免双向路径时自动返回
+		if(lastReturnEdge.startNode.num == returnEdge.startNode.num && lastReturnEdge.endNode.num == returnEdge.endNode.num
+				|| lastReturnEdge.startNode.num == returnEdge.endNode.num && lastReturnEdge.endNode.num == returnEdge.startNode.num){
+			returnEdge = null;
+		}
 		
+		if(returnEdge != null)
+			lastReturnEdge = returnEdge;
 		return returnEdge;
 	}
 	
@@ -133,6 +134,7 @@ public class Graph {
 	public void addTagArray(int x , int y, String tag){
 		tagArray.add(new FunctionNode(new Node(x, y,0), tag));
 	}
+	
 	public ArrayList<FunctionNode> getShipmentNode(){
 		return shipmentNodeArray;
 	}
