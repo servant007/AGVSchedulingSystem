@@ -75,6 +75,16 @@ public class Graph {
 		return null;
 	}
 	
+	public Node searchWideNode( int x, int y){
+		for(int i = 0; i < nodeArray.size(); i++){
+			if(Math.pow(x - nodeArray.get(i).x, 2) + 
+					Math.pow(y - nodeArray.get(i).y, 2) < 2000){
+				return nodeArray.get(i);
+			}
+		}
+		return null;
+	}
+	
 	public int searchHorizontal(int horizontal){
 		for(int i = 0; i < nodeArray.size(); i++){
 			if(Math.abs(horizontal - nodeArray.get(i).x) < 30)

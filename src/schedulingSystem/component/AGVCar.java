@@ -69,9 +69,9 @@ public class AGVCar{
 			return electricity;
 		}
 		
-		public void setKeepAlived(boolean keepAlived){
-			this.keepAlived = keepAlived;
-		}
+		//public void setKeepAlived(boolean keepAlived){
+			//this.keepAlived = keepAlived;
+		//}
 		
 		public boolean getKeepAlived(){
 			return keepAlived;
@@ -83,5 +83,12 @@ public class AGVCar{
 		
 		public long getLastTime(){
 			return lastCommunicationTime;
+		}
+		
+		public boolean isAlived(){
+			if(System.currentTimeMillis() - lastCommunicationTime < 6000)
+				return true;
+			else 
+				return false;
 		}
 	}

@@ -4,13 +4,13 @@ import java.awt.Dimension;
 import java.awt.Font;
 
 import java.awt.Graphics;
-import java.awt.Label;
+
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -24,15 +24,11 @@ import javax.swing.Timer;
 
 import org.apache.log4j.Logger;
 
-import jxl.Cell;
-import jxl.Sheet;
-import jxl.Workbook;
 import schedulingSystem.component.AGVCar;
 import schedulingSystem.component.Dijkstra;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Main;
 import schedulingSystem.component.Node;
-import schedulingSystem.component.Path;
 import schedulingSystem.toolKit.HandleReceiveMessage;
 import schedulingSystem.toolKit.MyToolKit;
 import schedulingSystem.toolKit.RoundButton;
@@ -58,6 +54,8 @@ public class SchedulingGui extends JPanel{
 	private Dimension screenSize;
 	private ExecutorService executorService;
 	private Dijkstra dijkstra;
+	private HandleReceiveMessage handleReceiveMessage;
+	
 	public static SchedulingGui getInstance(){
 		if(instance == null){
 			instance = new SchedulingGui();
@@ -104,13 +102,6 @@ public class SchedulingGui extends JPanel{
 		stateLabel.setBounds(0, 22*screenSize.height/25, screenSize.width, screenSize.height/25);
 		stateLabel.setFont(new Font("ËÎÌå", Font.BOLD, 25));
 		
-		this.setLayout(null);
-		this.add(schedulingGuiBtn);
-		this.add(setingGuiBtn);
-		this.add(graphGuiBtn);
-		this.add(stateLabel);
-		this.add(importGraphBtn);
-
 		try{
 			serverSocket = new ServerSocket(8001);
 		}catch(Exception e){
@@ -127,7 +118,8 @@ public class SchedulingGui extends JPanel{
 					try{
 						if(serverSocket != null){
 							socket = serverSocket.accept();
-							executorService.execute(new HandleReceiveMessage(socket, AGVArray, graph));
+							handleReceiveMessage = new HandleReceiveMessage(socket, AGVArray, graph);
+							executorService.execute(handleReceiveMessage);
 						}else{
 							stateString.append("serverSocket nullPointer//");
 							stateLabel.setText(stateString.toString());
@@ -141,6 +133,44 @@ public class SchedulingGui extends JPanel{
 		}).start();
 		timer = new Timer(100, new TimerListener());
 		timer.start();
+		
+		
+		this.addMouseListener(new MouseAdapter(){
+			public void mouseClicked(MouseEvent e){
+				if(e.getButton() == MouseEvent.BUTTON1){
+					Node node = graph.searchWideNode(e.getX(), e.getY());
+					if(node != null){
+						for(int i = 0; i < graph.getShipmentNode().size(); i++){
+							if(graph.getShipmentNode().get(i).nodeNum  == node.num){
+								ArrayList<Integer> route = dijkstra.findRoute(1, 10);
+								System.out.print("result:"+route);	
+								//myToolKit.routeToOrientation(graph, route);
+								handleReceiveMessage.SendMessage(myToolKit.routeToOrientation(graph, route));
+							}
+						}
+						
+						for(int i = 0; i < graph.getUnloadingNode().size(); i++){
+							if(graph.getUnloadingNode().get(i).nodeNum  == node.num){
+								ArrayList<Integer> route = dijkstra.findRoute(1, node.num);
+								System.out.print("result:"+route);
+								//myToolKit.routeToOrientation(graph, route);
+								handleReceiveMessage.SendMessage(myToolKit.routeToOrientation(graph, route));
+							}
+						}	
+					}
+				}
+			}
+		});
+
+		
+		this.setLayout(null);
+		this.add(schedulingGuiBtn);
+		this.add(setingGuiBtn);
+		this.add(graphGuiBtn);
+		this.add(stateLabel);
+		this.add(importGraphBtn);
+
+		
 		
 	}//init
 	
@@ -158,17 +188,7 @@ public class SchedulingGui extends JPanel{
 		schedulingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				try{					
-					ArrayList<Integer> route = dijkstra.findRoute(9, 10);
-					System.out.print("result:"+route);
-					ArrayList<Node> instructions = myToolKit.routeToOrientation(graph, route);
-					for(Node i : instructions){
-						if(i.orientation == 1)
-							System.out.println(i.num + "£º×ó   ");
-						if(i.orientation == 2)
-							System.out.println(i.num + "£ºÓÒ   ");
-						if(i.orientation == 3)
-							System.out.println(i.num + "£ºÇ°   ");
-					}
+					
 				}catch (Exception e1){
 					e1.printStackTrace();
 				}
@@ -219,4 +239,5 @@ public class SchedulingGui extends JPanel{
 		setingGuiBtn.setBackground(new Color(30, 144, 255));
 		graphGuiBtn.setBackground(new Color(30, 144, 255));
 	}
+
 }

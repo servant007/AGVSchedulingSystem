@@ -18,10 +18,11 @@ public class HandleReceiveMessage implements Runnable{
 	private OutputStream outputStream;
 	private Socket socket;
 	private long lastCommunicationTime;
-	private long reciveDelayTime = 10000;
+	private long reciveDelayTime = 600000;
 	private MyToolKit myToolKit;
 	private ArrayList<AGVCar> AGVArray;
 	private Graph graph;
+	private int noOfAGV;
 	
 	public HandleReceiveMessage(Socket socket, ArrayList<AGVCar> AGVArray, Graph graph){
 		myToolKit = new MyToolKit();
@@ -40,6 +41,18 @@ public class HandleReceiveMessage implements Runnable{
 		}
 		lastCommunicationTime = System.currentTimeMillis();
 	}
+	
+
+	public void SendMessage(String message){
+		try{
+			outputStream.write(myToolKit.HexString2Bytes(message));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		System.out.println(message);
+		
+	}
 	public void run(){
 		while(true){
 			if(System.currentTimeMillis() - lastCommunicationTime < reciveDelayTime){//			
@@ -51,7 +64,7 @@ public class HandleReceiveMessage implements Runnable{
 						String message = myToolKit.printHexString(buff);
 						System.out.println(message);
 						if(message.startsWith("AA")&&message.endsWith("BB")){
-							int noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
+							noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
 							if(!message.substring(4, 8).equals("BABA")){
 								
 								AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
