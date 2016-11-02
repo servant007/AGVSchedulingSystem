@@ -6,13 +6,16 @@ public class AGVCar{
 		private int x = -15;
 		private int y = -15;
 		private Edge edge;
+		private int lastCard;
+		private boolean orientation;//trueÓÒ£¬false×ó
+		private Graph graph;
 		private int electricity;
-		private boolean keepAlived;
 		private boolean finishEdge;
 		private long lastCommunicationTime;
 		private HandleReceiveMessage handleReceiveMessage;
 		
-		public AGVCar(){
+		public AGVCar(Graph graph){
+			this.graph = graph;
 			finishEdge = true;
 			edge = new Edge(new Node(0,0),new Node(0,0));
 		}
@@ -59,9 +62,11 @@ public class AGVCar{
 		
 		public void setOnEdge(Edge edge){
 			finishEdge = false;
-			this.edge = new Edge( edge.startNode, edge.endNode,edge.realDis, edge.strCardNum, edge.endCardNum, edge.twoWay);
+			this.edge = edge;//new Edge( edge.startNode, edge.endNode,edge.realDis, edge.strCardNum, edge.endCardNum, edge.twoWay);
 			x = edge.startNode.x;
 			y = edge.startNode.y;
+			if(edge.twoWay)
+				this.orientation = !this.orientation;
 		}
 		
 		public void setElectricity(int electricity){
@@ -72,30 +77,27 @@ public class AGVCar{
 			return electricity;
 		}
 		
-		public boolean getKeepAlived(){
-			return keepAlived;
-		}
-		
-		public void setTime(long time){
+		public void setLastCommunicationTime(long time){
 			lastCommunicationTime = time;
 		}
 		
-		public long getLastTime(){
+		public long getLastCommunitionTime(){
 			return lastCommunicationTime;
 		}
 		
 		public boolean isAlived(){
-			if(System.currentTimeMillis() - lastCommunicationTime < 6000)
+			if(System.currentTimeMillis() - lastCommunicationTime < 10000)
 				return true;
 			else 
 				return false;
 		}
 		
-		public int getStartNode(){
+		public Node getStartNode(){
 			if(edge.twoWay){
-				return edge.endNode.num;
+				edge.endNode.functionNode = true;
+				return edge.endNode;
 			}else{
-				return edge.startNode.num;
+				return edge.startNode;
 			}
 		}
 		
@@ -105,5 +107,27 @@ public class AGVCar{
 		
 		public HandleReceiveMessage getRunnable(){
 			return handleReceiveMessage;
+		}
+		
+		public void setLastCard(int num){
+			this.lastCard = num;
+			/*
+			if(graph != null){
+				if(graph.searchCard(num)!=null){
+					if(graph.searchCard(num).twoWay)
+						this.orientation = !this.orientation;
+				}
+				System.out.println("graph!=null");
+			}*/
+			
+			
+		}
+		
+		public int getLastCard(){
+			return lastCard;
+		}
+		
+		public boolean getOrientation(){
+			return orientation;
 		}
 }

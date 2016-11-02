@@ -344,6 +344,7 @@ public class GraphingGui extends JPanel{
 		g.drawString("("+String.valueOf(mousePosition.x)+","+String.valueOf(mousePosition.y)+")"
 				, mousePosition.x+10, mousePosition.y - 10);
 
+		
 		myToolKit.drawGraph(g, graph);
 	}
 	

@@ -6,8 +6,10 @@ public class Path {
 	private int startNode;
 	private int endNode;
 	private int realDis;
+	private int numOfAGV;
 	private boolean remove;
 	private ArrayList<Integer> route;
+	
 	public Path(int startNode, int endNode){
 		this.startNode = startNode;
 		this.endNode = endNode;
@@ -51,5 +53,13 @@ public class Path {
 	
 	public int getEndNode(){
 		return endNode;
+	}
+	
+	public void setNumOfAGV(int num){
+		this.numOfAGV = num;
+	}
+	
+	public int getNumOfAGV(){
+		return numOfAGV;
 	}
 }

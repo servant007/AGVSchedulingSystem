@@ -20,6 +20,7 @@ import jxl.CellType;
 import jxl.LabelCell;
 import jxl.Sheet;
 import jxl.Workbook;
+import jxl.NumberCell;
 import schedulingSystem.component.AGVCar;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Node;
@@ -27,6 +28,7 @@ import schedulingSystem.gui.SchedulingGui;
 
 public class MyToolKit {
 	private static Logger logger = Logger.getLogger(SchedulingGui.class.getName());
+	
 	public byte[] HexString2Bytes(String src) {
 		if (null == src || 0 == src.length()) {
 			return null;
@@ -61,7 +63,6 @@ public class MyToolKit {
 		return buff;
 	}
 	
-	
 	public void drawGraph(Graphics g, Graph graph){		
 		((Graphics2D)g).setStroke(new BasicStroke(6.0f));
 		g.setColor(Color.BLACK);
@@ -95,6 +96,30 @@ public class MyToolKit {
 		for(int i = 0; i < graph.getTagArray().size(); i++)
 			g.drawString(graph.getTagArray().get(i).tag, graph.getTagArray().get(i).position.x
 					, graph.getTagArray().get(i).position.y);
+		
+		for(int i = 0; i < graph.getEdgeSize(); i++){
+			if(graph.getEdge(i).startNode.y == graph.getEdge(i).endNode.y){
+				if(graph.getEdge(i).startNode.x > graph.getEdge(i).endNode.x){
+					g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x-60, graph.getEdge(i).startNode.y);
+					g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x+60, graph.getEdge(i).endNode.y);
+				}else{
+					g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x+60, graph.getEdge(i).startNode.y);
+					g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x-60, graph.getEdge(i).endNode.y);
+				}
+				
+			}
+			if(graph.getEdge(i).startNode.x == graph.getEdge(i).endNode.x){
+				if(graph.getEdge(i).startNode.y > graph.getEdge(i).endNode.y){
+					g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y-60);
+					g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y+60);
+				}else{
+					g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y+60);
+					g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y-60);
+				}
+				
+			}
+			
+		}
 	}
 	
 	public void drawAGV(Graphics g, ArrayList<AGVCar> AGVArray){
@@ -133,7 +158,7 @@ public class MyToolKit {
 				InputStream is = new FileInputStream(file.getPath());
 				Workbook wb = Workbook.getWorkbook(is);
 				
-				Sheet sheetNodes = wb.getSheet("nodes");
+				Sheet sheetNodes = wb.getSheet(0);
 				for(int i = 0; i < sheetNodes.getRows(); i++){
 					int x=0, y=0, num=0;
 					for(int j = 0; j < 3; j++){
@@ -150,7 +175,7 @@ public class MyToolKit {
 					graph.addImportNode(x, y, num);
 				}
 				
-				Sheet sheetEdges = wb.getSheet("edges");
+				Sheet sheetEdges = wb.getSheet(1);
 				for(int i = 0; i < sheetEdges.getRows(); i++){
 					int start=0, end=0, dis=0, strCardNum=0, endCardNum=0, twoWay = 0;
 					for(int j = 0; j < 6; j++){
@@ -178,7 +203,7 @@ public class MyToolKit {
 				
 				
 				
-				Sheet sheetShipment = wb.getSheet("shipment");
+				Sheet sheetShipment = wb.getSheet(2);
 				for(int i = 0; i < sheetShipment.getRows(); i++){
 					int x=0, y=0, num=0;
 					for(int j = 0; j < 2; j++){
@@ -195,7 +220,7 @@ public class MyToolKit {
 				
 				
 				
-				Sheet sheetUnloading = wb.getSheet("unloading");
+				Sheet sheetUnloading = wb.getSheet(3);
 				for(int i = 0; i < sheetUnloading.getRows(); i++){
 					int x=0, y=0, num=0;
 					for(int j = 0; j < 2; j++){
@@ -242,7 +267,7 @@ public class MyToolKit {
 					}
 					graph.addUnloadingNode(nodeNum, comNum);
 				}*/
-				
+				/*
 				Sheet sheetEmptyCar = wb.getSheet("emptyCar");
 				for(int i = 0; i < sheetEmptyCar.getRows(); i++){
 					int  nodeNum=0, comNum=0;
@@ -253,12 +278,27 @@ public class MyToolKit {
 								nodeNum = Integer.parseInt(str);
 							if(j == 1)
 								comNum = Integer.parseInt(str);
-							//System.out.println("emptyCar:"+str);						
+							System.out.println("emptyCar:"+str);						
 					}
 					graph.addEmptyCarNode(nodeNum, comNum);
-				}	
+				}	*/
 				
-				Sheet sheetTag = wb.getSheet("tag");
+				Sheet sheetEmptyCar = wb.getSheet(4);
+				for(int i = 0; i < sheetEmptyCar.getRows(); i++){
+					int x=0, y=0, num=0;
+					for(int j = 0; j < 2; j++){
+						Cell cell0 = sheetEmptyCar.getCell(j,i);
+							String str = cell0.getContents();
+							if(j == 0)
+								num = Integer.parseInt(str);
+							if(j == 1)
+								x = Integer.parseInt(str);
+							//System.out.println("emptyCar:"+str);					
+					}
+					graph.addEmptyCarNode(num,x);
+				}
+				
+				Sheet sheetTag = wb.getSheet(5);
 				for(int i = 0; i < sheetTag.getRows(); i++){
 					int x=0, y=0;
 					String tag = "";
@@ -284,14 +324,21 @@ public class MyToolKit {
 	}
 	
 	
-	public String routeToOrientation(Graph graph, ArrayList<Integer> route){
+	public String routeToOrientation(Graph graph, ArrayList<Integer> route, AGVCar agvCar){
+		boolean strNodeFunction =agvCar.getStartNode().functionNode;
+		boolean first = true;
 		ArrayList<Node> result = new ArrayList<Node>();
-		StringBuffer sendMessage = new StringBuffer(2*graph.getEdgeSize()+2);//
+		StringBuffer sendMessage = new StringBuffer();//2*graph.getEdgeSize()+3
 		sendMessage.append("AA");
-		for(int i = 0; i < 2*graph.getEdgeSize(); i++){
+		for(int i = 0; i < 2*graph.getEdgeSize()+1; i++){
 			sendMessage.append("00");
 		}
 		sendMessage.append("BB");
+		
+		if(strNodeFunction)
+			sendMessage.replace(3, 4, "2");//倒退
+		else
+			sendMessage.replace(3, 4, "1");//前进
 		
 		for(int i = 0; i+2 < route.size(); i++){
 			if(graph.getNode(route.get(i)-1).x == graph.getNode(route.get(i+1)-1).x){
@@ -303,11 +350,22 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 1));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "1");
+								if(!(strNodeFunction&&first))//左前进时
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "1");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "2");
+									first = false;
+								}
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "1");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "1");
+								else{
+									first = false;
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "2");
+								}
+									
 							}	
 						}
 					}else if(graph.getNode(route.get(i+2)-1).x == graph.getNode(route.get(i+1)-1).x){
@@ -315,11 +373,11 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 3));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "3");
+								sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "3");
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "3");
+								sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "3");
 							}	
 						}
 					}else{
@@ -327,11 +385,21 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 2));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "2");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "2");
+								else{
+									first = true;
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "1");
+								}
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "2");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "2");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "1");
+									first = true;
+								}
 							}	
 						}
 					}
@@ -342,11 +410,21 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 2));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "2");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "2");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "1");
+									first = true;
+								}
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "2");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "2");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "1");
+									first = true;
+								}
 							}	
 						}
 					}else if(graph.getNode(route.get(i+2)-1).x == graph.getNode(route.get(i+1)-1).x){
@@ -354,11 +432,11 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 3));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "3");
+								sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "3");
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "3");
+								sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "3");
 							}	
 						}
 					}else{
@@ -366,11 +444,21 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 1));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "1");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "1");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "2");
+									first = true;
+								}
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "1");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "1");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "2");
+									first = true;
+								}
 							}	
 						}
 					}
@@ -384,11 +472,21 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 2));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "2");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "2");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "1");
+									first = true;
+								}
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "2");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "2");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "1");
+									first = true;
+								}
 							}	
 						}
 					}else if(graph.getNode(route.get(i+2)-1).y == graph.getNode(route.get(i+1)-1).y){
@@ -396,11 +494,11 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 3));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "3");
+								sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "3");
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "3");
+								sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "3");
 							}	
 						}
 					}else {
@@ -408,11 +506,21 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 1));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "1");
+								if(!(strNodeFunction&&first))									
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "1");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "2");
+									first = true;
+								}
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "1");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "1");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "2");
+									first = true;
+								}
 							}	
 						}
 					}
@@ -423,11 +531,21 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 1));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "1");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "1");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "2");
+									first = true;
+								}
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "1");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "1");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "2");
+									first = true;
+								}
 							}	
 						}
 					}else if(graph.getNode(route.get(i+2)-1).y == graph.getNode(route.get(i+1)-1).y){
@@ -435,11 +553,11 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 3));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "3");
+								sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "3");
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "3");
+								sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "3");
 							}	
 						}
 					}else {
@@ -447,11 +565,21 @@ public class MyToolKit {
 						result.add(new Node(route.get(i+1), 2));
 						for(int j = 0; j < graph.getEdgeSize(); j++){
 							if((graph.getEdge(j).startNode.num == route.get(i) && graph.getEdge(j).endNode.num == route.get(i+1))){
-								sendMessage.replace(2*(graph.getEdge(j).endCardNum+1)-1, 2*(graph.getEdge(j).endCardNum+1), "2");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "2");
+								else{
+									sendMessage.replace(2*(graph.getEdge(j).endCardNum+2)-1, 2*(graph.getEdge(j).endCardNum+2), "1");
+									first = true;
+								}
 							}
 							
 							if(graph.getEdge(j).endNode.num == route.get(i) && graph.getEdge(j).startNode.num == route.get(i+1) && graph.getEdge(j).twoWay){
-								sendMessage.replace(2*(graph.getEdge(j).strCardNum+1)-1, 2*(graph.getEdge(j).strCardNum+1), "2");
+								if(!(strNodeFunction&&first))
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "2");
+								else{
+									first = true;
+									sendMessage.replace(2*(graph.getEdge(j).strCardNum+2)-1, 2*(graph.getEdge(j).strCardNum+2), "1");
+								}
 							}	
 						}
 					}

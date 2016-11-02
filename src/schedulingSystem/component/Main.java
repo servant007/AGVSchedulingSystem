@@ -8,6 +8,11 @@ import org.apache.log4j.Logger;
 import schedulingSystem.gui.*;;
 
 public class Main extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static Logger logger = Logger.getLogger(Main.class.getName());
 	private SchedulingGui schedulingGui;
 	private SetingGui setingGui;
 	private GraphingGui graphingGui;
@@ -27,7 +32,7 @@ public class Main extends JFrame {
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
-	private static Logger logger = Logger.getLogger(Main.class.getName());
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Main main = new Main();

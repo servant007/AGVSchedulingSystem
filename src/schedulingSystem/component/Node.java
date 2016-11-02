@@ -4,6 +4,7 @@ public class Node {
 	public int x;
 	public int y;
 	public boolean newNode = true;
+	public boolean functionNode = false;
 	public int orientation; 
 	public Node(){}
 	

@@ -28,7 +28,7 @@ public class Dijkstra {
 		}	
 	}//end init
 	
-	public ArrayList<Integer> findRoute(int startNode, int endNode){
+	public Path findRoute(int startNode, int endNode){
 		Path returnPath = new Path(startNode, endNode);
 		boolean adjoin = false;
 		sArray = new ArrayList<Path>();
@@ -82,23 +82,13 @@ public class Dijkstra {
 						}
 					}
 				}
-			}
-			
-			
-			/*
-			for(int i = 0; i < uArray.size(); i++){
-				if(!uArray.get(i).getRemove()){
-					System.out.print(uArray.get(i).getEndNode() + ":" +uArray.get(i).getRealDis()+"  /");
-					System.out.println("route:"+uArray.get(i).getRoute());
-				}
-			}*/
-						
+			}	
 		}//end while
 
 		for(int i = 0; i < sArray.size(); i++){
 			if(sArray.get(i).getEndNode() == endNode)
 				returnPath = sArray.get(i);
 		}
-		return returnPath.getRoute();
+		return returnPath;
 	}//end countPath
 }

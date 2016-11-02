@@ -10,6 +10,7 @@ public class Graph {
 	private ArrayList<FunctionNode> emptyCarNodeArray;
 	private ArrayList<FunctionNode> tagArray;
 	private Edge lastReturnEdge;
+	private boolean stopNode;
 	
 	public Graph(){
 		nodeArray = new ArrayList<Node>();
@@ -100,6 +101,8 @@ public class Graph {
 	}
 	
 	public Edge searchCard(int cardNum){
+		if(cardNum == 51)
+			stopNode = true;
 		Edge returnEdge = null;
 		for(Edge edge : edgeArray){
 			if(edge.strCardNum == cardNum){
@@ -108,14 +111,21 @@ public class Graph {
 				returnEdge = new Edge(edge.endNode, edge.startNode, edge.realDis, edge.strCardNum, edge.endCardNum, true);
 			}
 		}
-		//避免双向路径时自动返回
-		if(lastReturnEdge.startNode.num == returnEdge.startNode.num && lastReturnEdge.endNode.num == returnEdge.endNode.num
-				|| lastReturnEdge.startNode.num == returnEdge.endNode.num && lastReturnEdge.endNode.num == returnEdge.startNode.num){
-			returnEdge = null;
-		}
 		
-		if(returnEdge != null)
-			lastReturnEdge = returnEdge;
+		if(returnEdge != null){
+			//避免双向路径时自动返回
+			if(lastReturnEdge.startNode.num == returnEdge.startNode.num && lastReturnEdge.endNode.num == returnEdge.endNode.num
+					|| lastReturnEdge.startNode.num == returnEdge.endNode.num && lastReturnEdge.endNode.num == returnEdge.startNode.num){
+				if(!stopNode){
+					returnEdge = null;
+				}else{
+					stopNode = false;
+				}
+			}
+			if(returnEdge != null)
+				lastReturnEdge = returnEdge;
+		}else{
+		}
 		return returnEdge;
 	}
 	

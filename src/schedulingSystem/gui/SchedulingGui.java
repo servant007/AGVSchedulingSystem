@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -29,6 +28,7 @@ import schedulingSystem.component.Dijkstra;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Main;
 import schedulingSystem.component.Node;
+import schedulingSystem.component.Path;
 import schedulingSystem.toolKit.HandleReceiveMessage;
 import schedulingSystem.toolKit.MyToolKit;
 import schedulingSystem.toolKit.RoundButton;
@@ -75,7 +75,7 @@ public class SchedulingGui extends JPanel{
 		numOfAGV = 10;
 		AGVArray = new ArrayList<AGVCar>();
 		for(int i = 0; i < numOfAGV; i++){
-			AGVArray.add(new AGVCar());
+			AGVArray.add(new AGVCar(graph));
 		}
 
 		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -97,6 +97,10 @@ public class SchedulingGui extends JPanel{
 			public void actionPerformed(ActionEvent e){
 				graph = myToolKit.importNewGraph(null);
 				dijkstra = new Dijkstra(graph);
+				AGVArray = new ArrayList<AGVCar>();
+				for(int i = 0; i < numOfAGV; i++){
+					AGVArray.add(new AGVCar(graph));
+				}
 			}
 		});
 
@@ -142,40 +146,9 @@ public class SchedulingGui extends JPanel{
 		timer = new Timer(100, new TimerListener());
 		timer.start();
 		
-		
 		this.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent e){
-				if(e.getButton() == MouseEvent.BUTTON1){
-					Node node = graph.searchWideNode(e.getX(), e.getY());
-					if(node != null){
-						for(int i = 0; i < graph.getShipmentNode().size(); i++){
-							if(graph.getShipmentNode().get(i).nodeNum  == node.num){
-								if(AGVArray.get(1).getStartNode()!=0){
-									ArrayList<Integer> route = dijkstra.findRoute(AGVArray.get(1).getStartNode(), node.num);
-									System.out.println("result:"+route);
-									//myToolKit.routeToOrientation(graph, route);
-									AGVArray.get(1).getRunnable().SendMessage(myToolKit.routeToOrientation(graph, route));
-								}else{
-									System.out.println("没有定位agv");
-								}
-							}
-						}
-						
-						for(int i = 0; i < graph.getUnloadingNode().size(); i++){
-							if(graph.getUnloadingNode().get(i).nodeNum  == node.num){
-								if(AGVArray.get(1).getStartNode()!=0){
-									ArrayList<Integer> route = dijkstra.findRoute(AGVArray.get(1).getStartNode(), node.num);
-									System.out.println("result:"+route);
-									//myToolKit.routeToOrientation(graph, route);
-									AGVArray.get(1).getRunnable().SendMessage(myToolKit.routeToOrientation(graph, route));
-								}else{
-									System.out.println("没有定位agv");
-								}
-								
-							}
-						}	
-					}
-				}
+				handleFunctionNodeClick(e);
 			}
 		});
 	
@@ -194,6 +167,21 @@ public class SchedulingGui extends JPanel{
 		if(firstInit){
 			myToolKit.drawGraph(g, graph);
 			myToolKit.drawAGV(g, AGVArray);
+		}
+	}
+	
+	class TimerListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			repaint();
+			if(!firstInit){
+				panelSize.width = screenSize.width;
+				panelSize.height = screenSize.height;
+				firstInit = true;
+			}else {	
+				for(int i = 0; i < AGVArray.size(); i ++){
+					AGVArray.get(i).stepForward();
+				}
+			}		
 		}
 	}
 	
@@ -227,27 +215,55 @@ public class SchedulingGui extends JPanel{
 		
 	}
 	
-	class TimerListener implements ActionListener{
-		public void actionPerformed(ActionEvent e){
-			repaint();
-			if(!firstInit){
-				panelSize.width = screenSize.width;
-				panelSize.height = screenSize.height;
-				//graph.createGraph(panelSize);
-				firstInit = true;
-			}else {	
-				for(int i = 0; i < AGVArray.size(); i ++){
-					AGVArray.get(i).stepForward();
-				}
-			}		
-		}
-	}
-	
 	public void setBtnColor(){
 		schedulingGuiBtn.setBackground(Color.WHITE);
 		schedulingGuiBtn.setForeground(new Color(30, 144, 255));
 		setingGuiBtn.setBackground(new Color(30, 144, 255));
 		graphGuiBtn.setBackground(new Color(30, 144, 255));
 	}
-
+	
+	public void handleFunctionNodeClick(MouseEvent e){
+		if(e.getButton() == MouseEvent.BUTTON1){
+			Node node = graph.searchWideNode(e.getX(), e.getY());
+			if(node != null){
+				for(int i = 0; i < graph.getShipmentNode().size(); i++){
+					if(graph.getShipmentNode().get(i).nodeNum  == node.num){
+						sendingWhichAGV(node.num);
+					}
+				}
+				
+				for(int i = 0; i < graph.getUnloadingNode().size(); i++){
+					if(graph.getUnloadingNode().get(i).nodeNum  == node.num){
+						sendingWhichAGV(node.num);
+					}
+				}	
+			}
+		}
+	}
+	
+	public void sendingWhichAGV(int endNodeNum){
+		ArrayList<Path> pathArray = new ArrayList<Path>();
+		for(int i = 0; i < AGVArray.size(); i++){
+			if(AGVArray.get(i).getStartNode().num!=0 && AGVArray.get(i).isAlived()){
+				pathArray.add(dijkstra.findRoute(AGVArray.get(i).getStartNode().num, endNodeNum));
+				pathArray.get(pathArray.size()-1).setNumOfAGV(i);;
+			}
+		}
+		if(pathArray.size() != 0){
+			int minDis = 65535;
+			int minIndex = 0;
+			for(int i = 0; i < pathArray.size(); i++){
+				if(pathArray.get(i).getRealDis() < minDis){
+					minDis = pathArray.get(i).getRealDis();
+					minIndex = i;
+				}
+			}
+			System.out.println("result:"+pathArray.get(minIndex).getRoute());
+			AGVCar agvCar= AGVArray.get(pathArray.get(minIndex).getNumOfAGV());
+			agvCar.getRunnable().SendMessage(myToolKit.routeToOrientation(graph, pathArray.get(minIndex).getRoute(), agvCar));
+		}else{
+			System.out.println("没有AGV准备好");
+			logger.debug("没有AGV准备好");
+		}
+	}
 }

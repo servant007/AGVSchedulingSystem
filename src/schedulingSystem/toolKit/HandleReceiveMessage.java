@@ -18,13 +18,14 @@ public class HandleReceiveMessage implements Runnable{
 	private OutputStream outputStream;
 	private Socket socket;
 	private long lastCommunicationTime;
-	private long reciveDelayTime = 600000;
+	private long reciveDelayTime = 10000;
 	private MyToolKit myToolKit;
 	private ArrayList<AGVCar> AGVArray;
 	private Graph graph;
 	private int noOfAGV;
 	private int lastCard;
 	private RunnableListener listener;
+	private boolean oldRunnable;
 	
 	public HandleReceiveMessage(Socket socket, ArrayList<AGVCar> AGVArray, Graph graph){
 		myToolKit = new MyToolKit();
@@ -66,11 +67,17 @@ public class HandleReceiveMessage implements Runnable{
 						String message = myToolKit.printHexString(buff);
 						if(message.startsWith("AA")&&message.endsWith("BB")){
 							noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
-							listener.getAGVNum(noOfAGV);//返回Runnable与哪个AGV通讯
+							if(!oldRunnable){
+								listener.getAGVNum(noOfAGV);//返回Runnable与哪个AGV通讯
+								oldRunnable = true;
+							}
+								
 							if(!message.substring(4, 8).equals("BABA")){
-								AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
+								AGVArray.get(noOfAGV).setLastCommunicationTime(System.currentTimeMillis());
 								int NOOfCard = Integer.parseInt(message.substring(4, 6), 16);
+								
 								if(NOOfCard != lastCard){
+									AGVArray.get(noOfAGV).setLastCard(NOOfCard);
 									System.out.println("noofcarnum:"+NOOfCard);
 									int electricity = Integer.parseInt(message.substring(6, 8), 16);
 									Edge edge = null;
@@ -80,7 +87,7 @@ public class HandleReceiveMessage implements Runnable{
 									lastCard = NOOfCard;
 								}
 							}else{
-								AGVArray.get(noOfAGV).setTime(System.currentTimeMillis());
+								AGVArray.get(noOfAGV).setLastCommunicationTime(System.currentTimeMillis());
 								outputStream.write(myToolKit.HexString2Bytes("AAC0FFEEBB"));
 							}
 						}					
