@@ -241,18 +241,18 @@ public class GraphingGui extends JPanel{
 						FunctionDialog dialog = new FunctionDialog(mousePosition);
 						dialog.getInstance(dialog, true);
 						dialog.setOnActionListener(new FunctionDialogListener(){
-							public void getSeclectFunction(int function, String str, boolean btnState){
-								if(str.length() > 0){
+							public void getSeclectFunction(int function, String com,String card, boolean btnState){
+								if(com.length() > 0 && card.length() > 0){
 									if(function == 1)
-										graph.addShipmentNode(node.num, Integer.parseInt(str));
+										graph.addShipmentNode(node.num, Integer.parseInt(card), Integer.parseInt(com));
 									else if(function == 2)
-										graph.addUnloadingNode(node.num, Integer.parseInt(str));
+										graph.addUnloadingNode(node.num, Integer.parseInt(card), Integer.parseInt(com));
 									else if(function == 3)
-										graph.addEmptyCarNode(node.num, Integer.parseInt(str));
+										graph.addEmptyCarNode(node.num, Integer.parseInt(card),Integer.parseInt(com));
 									else if(function == 4)
-										graph.addTagArray(node.x, node.y, str);
+										graph.addTagArray(node.x, node.y, com);
 								}
-								System.out.println(str);
+								System.out.println(com);
 							}
 						});
 					}
@@ -262,10 +262,10 @@ public class GraphingGui extends JPanel{
 						FunctionDialog dialog = new FunctionDialog(mousePosition);
 						dialog.getInstance(dialog, false);
 						dialog.setOnActionListener(new FunctionDialogListener(){
-							public void getSeclectFunction(int function, String str, boolean btnState){
+							public void getSeclectFunction(int function, String str, String str1, boolean btnState){
 								if(str.length() > 0){
 									if(function == 4)
-										graph.addTagArray(node1.x, node1.y, str);
+										graph.addTagArray(node1.x, node1.y, str+str1);
 								}
 								System.out.println(str);
 							}
@@ -345,36 +345,7 @@ public class GraphingGui extends JPanel{
 				, mousePosition.x+10, mousePosition.y - 10);
 
 		
-		myToolKit.drawGraph(g, graph);
-	}
-	
-	public void drawGraph(Graphics g){
-		((Graphics2D)g).setStroke(new BasicStroke(6.0f));
-		g.setColor(Color.BLACK);
-		
-		for(int i = 0 ; i < graph.getEdgeSize(); i++){
-			g.drawLine(graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y, graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y);
-		}
-			
-		
-		g.setColor(Color.YELLOW);
-		for(int i = 0 ; i < graph.getNodeSize(); i++)
-			g.fillRect(graph.getNode(i).x - 5, graph.getNode(i).y - 5, 10, 10);
-		
-		g.setColor(Color.blue);
-		for(int i = 0; i < graph.getShipmentNode().size(); i++)
-			g.fillOval(graph.getNode(graph.getShipmentNode().get(i).nodeNum-1).x-20
-					, graph.getNode(graph.getShipmentNode().get(i).nodeNum-1).y-20, 40, 40);
-		
-		g.setColor(Color.green);
-		for(int i = 0; i < graph.getUnloadingNode().size(); i++)
-			g.fillOval(graph.getNode(graph.getUnloadingNode().get(i).nodeNum-1).x-20
-					, graph.getNode(graph.getUnloadingNode().get(i).nodeNum-1).y-20, 40, 40);
-		
-		g.setColor(Color.ORANGE);
-		for(int i = 0; i < graph.getEmptyCarNode().size(); i++)
-			g.fillOval(graph.getNode(graph.getEmptyCarNode().get(i).nodeNum-1).x-20
-					, graph.getNode(graph.getEmptyCarNode().get(i).nodeNum-1).y-20, 40, 40);
+		myToolKit.drawGraph(g, graph, true);
 	}
 	
 	public void setBtnColor(){
@@ -419,24 +390,30 @@ public class GraphingGui extends JPanel{
 			WritableSheet wsShipment = wwb.createSheet("shipment", 2);
 			for(int i = 0; i < graph.getShipmentNode().size(); i++){
 				Number numberNode = new Number(0, i, graph.getShipmentNode().get(i).nodeNum);
-				Number numberCom = new Number(1, i, graph.getShipmentNode().get(i).communicationNum);
+				Number numberCard = new Number(1, i, graph.getShipmentNode().get(i).cardNum);
+				Number numberCom = new Number(2, i, graph.getShipmentNode().get(i).communicationNum);
 				wsShipment.addCell(numberNode);
+				wsShipment.addCell(numberCard);
 				wsShipment.addCell(numberCom);
 			}
 			
 			WritableSheet wsUnloading = wwb.createSheet("unloading", 3);
 			for(int i = 0; i < graph.getUnloadingNode().size(); i++){
 				Number numberNode = new Number(0, i, graph.getUnloadingNode().get(i).nodeNum);
-				Number numberCom = new Number(1, i, graph.getUnloadingNode().get(i).communicationNum);
+				Number numberCard = new Number(1, i, graph.getUnloadingNode().get(i).cardNum);
+				Number numberCom = new Number(2, i, graph.getUnloadingNode().get(i).communicationNum);
 				wsUnloading.addCell(numberNode);
+				wsUnloading.addCell(numberCard);
 				wsUnloading.addCell(numberCom);
 			}
 			
 			WritableSheet wsEmptyCar = wwb.createSheet("emptyCar", 4);
 			for(int i = 0; i < graph.getEmptyCarNode().size(); i++){
 				Number numberNode = new Number(0, i, graph.getEmptyCarNode().get(i).nodeNum);
-				Number numberCom = new Number(1, i, graph.getEmptyCarNode().get(i).communicationNum);
+				Number numberCard = new Number(1, i, graph.getEmptyCarNode().get(i).cardNum);
+				Number numberCom = new Number(2, i, graph.getEmptyCarNode().get(i).communicationNum);
 				wsEmptyCar.addCell(numberNode);
+				wsEmptyCar.addCell(numberCard);
 				wsEmptyCar.addCell(numberCom);
 			}
 			

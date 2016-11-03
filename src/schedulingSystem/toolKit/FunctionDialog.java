@@ -23,65 +23,71 @@ public class FunctionDialog extends JDialog{
 	private RoundButton addStringBtn;
 	public  void getInstance(FunctionDialog instance, boolean isNotTag){
 		
-		JPanel shipmentPanel = new JPanel(new GridLayout(4,1,10,10));
+		JPanel shipmentPanel = new JPanel(new GridLayout(6,1,10,10));
 		shipmentPanel.setBorder(BorderFactory.createEtchedBorder());
 		JTextField shipmentNum = new JTextField();
 		shipmentNum.setFont(new Font("宋体", Font.BOLD, 30));
+		JTextField shipmentCard = new JTextField();
+		shipmentCard.setFont(new Font("宋体", Font.BOLD, 30));
 		RoundButton shipmentComBtn = new RoundButton("确认");
 		shipmentComBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				functionDialog.getSeclectFunction(1, shipmentNum.getText(), true);
+				functionDialog.getSeclectFunction(1, shipmentNum.getText(), shipmentCard.getText(),true);
 				instance.dispose();
 			}
 		});
 		RoundButton shipmentCelBtn = new RoundButton("取消");
 		shipmentCelBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				functionDialog.getSeclectFunction(0, "", false);
+				functionDialog.getSeclectFunction(0, "","", false);
 				instance.dispose();
 			}
 		});
-		setPanel(shipmentPanel, " 通讯编号:", shipmentNum, shipmentComBtn, shipmentCelBtn);
+		setPanel(shipmentPanel, " 通讯编号:", shipmentNum,shipmentCard, shipmentComBtn, shipmentCelBtn);
 		
-		JPanel unloadingPanel = new JPanel(new GridLayout(4,1,10,10));
+		JPanel unloadingPanel = new JPanel(new GridLayout(6,1,10,10));
 		unloadingPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 		JTextField unloadingNum = new JTextField();
 		unloadingNum.setFont(new Font("宋体", Font.BOLD, 30));
+		JTextField unloadingCard = new JTextField();
+		unloadingCard.setFont(new Font("宋体", Font.BOLD, 30));
 		RoundButton unloadingComBtn = new RoundButton("确认");
 		unloadingComBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				functionDialog.getSeclectFunction(2,unloadingNum.getText(),true);
+				functionDialog.getSeclectFunction(2,unloadingNum.getText(),unloadingCard.getText(),true);
 				instance.dispose();
 			}
 		});
 		RoundButton unloadingCelBtn = new RoundButton("取消");
 		unloadingCelBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				functionDialog.getSeclectFunction(0,"", false);
+				functionDialog.getSeclectFunction(0,"","", false);
 				instance.dispose();
 			}
 		});
-		setPanel(unloadingPanel, " 通讯编号：", unloadingNum, unloadingComBtn, unloadingCelBtn);
+		setPanel(unloadingPanel, " 通讯编号：", unloadingNum,unloadingCard, unloadingComBtn, unloadingCelBtn);
 		
-		JPanel emptyCarPanel = new JPanel(new GridLayout(4,1,10,10));
+		JPanel emptyCarPanel = new JPanel(new GridLayout(6,1,10,10));
 		emptyCarPanel.setBorder(BorderFactory.createRaisedBevelBorder());
 		JTextField emptyCarNum = new JTextField();
 		emptyCarNum.setFont(new Font("宋体", Font.BOLD, 30));
+		JTextField emptyCarCard = new JTextField();
+		emptyCarCard.setFont(new Font("宋体", Font.BOLD, 30));
 		RoundButton emptyCarComBtn = new RoundButton("确认");
 		emptyCarComBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				functionDialog.getSeclectFunction(3,emptyCarNum.getText(), true);
+				functionDialog.getSeclectFunction(3,emptyCarNum.getText(), emptyCarCard.getText(), true);
 				instance.dispose();
 			}
 		});
 		RoundButton emptyCarCelBtn = new RoundButton("取消");
 		emptyCarCelBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				functionDialog.getSeclectFunction(0,"", false);
+				functionDialog.getSeclectFunction(0,"", "", false);
 				instance.dispose();
 			}
 		});
-		setPanel(emptyCarPanel, " 通讯编号：", emptyCarNum, emptyCarComBtn, emptyCarCelBtn);
+		setPanel(emptyCarPanel, " 通讯编号：", emptyCarNum, emptyCarCard, emptyCarComBtn, emptyCarCelBtn);
 		
 		JPanel addStringPanel = new JPanel(new GridLayout(4,1,10,10));
 		addStringPanel.setBorder(BorderFactory.createRaisedBevelBorder());
@@ -90,18 +96,18 @@ public class FunctionDialog extends JDialog{
 		RoundButton addStringComBtn = new RoundButton("确认");
 		addStringComBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				functionDialog.getSeclectFunction(4, addStringNum.getText(), true);
+				functionDialog.getSeclectFunction(4, addStringNum.getText(), " ", true);
 				instance.dispose();
 			}
 		});
 		RoundButton addStringCelBtn = new RoundButton("取消");
 		addStringCelBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				functionDialog.getSeclectFunction(0,"", false);
+				functionDialog.getSeclectFunction(0,"", "", false);
 				instance.dispose();
 			}
 		});
-		setPanel(addStringPanel," 标签内容：", addStringNum, addStringComBtn, addStringCelBtn);
+		setPanel(addStringPanel," 标签内容：", addStringNum,  new JTextField(), addStringComBtn, addStringCelBtn);
 		
 		
 		
@@ -184,15 +190,15 @@ public class FunctionDialog extends JDialog{
 		this.functionDialog = listener;
 	}
 	
-	public void setPanel(JPanel panel, String str, JTextField num, RoundButton comBtn, RoundButton celBtn){
-		//panel.add(new JPanel());
-		//panel.add(new JPanel());
-		JLabel label = new JLabel(str);
-		label.setFont(new Font("宋体", Font.BOLD, 30));
-		panel.add(label);
+	public void setPanel(JPanel panel, String str, JTextField num, JTextField card, RoundButton comBtn, RoundButton celBtn){
+		JLabel labelNum = new JLabel(str);
+		labelNum.setFont(new Font("宋体", Font.BOLD, 30));
+		panel.add(labelNum);
 		panel.add(num);
-		//panel.add(new JPanel());
-		//panel.add(new JPanel());
+		JLabel labelCard = new JLabel("卡号");
+		labelCard.setFont(new Font("宋体", Font.BOLD, 30));
+		panel.add(labelCard);
+		panel.add(card);
 		panel.add(comBtn);
 		panel.add(celBtn);
 	}

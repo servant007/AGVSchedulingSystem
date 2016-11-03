@@ -11,6 +11,7 @@ public class Graph {
 	private ArrayList<FunctionNode> tagArray;
 	private Edge lastReturnEdge;
 	private boolean stopNode;
+	private ArrayList<Integer> ignoreCard;
 	
 	public Graph(){
 		nodeArray = new ArrayList<Node>();
@@ -101,7 +102,7 @@ public class Graph {
 	}
 	
 	public Edge searchCard(int cardNum){
-		if(cardNum == 51)
+		if(cardNum == 50)
 			stopNode = true;
 		Edge returnEdge = null;
 		for(Edge edge : edgeArray){
@@ -129,16 +130,16 @@ public class Graph {
 		return returnEdge;
 	}
 	
-	public void addShipmentNode(int nodeNum, int comNum){
-		shipmentNodeArray.add(new FunctionNode(nodeNum, comNum));
+	public void addShipmentNode(int nodeNum, int card, int comNum){
+		shipmentNodeArray.add(new FunctionNode(nodeNum,card, comNum));
 	}
 	
-	public void addUnloadingNode(int nodeNum, int comNum){
-		unloadingNodeArray.add(new FunctionNode(nodeNum, comNum));
+	public void addUnloadingNode(int nodeNum, int card, int comNum){
+		unloadingNodeArray.add(new FunctionNode(nodeNum, card, comNum));
 	}
 	
-	public void addEmptyCarNode(int nodeNum, int comNum){
-		emptyCarNodeArray.add(new FunctionNode(nodeNum, comNum));
+	public void addEmptyCarNode(int nodeNum, int card, int comNum){
+		emptyCarNodeArray.add(new FunctionNode(nodeNum, card,comNum));
 	}
 	
 	public void addTagArray(int x , int y, String tag){
@@ -159,5 +160,33 @@ public class Graph {
 	
 	public ArrayList<FunctionNode> getTagArray(){
 		return tagArray;
+	}
+	
+	public void initIgnoreCard(){
+		//去除无需指令点
+		ArrayList<Integer> noForkNode = new ArrayList<Integer>();
+		for(int i = 0; i < this.getNodeSize(); i++){
+			int count = 0;
+			for(int j = 0; j < this.getNodeSize(); j++ ){
+				if(this.getNode(i).num == this.getEdge(j).endNode.num || this.getNode(i).num == this.getEdge(j).startNode.num){
+					count++;
+				}
+			}
+			if(count == 2)
+				noForkNode.add(i+1);
+		}
+		ignoreCard = new ArrayList<Integer>();
+		for(int i = 0; i < noForkNode.size(); i++){
+			//System.out.println("noForkNode:"+noForkNode.get(i));
+			for(int j = 0; j < this.getEdgeSize(); j++){
+				if(noForkNode.get(i) == this.getEdge(j).endNode.num){
+					ignoreCard.add(this.getEdge(j).endCardNum);
+				}
+			}
+		}				
+	}
+	
+	public ArrayList<Integer> getIgnoreCard(){
+		return this.ignoreCard;
 	}
 }

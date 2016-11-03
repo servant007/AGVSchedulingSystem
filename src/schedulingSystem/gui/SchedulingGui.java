@@ -24,6 +24,7 @@ import javax.swing.Timer;
 import org.apache.log4j.Logger;
 
 import schedulingSystem.component.AGVCar;
+import schedulingSystem.component.ConflictDetection;
 import schedulingSystem.component.Dijkstra;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Main;
@@ -56,6 +57,9 @@ public class SchedulingGui extends JPanel{
 	private ExecutorService executorService;
 	private Dijkstra dijkstra;
 	private HandleReceiveMessage handleReceiveMessage;
+	private int time500ms;
+	private boolean reverseColor;
+	private ConflictDetection conflictDetection;
 	
 	public static SchedulingGui getInstance(){
 		if(instance == null){
@@ -68,14 +72,16 @@ public class SchedulingGui extends JPanel{
 		myToolKit = new MyToolKit();
 		graph = new Graph();
 		graph = myToolKit.importNewGraph("C:/testGraph.xls");
+		graph.initIgnoreCard();
 		dijkstra = new Dijkstra(graph);
 		stateString = new StringBuffer();
 		panelSize = new Dimension(0, 0);
 		executorService = Executors.newFixedThreadPool(15);
 		numOfAGV = 10;
+		conflictDetection = new ConflictDetection(graph);
 		AGVArray = new ArrayList<AGVCar>();
 		for(int i = 0; i < numOfAGV; i++){
-			AGVArray.add(new AGVCar(graph));
+			AGVArray.add(new AGVCar(i+1, graph, conflictDetection));
 		}
 
 		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -96,10 +102,12 @@ public class SchedulingGui extends JPanel{
 		importGraphBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				graph = myToolKit.importNewGraph(null);
+				graph.initIgnoreCard();
 				dijkstra = new Dijkstra(graph);
+				conflictDetection = new ConflictDetection(graph);
 				AGVArray = new ArrayList<AGVCar>();
 				for(int i = 0; i < numOfAGV; i++){
-					AGVArray.add(new AGVCar(graph));
+					AGVArray.add(new AGVCar(i+1, graph, conflictDetection));
 				}
 			}
 		});
@@ -127,7 +135,7 @@ public class SchedulingGui extends JPanel{
 							handleReceiveMessage = new HandleReceiveMessage(socket, AGVArray, graph);
 							handleReceiveMessage.setOnRunnableListener(new RunnableListener(){
 								public void getAGVNum(int NOOfAGV){
-									AGVArray.get(NOOfAGV).setRunnabel(handleReceiveMessage);
+									AGVArray.get(NOOfAGV-1).setRunnabel(handleReceiveMessage);
 									System.out.println(NOOfAGV+"ºÅAGV·µ»ØHandleReceiveMessage");
 								}
 							});
@@ -165,7 +173,7 @@ public class SchedulingGui extends JPanel{
 		super.paint(g);
 		//super.paintComponents(g);
 		if(firstInit){
-			myToolKit.drawGraph(g, graph);
+			myToolKit.drawGraph(g, graph, reverseColor);
 			myToolKit.drawAGV(g, AGVArray);
 		}
 	}
@@ -173,6 +181,12 @@ public class SchedulingGui extends JPanel{
 	class TimerListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			repaint();
+			time500ms++;
+			if(time500ms >= 5){
+				time500ms = 0;
+				reverseColor = !reverseColor;
+			}
+
 			if(!firstInit){
 				panelSize.width = screenSize.width;
 				panelSize.height = screenSize.height;
@@ -228,12 +242,21 @@ public class SchedulingGui extends JPanel{
 			if(node != null){
 				for(int i = 0; i < graph.getShipmentNode().size(); i++){
 					if(graph.getShipmentNode().get(i).nodeNum  == node.num){
+						graph.getShipmentNode().get(i).clicked = true;
 						sendingWhichAGV(node.num);
 					}
 				}
 				
 				for(int i = 0; i < graph.getUnloadingNode().size(); i++){
 					if(graph.getUnloadingNode().get(i).nodeNum  == node.num){
+						graph.getUnloadingNode().get(i).clicked = true;
+						sendingWhichAGV(node.num);
+					}
+				}	
+				
+				for(int i = 0; i < graph.getEmptyCarNode().size(); i++){
+					if(graph.getEmptyCarNode().get(i).nodeNum  == node.num){
+						graph.getEmptyCarNode().get(i).clicked = true;
 						sendingWhichAGV(node.num);
 					}
 				}	

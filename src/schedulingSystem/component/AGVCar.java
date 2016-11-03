@@ -3,6 +3,7 @@ package schedulingSystem.component;
 import schedulingSystem.toolKit.HandleReceiveMessage;
 
 public class AGVCar{
+		private int number;
 		private int x = -15;
 		private int y = -15;
 		private Edge edge;
@@ -13,11 +14,18 @@ public class AGVCar{
 		private boolean finishEdge;
 		private long lastCommunicationTime;
 		private HandleReceiveMessage handleReceiveMessage;
+		private ConflictDetection conflictDetection;
 		
-		public AGVCar(Graph graph){
+		public AGVCar(int number, Graph graph, ConflictDetection conflictDetection){
+			this.number = number;
 			this.graph = graph;
+			this.conflictDetection = conflictDetection;
 			finishEdge = true;
 			edge = new Edge(new Node(0,0),new Node(0,0));
+		}
+		
+		public int getNumber(){
+			return number;
 		}
 		
 		public int getX(){
@@ -86,7 +94,7 @@ public class AGVCar{
 		}
 		
 		public boolean isAlived(){
-			if(System.currentTimeMillis() - lastCommunicationTime < 10000)
+			if(System.currentTimeMillis() - lastCommunicationTime < 100000)
 				return true;
 			else 
 				return false;
@@ -109,18 +117,48 @@ public class AGVCar{
 			return handleReceiveMessage;
 		}
 		
-		public void setLastCard(int num){
-			this.lastCard = num;
-			/*
-			if(graph != null){
-				if(graph.searchCard(num)!=null){
-					if(graph.searchCard(num).twoWay)
-						this.orientation = !this.orientation;
+		public void setLastCard(int cardNum){
+			
+			//如果是停止卡则取消闪烁
+			for(int i = 0; i < graph.getShipmentNode().size(); i++){
+				if(graph.getShipmentNode().get(i).cardNum  == cardNum){
+					graph.getShipmentNode().get(i).clicked = false;
 				}
-				System.out.println("graph!=null");
-			}*/
+			}
+			
+			for(int i = 0; i < graph.getUnloadingNode().size(); i++){
+				if(graph.getUnloadingNode().get(i).cardNum  == cardNum){
+					graph.getUnloadingNode().get(i).clicked = false;
+				}
+			}	
+			
+			for(int i = 0; i < graph.getEmptyCarNode().size(); i++){
+				if(graph.getEmptyCarNode().get(i).cardNum  == cardNum){
+					graph.getEmptyCarNode().get(i).clicked = false;
+				}
+			}	
 			
 			
+			//查询是否是endCard，如果是，检测是否冲突，将结果发送给agv
+			for(int i = 0; i < graph.getEdgeSize(); i++){
+				if(cardNum == graph.getEdge(i).strCardNum && lastCard == graph.getEdge(i).endCardNum){//检测冲突
+					System.out.println("读到"+cardNum+"号卡"+"查询是否冲突");
+					conflictDetection.checkConflict(this, graph.getEdge(i).startNode.num, 0);//根据route
+				}else if(cardNum == graph.getEdge(i).endCardNum && lastCard == graph.getEdge(i).strCardNum){//检测冲突
+					System.out.println("读到"+cardNum+"号卡"+"查询是否冲突");
+					conflictDetection.checkConflict(this, graph.getEdge(i).endNode.num, 0);//根据route
+				}
+				if(cardNum == graph.getEdge(i).strCardNum){//解除占用
+					System.out.println("读到"+cardNum+"号卡"+"解除" + this.number + "号对" + graph.getEdge(i).startNode.num +"的占用");
+					conflictDetection.removeOccupy(this, graph.getEdge(i).startNode.num);
+				}else if(cardNum == graph.getEdge(i).endCardNum){
+					System.out.println("读到"+cardNum+"号卡"+"解除" + this.number + "号对" + graph.getEdge(i).endNode.num + "的占用");
+					conflictDetection.removeOccupy(this, graph.getEdge(i).endNode.num);
+				}
+			}
+			
+			
+			this.lastCard = cardNum;
 		}
 		
 		public int getLastCard(){
