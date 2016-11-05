@@ -27,12 +27,12 @@ public class ConflictDetection {
 		if(conflictNodeArray.get(strNode-1).occupy){
 			conflictNodeArray.get(strNode-1).waitQueue.add(agvCar);
 			//agvCar.getRunnable().SendMessage("stop");//马上停止
-			System.out.println("让"+agvCar.getNumber()+"号马上停止");
+			//System.out.println("让"+agvCar.getNumber()+"号马上停止");
 			
 		}else{
 			conflictNodeArray.get(strNode-1).waitQueue.add(agvCar);
 			conflictNodeArray.get(strNode-1).occupy = true;
-			System.out.println(strNode + "点被"+agvCar.getNumber()+"号占用");
+			//System.out.println(strNode + "点被"+agvCar.getNumber()+"号占用");
 		}
 			
 	}

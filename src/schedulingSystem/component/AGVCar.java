@@ -8,7 +8,8 @@ public class AGVCar{
 		private int y = -15;
 		private Edge edge;
 		private int lastCard;
-		private boolean orientation;//true右，false左
+		public enum Orientation{LEFT,RIGTH,UP,DOWN}
+		private Orientation orientation;//true右，false左
 		private Graph graph;
 		private int electricity;
 		private boolean finishEdge;
@@ -73,8 +74,9 @@ public class AGVCar{
 			this.edge = edge;//new Edge( edge.startNode, edge.endNode,edge.realDis, edge.strCardNum, edge.endCardNum, edge.twoWay);
 			x = edge.startNode.x;
 			y = edge.startNode.y;
-			if(edge.twoWay)
-				this.orientation = !this.orientation;
+			judgeOrientation();
+			//if(edge.twoWay)
+				//this.orientation = !this.orientation;
 		}
 		
 		public void setElectricity(int electricity){
@@ -142,17 +144,17 @@ public class AGVCar{
 			//查询是否是endCard，如果是，检测是否冲突，将结果发送给agv
 			for(int i = 0; i < graph.getEdgeSize(); i++){
 				if(cardNum == graph.getEdge(i).strCardNum && lastCard == graph.getEdge(i).endCardNum){//检测冲突
-					System.out.println("读到"+cardNum+"号卡"+"查询是否冲突");
+					//System.out.println("读到"+cardNum+"号卡"+"查询是否冲突");
 					conflictDetection.checkConflict(this, graph.getEdge(i).startNode.num, 0);//根据route
 				}else if(cardNum == graph.getEdge(i).endCardNum && lastCard == graph.getEdge(i).strCardNum){//检测冲突
-					System.out.println("读到"+cardNum+"号卡"+"查询是否冲突");
+					//System.out.println("读到"+cardNum+"号卡"+"查询是否冲突");
 					conflictDetection.checkConflict(this, graph.getEdge(i).endNode.num, 0);//根据route
 				}
 				if(cardNum == graph.getEdge(i).strCardNum){//解除占用
-					System.out.println("读到"+cardNum+"号卡"+"解除" + this.number + "号对" + graph.getEdge(i).startNode.num +"的占用");
+					//System.out.println("读到"+cardNum+"号卡"+"解除" + this.number + "号对" + graph.getEdge(i).startNode.num +"的占用");
 					conflictDetection.removeOccupy(this, graph.getEdge(i).startNode.num);
 				}else if(cardNum == graph.getEdge(i).endCardNum){
-					System.out.println("读到"+cardNum+"号卡"+"解除" + this.number + "号对" + graph.getEdge(i).endNode.num + "的占用");
+					//System.out.println("读到"+cardNum+"号卡"+"解除" + this.number + "号对" + graph.getEdge(i).endNode.num + "的占用");
 					conflictDetection.removeOccupy(this, graph.getEdge(i).endNode.num);
 				}
 			}
@@ -165,7 +167,28 @@ public class AGVCar{
 			return lastCard;
 		}
 		
-		public boolean getOrientation(){
+		public Orientation getOrientation(){
 			return orientation;
+		}
+		
+		public void judgeOrientation(){
+			if(edge.startNode.x == edge.endNode.x){
+				if(edge.startNode.y < edge.endNode.y){
+					orientation = Orientation.DOWN;
+					System.out.println("DOWN");
+				}else{
+					orientation = Orientation.UP;
+					System.out.println("UP");
+				} 	
+			}else if(edge.startNode.y == edge.endNode.y){
+				if(edge.startNode.x < edge.endNode.x){
+					orientation = Orientation.RIGTH;
+					System.out.println("RIGTH");
+				}else{
+					orientation = Orientation.LEFT;
+					System.out.println("LEFT");
+				} 
+					
+			}
 		}
 }

@@ -4,7 +4,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 
 import java.awt.Graphics;
-
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,6 +24,7 @@ import javax.swing.Timer;
 import org.apache.log4j.Logger;
 
 import schedulingSystem.component.AGVCar;
+import schedulingSystem.component.AGVCar.Orientation;
 import schedulingSystem.component.ConflictDetection;
 import schedulingSystem.component.Dijkstra;
 import schedulingSystem.component.Graph;
@@ -60,6 +61,15 @@ public class SchedulingGui extends JPanel{
 	private int time500ms;
 	private boolean reverseColor;
 	private ConflictDetection conflictDetection;
+	private Image leftImage;
+	private Image rightImage;
+	private Image upImage;
+	private Image downImage;
+	private Image leftImage2;
+	private Image rightImage2;
+	private Image upImage2;
+	private Image downImage2;
+	
 	
 	public static SchedulingGui getInstance(){
 		if(instance == null){
@@ -69,6 +79,15 @@ public class SchedulingGui extends JPanel{
 	}
 	
 	private SchedulingGui(){
+		Toolkit tool = this.getToolkit();
+		leftImage = tool.getImage("leftImage.png");
+		rightImage = tool.getImage("rightImage.png");
+		upImage = tool.getImage("upImage.png");
+		downImage = tool.getImage("downImage.png");
+		leftImage2 = tool.getImage("leftImage2.png");
+		rightImage2 = tool.getImage("rightImage2.png");
+		upImage2 = tool.getImage("upImage2.png");
+		downImage2 = tool.getImage("downImage2.png");
 		myToolKit = new MyToolKit();
 		graph = new Graph();
 		graph = myToolKit.importNewGraph("C:/testGraph.xls");
@@ -135,7 +154,7 @@ public class SchedulingGui extends JPanel{
 							handleReceiveMessage = new HandleReceiveMessage(socket, AGVArray, graph);
 							handleReceiveMessage.setOnRunnableListener(new RunnableListener(){
 								public void getAGVNum(int NOOfAGV){
-									AGVArray.get(NOOfAGV-1).setRunnabel(handleReceiveMessage);
+									//AGVArray.get(NOOfAGV-1).setRunnabel(handleReceiveMessage);
 									System.out.println(NOOfAGV+"ºÅAGV·µ»ØHandleReceiveMessage");
 								}
 							});
@@ -171,10 +190,46 @@ public class SchedulingGui extends JPanel{
 	@Override
 	public void paint(Graphics g){
 		super.paint(g);
-		//super.paintComponents(g);
 		if(firstInit){
 			myToolKit.drawGraph(g, graph, reverseColor);
-			myToolKit.drawAGV(g, AGVArray);
+			
+			for(int i = 0; i < AGVArray.size(); i++){
+				if(AGVArray.get(i).isAlived()){
+					if(AGVArray.get(i).getOrientation() == Orientation.LEFT){
+						System.out.println("zuo");
+						g.drawImage(leftImage,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 40, 34, this);
+					}else if(AGVArray.get(i).getOrientation() == Orientation.RIGTH){
+						System.out.println("you");
+						g.drawImage(rightImage,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 40, 34, this);
+					}else if(AGVArray.get(i).getOrientation() == Orientation.UP){
+						System.out.println("up");
+						g.drawImage(upImage,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 40, 34, this);
+					}else if(AGVArray.get(i).getOrientation() == Orientation.DOWN){
+						System.out.println("down");
+						g.drawImage(downImage,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 40, 34, this);
+					}
+					g.setColor(Color.black);
+					g.setFont(new java.awt.Font("Dialog", 1, 20));
+					g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 5, AGVArray.get(i).getY() + 5);
+				}else{
+					if(AGVArray.get(i).getOrientation() == Orientation.LEFT){
+						System.out.println("zuo");
+						g.drawImage(leftImage2,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 40, 34, this);
+					}else if(AGVArray.get(i).getOrientation() == Orientation.RIGTH){
+						System.out.println("you");
+						g.drawImage(rightImage2,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 40, 34, this);
+					}else if(AGVArray.get(i).getOrientation() == Orientation.UP){
+						System.out.println("up");
+						g.drawImage(upImage2,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 40, 34, this);
+					}else if(AGVArray.get(i).getOrientation() == Orientation.DOWN){
+						System.out.println("down");
+						g.drawImage(downImage2,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 40, 34, this);
+					}
+					g.setColor(Color.BLACK);
+					g.setFont(new java.awt.Font("Dialog", 1, 20));
+					g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 4, AGVArray.get(i).getY() + 8);
+				}
+			}
 		}
 	}
 	
@@ -264,9 +319,13 @@ public class SchedulingGui extends JPanel{
 		}
 	}
 	
-	public void sendingWhichAGV(int endNodeNum){
+	public void sendingWhichAGV(int endNodeNum){/*
+		Path path = dijkstra.findRoute(AGVArray.get(0).getStartNode().num, endNodeNum);
+		System.out.println("result:"+path.getRoute());
+		AGVArray.get(0).getRunnable().SendMessage(myToolKit.routeToOrientation(graph, path.getRoute(), AGVArray.get(0)));*/
+		
 		ArrayList<Path> pathArray = new ArrayList<Path>();
-		for(int i = 0; i < AGVArray.size(); i++){
+		for(int i = 0; i < 9; i++){
 			if(AGVArray.get(i).getStartNode().num!=0 && AGVArray.get(i).isAlived()){
 				pathArray.add(dijkstra.findRoute(AGVArray.get(i).getStartNode().num, endNodeNum));
 				pathArray.get(pathArray.size()-1).setNumOfAGV(i);;

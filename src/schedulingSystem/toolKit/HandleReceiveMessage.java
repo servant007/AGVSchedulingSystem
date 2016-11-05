@@ -36,7 +36,7 @@ public class HandleReceiveMessage implements Runnable{
 		try{
 			inputStream = socket.getInputStream();
 			outputStream = socket.getOutputStream();
-			outputStream.write(myToolKit.HexString2Bytes("AAC0FFEEBB"));
+			//outputStream.write(myToolKit.HexString2Bytes("AAC0FFEEBB"));
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error(e);
@@ -65,10 +65,12 @@ public class HandleReceiveMessage implements Runnable{
 						byte[] buff = new byte[5];
 						inputStream.read(buff);
 						String message = myToolKit.printHexString(buff);
+						System.out.println(message);
 						if(message.startsWith("AA")&&message.endsWith("BB")){
 							noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
 							if(!oldRunnable){
-								listener.getAGVNum(noOfAGV);//返回Runnable与哪个AGV通讯
+								//listener.getAGVNum(noOfAGV);//返回Runnable与哪个AGV通讯
+								AGVArray.get(noOfAGV-1).setRunnabel(this);
 								oldRunnable = true;
 							}
 								
@@ -88,7 +90,7 @@ public class HandleReceiveMessage implements Runnable{
 								}
 							}else{
 								AGVArray.get(noOfAGV-1).setLastCommunicationTime(System.currentTimeMillis());
-								outputStream.write(myToolKit.HexString2Bytes("AAC0FFEEBB"));
+								//outputStream.write(myToolKit.HexString2Bytes("AAC0FFEEBB"));
 							}
 						}					
 					}else {

@@ -57,7 +57,7 @@ public class MyToolKit {
 				hex = '0' + hex; 
 			} 
 			buff+=hex.toUpperCase();
-			System.out.print(hex.toUpperCase());
+			//System.out.print(hex.toUpperCase());
 		} 
 		System.out.println();
 		return buff;
@@ -150,23 +150,7 @@ public class MyToolKit {
 		}
 	}
 	
-	public void drawAGV(Graphics g, ArrayList<AGVCar> AGVArray){
-		for(int i = 0; i < AGVArray.size(); i++){
-			if(AGVArray.get(i).isAlived()){
-				g.setColor(Color.green);
-				g.fillOval(AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 34, 34);
-				g.setColor(Color.black);
-				g.setFont(new java.awt.Font("Dialog", 1, 20));
-				g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 5, AGVArray.get(i).getY() + 5);
-			}else{
-				g.setColor(Color.red);
-				g.fillOval(AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 17, 34, 34);
-				g.setColor(Color.BLACK);
-				g.setFont(new java.awt.Font("Dialog", 1, 20));
-				g.drawString(String.valueOf(i), AGVArray.get(i).getX() - 4, AGVArray.get(i).getY() + 8);
-			}
-		}
-	}
+	
 	
 	public Graph importNewGraph(String fileName){
 		Graph graph = new Graph();
