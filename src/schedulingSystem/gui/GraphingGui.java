@@ -133,18 +133,20 @@ public class GraphingGui extends JPanel{
 									if(buttonState && realDis.length() > 0
 											&& strCard.length() > 0  && endCard.length() > 0){
 										//弹出对话框判断是否添加
-										if(tempStrNode.questIsNewNode()){
+										if(tempStrNode.questIsNewNode())
 											graph.addNode(tempStrNode);
+										
+										if(twoWay){
 											graph.addEdge(tempStrNode.num, node.num, Integer.parseInt(realDis)
 													,Integer.parseInt(strCard), Integer.parseInt(endCard), twoWay);
-											initNode();
-											repaint();
+											graph.addEdge(node.num, tempStrNode.num, Integer.parseInt(realDis)
+													, Integer.parseInt(endCard),Integer.parseInt(strCard), twoWay);
 										}else{
 											graph.addEdge(tempStrNode.num, node.num, Integer.parseInt(realDis)
 													,Integer.parseInt(strCard), Integer.parseInt(endCard), twoWay);
-											initNode();
-											repaint();
 										}
+										initNode();
+										repaint();
 										
 									}else{
 										initNode();
@@ -212,19 +214,20 @@ public class GraphingGui extends JPanel{
 										if(tempStrNode.questIsNewNode()){
 											graph.addNode(tempStrNode);
 											graph.addNode(tempEndNode);
-											//System.out.println("tempStrNode"+tempStrNode.x+tempStrNode.y);
-											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis)
-													,Integer.parseInt(strCard), Integer.parseInt(endCard),twoWay);
-											initNode();
-											repaint();
 										}else{
 											graph.addNode(tempEndNode);
-											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis)
-													,Integer.parseInt(strCard), Integer.parseInt(endCard), twoWay);
-											initNode();
-											repaint();
 										}
-										
+										if(twoWay){
+											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis)
+													,Integer.parseInt(strCard), Integer.parseInt(endCard),twoWay);
+											graph.addEdge(tempEndNode.num, tempStrNode.num, Integer.parseInt(realDis)
+													,Integer.parseInt(strCard), Integer.parseInt(endCard),twoWay);
+										}else{
+											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis)
+													,Integer.parseInt(strCard), Integer.parseInt(endCard),twoWay);
+										}										
+										initNode();
+										repaint();
 									}else{
 										initNode();
 										repaint();

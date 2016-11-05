@@ -9,9 +9,10 @@ public class Graph {
 	private ArrayList<FunctionNode> unloadingNodeArray;
 	private ArrayList<FunctionNode> emptyCarNodeArray;
 	private ArrayList<FunctionNode> tagArray;
-	private Edge lastReturnEdge;
-	private boolean stopNode;
 	private ArrayList<Integer> ignoreCard;
+	private int cardQuantity;
+	private int stopCard = 50;
+	private int executeCard = 61;
 	
 	public Graph(){
 		nodeArray = new ArrayList<Node>();
@@ -20,45 +21,42 @@ public class Graph {
 		unloadingNodeArray = new ArrayList<FunctionNode>();
 		emptyCarNodeArray = new ArrayList<FunctionNode>();
 		tagArray = new ArrayList<FunctionNode>();
-		lastReturnEdge = new Edge(new Node(0,0,0), new Node(0,0,0));
-	}
-	
-	public void addEdge(int strNodeNum, int endNodeNum, int dis, int strCardNum, int endCardNum, boolean twoWay){
-		for(int i = 0; i < nodeArray.size(); i++){
-			if(nodeArray.get(i).num == strNodeNum)
-				strNodeNum = i;
-		}
-		for(int i = 0; i < nodeArray.size(); i++){
-			if(nodeArray.get(i).num == endNodeNum)
-				endNodeNum = i;
-		}
-		
-		edgeArray.add(new Edge(nodeArray.get(strNodeNum), nodeArray.get(endNodeNum)
-				, dis, strCardNum, endCardNum, twoWay));
-	} 
-	
-	public void addNode(Node node){
-		nodeArray.add(new Node(node.x, node.y, node.num));
-	}
-	
-	public void addImportNode(int x , int y, int num){
-		nodeArray.add(new Node(x, y, num));
-	}
 
-	public Edge getEdge(int num){
-		return edgeArray.get(num);
 	}
 	
-	public int getEdgeSize(){
-		return edgeArray.size();
+	public void initIgnoreCard(){
+		boolean firstLoop = true;
+		int cardCount = 0;
+		ArrayList<Integer> noForkNode = new ArrayList<Integer>();
+		for(int i = 0; i < this.getNodeSize(); i++){
+			int count = 0;
+			for(int j = 0; j < this.getEdgeSize(); j++ ){
+				if(this.getNode(i).num == this.getEdge(j).endNode.num || this.getNode(i).num == this.getEdge(j).startNode.num){
+					count++;
+				}
+				if(firstLoop)
+					if(this.getEdge(j).twoWay)
+						cardCount++;
+			}
+			firstLoop = false;
+			if(count == 2)
+				noForkNode.add(i+1);
+		}
+		this.cardQuantity = 2*this.getEdgeSize() - cardCount;
+		System.out.println("cardQuantity"+cardQuantity);
+		ignoreCard = new ArrayList<Integer>();
+		for(int i = 0; i < noForkNode.size(); i++){
+			//System.out.println("noForkNode:"+noForkNode.get(i));
+			for(int j = 0; j < this.getEdgeSize(); j++){
+				if(noForkNode.get(i) == this.getEdge(j).endNode.num){
+					ignoreCard.add(this.getEdge(j).endCardNum);
+				}
+			}
+		}	
 	}
 	
-	public Node getNode(int num){
-		return nodeArray.get(num);
-	}
-	
-	public int getNodeSize(){
-		return nodeArray.size();		
+	public ArrayList<Integer> getIgnoreCard(){
+		return this.ignoreCard;
 	}
 	
 	public Node searchNode( int x, int y){
@@ -101,35 +99,10 @@ public class Graph {
 		return nodeArray;
 	}
 	
-	public Edge searchCard(int cardNum){
-		if(cardNum == 50)
-			stopNode = true;
-		Edge returnEdge = null;
-		for(Edge edge : edgeArray){
-			if(edge.strCardNum == cardNum){
-				returnEdge = edge;
-			}else if(edge.endCardNum == cardNum && edge.twoWay){
-				returnEdge = new Edge(edge.endNode, edge.startNode, edge.realDis, edge.strCardNum, edge.endCardNum, true);
-			}
-		}
-		
-		if(returnEdge != null){
-			//避免双向路径时自动返回
-			if(lastReturnEdge.startNode.num == returnEdge.startNode.num && lastReturnEdge.endNode.num == returnEdge.endNode.num
-					|| lastReturnEdge.startNode.num == returnEdge.endNode.num && lastReturnEdge.endNode.num == returnEdge.startNode.num){
-				if(!stopNode){
-					returnEdge = null;
-				}else{
-					stopNode = false;
-				}
-			}
-			if(returnEdge != null)
-				lastReturnEdge = returnEdge;
-		}else{
-		}
-		return returnEdge;
+	public ArrayList<Edge> getEdgeArray(){
+		return edgeArray;
 	}
-	
+
 	public void addShipmentNode(int nodeNum, int card, int comNum){
 		shipmentNodeArray.add(new FunctionNode(nodeNum,card, comNum));
 	}
@@ -162,31 +135,54 @@ public class Graph {
 		return tagArray;
 	}
 	
-	public void initIgnoreCard(){
-		//去除无需指令点
-		ArrayList<Integer> noForkNode = new ArrayList<Integer>();
-		for(int i = 0; i < this.getNodeSize(); i++){
-			int count = 0;
-			for(int j = 0; j < this.getNodeSize(); j++ ){
-				if(this.getNode(i).num == this.getEdge(j).endNode.num || this.getNode(i).num == this.getEdge(j).startNode.num){
-					count++;
-				}
-			}
-			if(count == 2)
-				noForkNode.add(i+1);
+	public void addEdge(int strNodeNum, int endNodeNum, int dis, int strCardNum, int endCardNum, boolean twoWay){
+		for(int i = 0; i < nodeArray.size(); i++){
+			if(nodeArray.get(i).num == strNodeNum)
+				strNodeNum = i;
 		}
-		ignoreCard = new ArrayList<Integer>();
-		for(int i = 0; i < noForkNode.size(); i++){
-			//System.out.println("noForkNode:"+noForkNode.get(i));
-			for(int j = 0; j < this.getEdgeSize(); j++){
-				if(noForkNode.get(i) == this.getEdge(j).endNode.num){
-					ignoreCard.add(this.getEdge(j).endCardNum);
-				}
-			}
-		}				
+		for(int i = 0; i < nodeArray.size(); i++){
+			if(nodeArray.get(i).num == endNodeNum)
+				endNodeNum = i;
+		}
+		
+		edgeArray.add(new Edge(nodeArray.get(strNodeNum), nodeArray.get(endNodeNum)
+				, dis, strCardNum, endCardNum, twoWay));
+	} 
+	
+	public void addNode(Node node){
+		nodeArray.add(new Node(node.x, node.y, node.num));
 	}
 	
-	public ArrayList<Integer> getIgnoreCard(){
-		return this.ignoreCard;
+	public void addImportNode(int x , int y, int num){
+		nodeArray.add(new Node(x, y, num));
 	}
+
+	public Edge getEdge(int num){
+		return edgeArray.get(num);
+	}
+	
+	public int getEdgeSize(){
+		return edgeArray.size();
+	}
+	
+	public Node getNode(int num){
+		return nodeArray.get(num);
+	}
+	
+	public int getNodeSize(){
+		return nodeArray.size();		
+	}
+	
+	public int getCardQuantity(){
+		return cardQuantity;
+	}
+	
+	public int getStopCard(){
+		return stopCard;
+	}
+	
+	public int getExecuteCard(){
+		return executeCard;
+	}
+	
 }

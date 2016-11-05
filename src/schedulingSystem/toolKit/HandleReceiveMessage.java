@@ -79,12 +79,10 @@ public class HandleReceiveMessage implements Runnable{
 								int NOOfCard = Integer.parseInt(message.substring(4, 6), 16);
 								
 								if(NOOfCard != lastCard){
+									System.out.println("receive card number:"+NOOfCard);
 									AGVArray.get(noOfAGV-1).setLastCard(NOOfCard);
-									System.out.println("noofcarnum:"+NOOfCard);
+									AGVArray.get(noOfAGV-1).setOnEdge(NOOfCard);
 									int electricity = Integer.parseInt(message.substring(6, 8), 16);
-									Edge edge = null;
-									if((edge = graph.searchCard(NOOfCard)) != null)
-										AGVArray.get(noOfAGV-1).setOnEdge(edge);
 									AGVArray.get(noOfAGV-1).setElectricity(electricity);
 									lastCard = NOOfCard;
 								}

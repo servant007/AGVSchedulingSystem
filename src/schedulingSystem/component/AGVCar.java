@@ -8,6 +8,7 @@ public class AGVCar{
 		private int y = -15;
 		private Edge edge;
 		private int lastCard;
+		private int lastLaterCard;
 		public enum Orientation{LEFT,RIGTH,UP,DOWN}
 		private Orientation orientation;//true右，false左
 		private Graph graph;
@@ -16,7 +17,8 @@ public class AGVCar{
 		private long lastCommunicationTime;
 		private HandleReceiveMessage handleReceiveMessage;
 		private ConflictDetection conflictDetection;
-		
+		private boolean lock = true;
+		public AGVCar(){}
 		public AGVCar(int number, Graph graph, ConflictDetection conflictDetection){
 			this.number = number;
 			this.graph = graph;
@@ -24,19 +26,7 @@ public class AGVCar{
 			finishEdge = true;
 			edge = new Edge(new Node(0,0),new Node(0,0));
 		}
-		
-		public int getNumber(){
-			return number;
-		}
-		
-		public int getX(){
-			return x;
-		}
-		
-		public int getY(){
-			return y;
-		}
-		
+
 		public void stepForward(){
 			if(!finishEdge){
 				if(edge.startNode.x == edge.endNode.x){
@@ -69,41 +59,45 @@ public class AGVCar{
 			}
 		} 
 		
-		public void setOnEdge(Edge edge){
-			finishEdge = false;
-			this.edge = edge;//new Edge( edge.startNode, edge.endNode,edge.realDis, edge.strCardNum, edge.endCardNum, edge.twoWay);
-			x = edge.startNode.x;
-			y = edge.startNode.y;
-			judgeOrientation();
-			//if(edge.twoWay)
-				//this.orientation = !this.orientation;
-		}
-		
-		public void setElectricity(int electricity){
-			this.electricity = electricity;
-		}
-		
-		public int getElectricity(){
-			return electricity;
-		}
-		
-		public void setLastCommunicationTime(long time){
-			lastCommunicationTime = time;
-		}
-		
-		public long getLastCommunitionTime(){
-			return lastCommunicationTime;
-		}
-		
-		public boolean isAlived(){
-			if(System.currentTimeMillis() - lastCommunicationTime < 100000)
-				return true;
-			else 
-				return false;
+		public void setOnEdge(int cardNum){
+			Edge returnEdge = null;
+			boolean foundStr = false;
+			boolean foundEnd = false;
+			for(Edge edge : graph.getEdgeArray()){
+				if(edge.strCardNum == cardNum){
+					returnEdge = edge;
+					foundStr = true;
+				}else if(edge.endCardNum == cardNum){
+					foundEnd = true;
+				}
+			}
+			if(lock){
+				if(foundEnd){
+					lock = false;
+				}else if(foundStr){
+					this.edge = returnEdge;
+					lock = true;
+				}
+			}else{
+				if(foundStr){
+					this.edge = returnEdge;
+					lock = true;
+				}else if(foundEnd){
+					lock = false;
+				}
+			}
+
+			if((returnEdge != null)&&(lock)){
+				finishEdge = false;
+				x = edge.startNode.x;
+				y = edge.startNode.y;
+				judgeOrientation();
+			}
 		}
 		
 		public Node getStartNode(){
-			if(edge.twoWay){
+			//如果最后一张卡是停止卡，
+			if(lastCard == graph.getStopCard()){
 				edge.endNode.functionNode = true;
 				return edge.endNode;
 			}else{
@@ -111,14 +105,25 @@ public class AGVCar{
 			}
 		}
 		
-		public void setRunnabel(HandleReceiveMessage handleReceiveMessage){
-			this.handleReceiveMessage = handleReceiveMessage;
-		}
-		
-		public HandleReceiveMessage getRunnable(){
-			return handleReceiveMessage;
-		}
-		
+		public void judgeOrientation(){
+			if(!(lastLaterCard == graph.getStopCard())){//
+				if(edge.startNode.x == edge.endNode.x){
+					if(edge.startNode.y < edge.endNode.y){
+						orientation = Orientation.DOWN;
+					}else{
+						orientation = Orientation.UP;
+					} 	
+				}else if(edge.startNode.y == edge.endNode.y){
+					if(edge.startNode.x < edge.endNode.x){
+						orientation = Orientation.RIGTH;
+					}else{
+						orientation = Orientation.LEFT;
+					} 
+						
+				}
+			}
+		}		
+	
 		public void setLastCard(int cardNum){
 			
 			//如果是停止卡则取消闪烁
@@ -158,8 +163,7 @@ public class AGVCar{
 					conflictDetection.removeOccupy(this, graph.getEdge(i).endNode.num);
 				}
 			}
-			
-			
+			this.lastLaterCard = this.lastCard;
 			this.lastCard = cardNum;
 		}
 		
@@ -171,24 +175,47 @@ public class AGVCar{
 			return orientation;
 		}
 		
-		public void judgeOrientation(){
-			if(edge.startNode.x == edge.endNode.x){
-				if(edge.startNode.y < edge.endNode.y){
-					orientation = Orientation.DOWN;
-					System.out.println("DOWN");
-				}else{
-					orientation = Orientation.UP;
-					System.out.println("UP");
-				} 	
-			}else if(edge.startNode.y == edge.endNode.y){
-				if(edge.startNode.x < edge.endNode.x){
-					orientation = Orientation.RIGTH;
-					System.out.println("RIGTH");
-				}else{
-					orientation = Orientation.LEFT;
-					System.out.println("LEFT");
-				} 
-					
-			}
+
+		public void setElectricity(int electricity){
+			this.electricity = electricity;
+		}
+		
+		public int getElectricity(){
+			return electricity;
+		}
+		
+		public void setLastCommunicationTime(long time){
+			lastCommunicationTime = time;
+		}
+		
+		public long getLastCommunitionTime(){
+			return lastCommunicationTime;
+		}
+		
+		public boolean isAlived(){
+			if(System.currentTimeMillis() - lastCommunicationTime < 100000)
+				return true;
+			else 
+				return false;
+		}
+		
+		public void setRunnabel(HandleReceiveMessage handleReceiveMessage){
+			this.handleReceiveMessage = handleReceiveMessage;
+		}
+		
+		public HandleReceiveMessage getRunnable(){
+			return handleReceiveMessage;
+		}
+
+		public int getNumber(){
+			return number;
+		}
+		
+		public int getX(){
+			return x;
+		}
+		
+		public int getY(){
+			return y;
 		}
 }

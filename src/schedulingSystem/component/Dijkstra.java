@@ -19,12 +19,13 @@ public class Dijkstra {
 			}
 		}
 		for(int i = 0; i < graph.getEdgeSize(); i++){
-			if(graph.getEdge(i).twoWay){
-				graphArray[graph.getEdge(i).startNode.num-1][graph.getEdge(i).endNode.num-1]=graph.getEdge(i).realDis;
-				graphArray[graph.getEdge(i).endNode.num-1][graph.getEdge(i).startNode.num-1]=graph.getEdge(i).realDis;
-			}else{
-				graphArray[graph.getEdge(i).startNode.num-1][graph.getEdge(i).endNode.num-1]=graph.getEdge(i).realDis;
-			}
+			graphArray[graph.getEdge(i).startNode.num-1][graph.getEdge(i).endNode.num-1]=graph.getEdge(i).realDis;
+			//if(graph.getEdge(i).twoWay){
+			//	graphArray[graph.getEdge(i).startNode.num-1][graph.getEdge(i).endNode.num-1]=graph.getEdge(i).realDis;
+				//graphArray[graph.getEdge(i).endNode.num-1][graph.getEdge(i).startNode.num-1]=graph.getEdge(i).realDis;
+			//}else{
+				//graphArray[graph.getEdge(i).startNode.num-1][graph.getEdge(i).endNode.num-1]=graph.getEdge(i).realDis;
+			//}
 		}	
 	}//end init
 	
@@ -37,8 +38,7 @@ public class Dijkstra {
 		for(int i = 0; i < size; i++){//³õÊ¼»¯
 			uArray.add(new Path(startNode, i + 1));
 			for(int j = 0; j < graph.getEdgeSize(); j++){
-				if((graph.getEdge(j).startNode.num == startNode && graph.getEdge(j).endNode.num == (i+1)) 
-						|| (graph.getEdge(j).endNode.num == startNode && graph.getEdge(j).startNode.num == (i+1) && graph.getEdge(j).twoWay)){
+				if((graph.getEdge(j).startNode.num == startNode && graph.getEdge(j).endNode.num == (i+1))){//|| (graph.getEdge(j).endNode.num == startNode && graph.getEdge(j).startNode.num == (i+1) && graph.getEdge(j).twoWay)
 					uArray.get(i).setRealDis(graph.getEdge(j).realDis);
 					uArray.get(i).addRouteNode(i+1);
 					adjoin = true;
@@ -71,8 +71,7 @@ public class Dijkstra {
 			int tempStart = sArray.get(sArray.size()-1).getEndNode();
 			for(int i = 0; i < size; i++){
 				for(int j = 0; j < graph.getEdgeSize(); j++){
-					if((graph.getEdge(j).startNode.num == tempStart && graph.getEdge(j).endNode.num == (i+1)) 
-							|| (graph.getEdge(j).endNode.num == tempStart && graph.getEdge(j).startNode.num == (i+1) && graph.getEdge(j).twoWay)){
+					if((graph.getEdge(j).startNode.num == tempStart && graph.getEdge(j).endNode.num == (i+1))){//|| (graph.getEdge(j).endNode.num == tempStart && graph.getEdge(j).startNode.num == (i+1) && graph.getEdge(j).twoWay)
 						if(graph.getEdge(j).realDis + sArray.get(sArray.size() - 1).getRealDis() < uArray.get(i).getRealDis()){
 							uArray.get(i).setRealDis(graph.getEdge(j).realDis + sArray.get(sArray.size() - 1).getRealDis());
 							uArray.get(i).newRoute(sArray.get(sArray.size()-1).getRoute());
