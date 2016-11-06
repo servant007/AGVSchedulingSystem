@@ -8,6 +8,7 @@ public class Graph {
 	private ArrayList<FunctionNode> shipmentNodeArray;
 	private ArrayList<FunctionNode> unloadingNodeArray;
 	private ArrayList<FunctionNode> emptyCarNodeArray;
+	private ArrayList<FunctionNode> chargeNodeArray;
 	private ArrayList<FunctionNode> tagArray;
 	private ArrayList<Integer> ignoreCard;
 	private int cardQuantity;
@@ -20,6 +21,7 @@ public class Graph {
 		shipmentNodeArray = new ArrayList<FunctionNode>();
 		unloadingNodeArray = new ArrayList<FunctionNode>();
 		emptyCarNodeArray = new ArrayList<FunctionNode>();
+		chargeNodeArray = new ArrayList<FunctionNode>();
 		tagArray = new ArrayList<FunctionNode>();
 
 	}
@@ -43,7 +45,6 @@ public class Graph {
 				noForkNode.add(i+1);
 		}
 		this.cardQuantity = 2*this.getEdgeSize() - cardCount;
-		System.out.println("cardQuantity"+cardQuantity);
 		ignoreCard = new ArrayList<Integer>();
 		for(int i = 0; i < noForkNode.size(); i++){
 			//System.out.println("noForkNode:"+noForkNode.get(i));
@@ -103,16 +104,24 @@ public class Graph {
 		return edgeArray;
 	}
 
-	public void addShipmentNode(int nodeNum, int card, int comNum){
-		shipmentNodeArray.add(new FunctionNode(nodeNum,card, comNum));
+	public void addShipmentNode(int nodeNum, int card, int comNum, String tag){
+		shipmentNodeArray.add(new FunctionNode(nodeNum,card, comNum, tag));
+		nodeArray.get(nodeNum-1).tag = tag;
 	}
 	
-	public void addUnloadingNode(int nodeNum, int card, int comNum){
-		unloadingNodeArray.add(new FunctionNode(nodeNum, card, comNum));
+	public void addUnloadingNode(int nodeNum, int card, int comNum, String tag){
+		unloadingNodeArray.add(new FunctionNode(nodeNum, card, comNum, tag));
+		nodeArray.get(nodeNum-1).tag = tag;
 	}
 	
-	public void addEmptyCarNode(int nodeNum, int card, int comNum){
-		emptyCarNodeArray.add(new FunctionNode(nodeNum, card,comNum));
+	public void addChargeNode(int nodeNum, int card, int comNum, String tag){
+		chargeNodeArray.add(new FunctionNode(nodeNum, card,comNum, tag));
+		nodeArray.get(nodeNum-1).tag = tag;
+	}
+	
+	public void addEmptyCarNode(int nodeNum, int card, int comNum, String tag){
+		emptyCarNodeArray.add(new FunctionNode(nodeNum, card,comNum, tag));
+		nodeArray.get(nodeNum-1).tag = tag;
 	}
 	
 	public void addTagArray(int x , int y, String tag){
@@ -125,6 +134,10 @@ public class Graph {
 	
 	public ArrayList<FunctionNode> getUnloadingNode(){
 		return unloadingNodeArray;
+	}
+	
+	public ArrayList<FunctionNode> getChargeNode(){
+		return chargeNodeArray;
 	}
 	
 	public ArrayList<FunctionNode> getEmptyCarNode(){

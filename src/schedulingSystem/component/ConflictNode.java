@@ -15,8 +15,8 @@ public class ConflictNode {
 	
 	public void removeAGV(AGVCar agvCar){
 		for(int i = 0; i < waitQueue.size(); i++){
-			if(waitQueue.get(i).getNumber() == agvCar.getNumber())
-				waitQueue.remove(i);
+			//if(waitQueue.get(i).getNumber() == agvCar.getNumber())
+				//waitQueue.remove(i);
 				//System.out.println(agvCar.getNumber() + "号解除占用" + this.number+ "点");
 		}
 		if(waitQueue.size() == 0){

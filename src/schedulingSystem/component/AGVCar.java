@@ -3,14 +3,14 @@ package schedulingSystem.component;
 import schedulingSystem.toolKit.HandleReceiveMessage;
 
 public class AGVCar{
-		private int number;
+		private int AGVNum;
 		private int x = -15;
 		private int y = -15;
 		private Edge edge;
 		private int lastCard;
 		private int lastLaterCard;
 		public enum Orientation{LEFT,RIGTH,UP,DOWN}
-		private Orientation orientation;//true右，false左
+		private Orientation orientation;
 		private Graph graph;
 		private int electricity;
 		private boolean finishEdge;
@@ -18,9 +18,16 @@ public class AGVCar{
 		private HandleReceiveMessage handleReceiveMessage;
 		private ConflictDetection conflictDetection;
 		private boolean lock = true;
+		private int destinationCard;
+		private boolean isOnMission;
+		private String missionString;
+		//private int 
+		
+		
 		public AGVCar(){}
-		public AGVCar(int number, Graph graph, ConflictDetection conflictDetection){
-			this.number = number;
+		
+		public AGVCar(int AGVNum, Graph graph, ConflictDetection conflictDetection){
+			this.AGVNum = AGVNum;
 			this.graph = graph;
 			this.conflictDetection = conflictDetection;
 			finishEdge = true;
@@ -156,13 +163,16 @@ public class AGVCar{
 					conflictDetection.checkConflict(this, graph.getEdge(i).endNode.num, 0);//根据route
 				}
 				if(cardNum == graph.getEdge(i).strCardNum){//解除占用
-					//System.out.println("读到"+cardNum+"号卡"+"解除" + this.number + "号对" + graph.getEdge(i).startNode.num +"的占用");
+					//System.out.println("读到"+cardNum+"号卡"+"解除" + this.AGVNum + "号对" + graph.getEdge(i).startNode.num +"的占用");
 					conflictDetection.removeOccupy(this, graph.getEdge(i).startNode.num);
 				}else if(cardNum == graph.getEdge(i).endCardNum){
-					//System.out.println("读到"+cardNum+"号卡"+"解除" + this.number + "号对" + graph.getEdge(i).endNode.num + "的占用");
+					//System.out.println("读到"+cardNum+"号卡"+"解除" + this.AGVNum + "号对" + graph.getEdge(i).endNode.num + "的占用");
 					conflictDetection.removeOccupy(this, graph.getEdge(i).endNode.num);
 				}
 			}
+			
+			if(cardNum == this.destinationCard)
+				this.isOnMission = false;
 			this.lastLaterCard = this.lastCard;
 			this.lastCard = cardNum;
 		}
@@ -207,8 +217,8 @@ public class AGVCar{
 			return handleReceiveMessage;
 		}
 
-		public int getNumber(){
-			return number;
+		public int getAGVNum(){
+			return AGVNum;
 		}
 		
 		public int getX(){
@@ -217,5 +227,23 @@ public class AGVCar{
 		
 		public int getY(){
 			return y;
+		}
+		
+		public void setDestinationNode(int nodeNum){
+			this.missionString = graph.getNode(nodeNum).tag;
+			this.isOnMission = true;
+			for(int i = 0 ; i < graph.getEdgeSize(); i++){
+				if(nodeNum == graph.getEdge(i).endNode.num){
+					this.destinationCard = graph.getEdge(i).endCardNum;
+				}
+			}
+		}
+		
+		public boolean isOnMission(){
+			return this.isOnMission;
+		}
+		
+		public String getMissionString(){
+			return missionString;
 		}
 }

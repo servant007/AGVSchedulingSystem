@@ -5,6 +5,7 @@ public class Node {
 	public int y;
 	public boolean newNode = true;
 	public boolean functionNode = false;
+	public String tag;
 	public int orientation; 
 	public Node(){}
 	

@@ -175,7 +175,7 @@ public class MyToolKit {
 				InputStream is = new FileInputStream(file.getPath());
 				Workbook wb = Workbook.getWorkbook(is);
 				
-				Sheet sheetNodes = wb.getSheet(0);
+				Sheet sheetNodes = wb.getSheet("nodes");
 				for(int i = 0; i < sheetNodes.getRows(); i++){
 					int x=0, y=0, num=0;
 					for(int j = 0; j < 3; j++){
@@ -192,7 +192,7 @@ public class MyToolKit {
 					graph.addImportNode(x, y, num);
 				}
 				
-				Sheet sheetEdges = wb.getSheet(1);
+				Sheet sheetEdges = wb.getSheet("edges");
 				for(int i = 0; i < sheetEdges.getRows(); i++){
 					int start=0, end=0, dis=0, strCardNum=0, endCardNum=0, twoWay = 0;
 					for(int j = 0; j < 6; j++){
@@ -218,12 +218,11 @@ public class MyToolKit {
 						graph.addEdge(start, end, dis, strCardNum, endCardNum, false);
 				}
 				
-				
-				
-				Sheet sheetShipment = wb.getSheet(2);
+				Sheet sheetShipment = wb.getSheet("shipment");
 				for(int i = 0; i < sheetShipment.getRows(); i++){
 					int node=0, com=0, card=0;
-					for(int j = 0; j < 3; j++){
+					String tag = "";
+					for(int j = 0; j < 4; j++){
 						Cell cell0 = sheetShipment.getCell(j,i);
 							String str = cell0.getContents();
 							if(j == 0)
@@ -232,17 +231,20 @@ public class MyToolKit {
 								com = Integer.parseInt(str);
 							if(j == 2)
 								card = Integer.parseInt(str);
+							if(j == 3)
+								tag = str;
 							//System.out.println("sheetShipment:"+str);					
 					}
-					graph.addShipmentNode(node, com, card);
+					graph.addShipmentNode(node, com, card, tag);
 				}
 				
 				
 				
-				Sheet sheetUnloading = wb.getSheet(3);
+				Sheet sheetUnloading = wb.getSheet("unloading");
 				for(int i = 0; i < sheetUnloading.getRows(); i++){
 					int node=0, com=0, card=0;
-					for(int j = 0; j < 3; j++){
+					String tag = "";
+					for(int j = 0; j < 4; j++){
 						Cell cell0 = sheetUnloading.getCell(j,i);
 							String str = cell0.getContents();
 							if(j == 0)
@@ -251,15 +253,19 @@ public class MyToolKit {
 								com = Integer.parseInt(str);
 							if(j == 2)
 								card = Integer.parseInt(str);
+							if( j == 3)
+								tag = str;
+							
 							//System.out.println("unloading:"+str);					
 					}
-					graph.addUnloadingNode(node, com, card);
+					graph.addUnloadingNode(node, com, card, tag);
 				}
 				
 				
-				Sheet sheetEmptyCar = wb.getSheet(4);
+				Sheet sheetEmptyCar = wb.getSheet("emptyCar");
 				for(int i = 0; i < sheetEmptyCar.getRows(); i++){
 					int node=0, com=0, card=0;
+					String tag = "";
 					for(int j = 0; j < 3; j++){
 						Cell cell0 = sheetEmptyCar.getCell(j,i);
 							String str = cell0.getContents();
@@ -268,13 +274,33 @@ public class MyToolKit {
 							if(j == 1)
 								com = Integer.parseInt(str);
 							if(j == 2)
-								card = Integer.parseInt(str);
-							//System.out.println("emptyCar:"+str);					
+								card = Integer.parseInt(str);	
+							if(j == 3)
+								tag = str;
 					}
-					graph.addEmptyCarNode(node, com, card);
+					graph.addEmptyCarNode(node, com, card, tag);
 				}
 				
-				Sheet sheetTag = wb.getSheet(5);
+				Sheet sheetCharge = wb.getSheet("charge");
+				for(int i = 0; i < sheetCharge.getRows(); i++){
+					int node=0, com=0, card=0;
+					String tag = "";
+					for(int j = 0; j < 3; j++){
+						Cell cell0 = sheetCharge.getCell(j,i);
+							String str = cell0.getContents();
+							if(j == 0)
+								node = Integer.parseInt(str);
+							if(j == 1)
+								com = Integer.parseInt(str);
+							if(j == 2)
+								card = Integer.parseInt(str);	
+							if(j == 3)
+								tag = str;
+					}
+					graph.addChargeNode(node, com, card, tag);
+				}
+				
+				Sheet sheetTag = wb.getSheet("tag");
 				for(int i = 0; i < sheetTag.getRows(); i++){
 					int x=0, y=0;
 					String tag = "";
@@ -286,8 +312,7 @@ public class MyToolKit {
 							if(j == 1)
 								y = Integer.parseInt(str);
 							if(j == 2)
-								tag = str;
-							//System.out.println("tag:"+str);					
+								tag = str;			
 					}
 					graph.addTagArray(x, y, tag);
 				}
@@ -482,7 +507,7 @@ public class MyToolKit {
 				}
 			}
 		}		
-		
+		//开胜项目才要忽略无需命令点，毕业项目不能忽略
 		for(int i = 0; i < graph.getIgnoreCard().size(); i++){
 			sendMessage.replace(2*(graph.getIgnoreCard().get(i) + 2) - 1, 2*(graph.getIgnoreCard().get(i) + 2), "0");
 		}

@@ -7,10 +7,11 @@ public class FunctionNode {
 	public Node position;
 	public String tag;
 	public boolean clicked;
-	public FunctionNode(int nodeNum, int cardNum, int communicationNum){
+	public FunctionNode(int nodeNum, int cardNum, int communicationNum, String tag){
 		this.nodeNum = nodeNum;
 		this.cardNum = cardNum;
 		this.communicationNum = communicationNum;
+		this.tag = tag;
 	}
 	
 	public FunctionNode(Node position, String tag){

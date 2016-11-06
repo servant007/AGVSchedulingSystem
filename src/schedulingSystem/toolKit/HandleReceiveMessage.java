@@ -21,16 +21,13 @@ public class HandleReceiveMessage implements Runnable{
 	private long reciveDelayTime = 100000;
 	private MyToolKit myToolKit;
 	private ArrayList<AGVCar> AGVArray;
-	private Graph graph;
 	private int noOfAGV;
 	private int lastCard;
-	private RunnableListener listener;
 	private boolean oldRunnable;
 	
 	public HandleReceiveMessage(Socket socket, ArrayList<AGVCar> AGVArray, Graph graph){
 		myToolKit = new MyToolKit();
 		this.AGVArray = AGVArray;
-		this.graph = graph;
 		System.out.println("socket connect:"+socket.toString());
 		this.socket = socket;
 		try{
@@ -113,10 +110,5 @@ public class HandleReceiveMessage implements Runnable{
 				break;//ÍË³öwhileÑ­»·
 			}				
 		}//while
-	}
-	
-	
-	public void setOnRunnableListener(RunnableListener listener){
-		this.listener = listener;
 	}
 }
