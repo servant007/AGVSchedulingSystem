@@ -124,6 +124,20 @@ public class MyToolKit {
 					, graph.getNode(graph.getEmptyCarNode().get(i).nodeNum-1).y-20, 40, 40);
 		}
 		
+		g.setColor(Color.PINK);
+		for(int i = 0; i < graph.getChargeNode().size(); i++){
+			if(graph.getChargeNode().get(i).clicked){
+				if(!reverseColor)
+					g.setColor(Color.red);
+				else
+					g.setColor(Color.PINK);
+			}
+			else
+				g.setColor(Color.PINK);
+			g.fillOval(graph.getNode(graph.getChargeNode().get(i).nodeNum-1).x-20
+					, graph.getNode(graph.getChargeNode().get(i).nodeNum-1).y-20, 40, 40);
+		}
+		
 		g.setColor(Color.gray);
 		g.setFont(new Font("ËÎÌו", Font.BOLD, 30));
 		for(int i = 0; i < graph.getTagArray().size(); i++)
@@ -266,7 +280,7 @@ public class MyToolKit {
 				for(int i = 0; i < sheetEmptyCar.getRows(); i++){
 					int node=0, com=0, card=0;
 					String tag = "";
-					for(int j = 0; j < 3; j++){
+					for(int j = 0; j < 4; j++){
 						Cell cell0 = sheetEmptyCar.getCell(j,i);
 							String str = cell0.getContents();
 							if(j == 0)
@@ -285,7 +299,7 @@ public class MyToolKit {
 				for(int i = 0; i < sheetCharge.getRows(); i++){
 					int node=0, com=0, card=0;
 					String tag = "";
-					for(int j = 0; j < 3; j++){
+					for(int j = 0; j < 4; j++){
 						Cell cell0 = sheetCharge.getCell(j,i);
 							String str = cell0.getContents();
 							if(j == 0)
@@ -326,7 +340,7 @@ public class MyToolKit {
 	
 	
 	public String routeToOrientation(Graph graph, ArrayList<Integer> route, AGVCar agvCar){
-		boolean strNodeFunction = agvCar.getStartNode().functionNode;
+		boolean strNodeFunction = agvCar.getStartEdge().endNode.functionNode;
 		boolean first = true;
 		ArrayList<Node> result = new ArrayList<Node>();
 		StringBuffer sendMessage = new StringBuffer();//2*graph.getEdgeSize()+3

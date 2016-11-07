@@ -29,16 +29,16 @@ public class Dijkstra {
 		}	
 	}//end init
 	
-	public Path findRoute(int startNode, int endNode){
-		Path returnPath = new Path(startNode, endNode);
+	public Path findRoute(Edge startEdge, int endNode){
+		Path returnPath = new Path(startEdge.endNode.num, endNode);
 		boolean adjoin = false;
 		sArray = new ArrayList<Path>();
-		sArray.add(new Path(startNode, startNode));
+		sArray.add(new Path(startEdge.endNode.num, startEdge.endNode.num));
 		uArray = new ArrayList<Path>();
 		for(int i = 0; i < size; i++){//³õÊ¼»¯
-			uArray.add(new Path(startNode, i + 1));
+			uArray.add(new Path(startEdge.endNode.num, i + 1));
 			for(int j = 0; j < graph.getEdgeSize(); j++){
-				if((graph.getEdge(j).startNode.num == startNode && graph.getEdge(j).endNode.num == (i+1))){//|| (graph.getEdge(j).endNode.num == startNode && graph.getEdge(j).startNode.num == (i+1) && graph.getEdge(j).twoWay)
+				if((graph.getEdge(j).startNode.num == startEdge.endNode.num && graph.getEdge(j).endNode.num == (i+1))){//|| (graph.getEdge(j).endNode.num == startNode && graph.getEdge(j).startNode.num == (i+1) && graph.getEdge(j).twoWay)
 					uArray.get(i).setRealDis(graph.getEdge(j).realDis);
 					uArray.get(i).addRouteNode(i+1);
 					adjoin = true;
@@ -49,7 +49,7 @@ public class Dijkstra {
 			adjoin = false;
 		}
 
-		uArray.get(startNode - 1).setRemove();
+		uArray.get(startEdge.endNode.num - 1).setRemove();
 		int removedCount = 1;
 		
 		while(uArray.size() != removedCount){//
@@ -85,8 +85,19 @@ public class Dijkstra {
 		}//end while
 
 		for(int i = 0; i < sArray.size(); i++){
-			if(sArray.get(i).getEndNode() == endNode)
+			if(sArray.get(i).getEndNode() == endNode){
 				returnPath = sArray.get(i);
+				if(!startEdge.endNode.functionNode){
+					ArrayList<Integer> tempArray = new ArrayList<Integer>(returnPath.getRoute());
+					returnPath.getRoute().clear();
+					returnPath.getRoute().add(startEdge.startNode.num);
+					for(int j = 0; j < tempArray.size(); j++){
+						returnPath.getRoute().add(tempArray.get(j));
+					}
+					
+				}
+					
+			}
 		}
 		return returnPath;
 	}//end countPath

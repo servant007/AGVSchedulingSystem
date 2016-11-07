@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 import schedulingSystem.component.AGVCar;
+import schedulingSystem.component.ConflictDetection;
 import schedulingSystem.component.Edge;
 import schedulingSystem.component.Graph;
 import schedulingSystem.gui.SchedulingGui;
@@ -18,15 +19,17 @@ public class HandleReceiveMessage implements Runnable{
 	private OutputStream outputStream;
 	private Socket socket;
 	private long lastCommunicationTime;
-	private long reciveDelayTime = 100000;
+	private long reciveDelayTime = 7000;
 	private MyToolKit myToolKit;
 	private ArrayList<AGVCar> AGVArray;
 	private int noOfAGV;
 	private int lastCard;
 	private boolean oldRunnable;
+	private Graph graph;
 	
 	public HandleReceiveMessage(Socket socket, ArrayList<AGVCar> AGVArray, Graph graph){
 		myToolKit = new MyToolKit();
+		this.graph = graph;
 		this.AGVArray = AGVArray;
 		System.out.println("socket connect:"+socket.toString());
 		this.socket = socket;
@@ -78,7 +81,6 @@ public class HandleReceiveMessage implements Runnable{
 								if(NOOfCard != lastCard){
 									System.out.println("receive card number:"+NOOfCard);
 									AGVArray.get(noOfAGV-1).setLastCard(NOOfCard);
-									AGVArray.get(noOfAGV-1).setOnEdge(NOOfCard);
 									int electricity = Integer.parseInt(message.substring(6, 8), 16);
 									AGVArray.get(noOfAGV-1).setElectricity(electricity);
 									lastCard = NOOfCard;
@@ -87,7 +89,13 @@ public class HandleReceiveMessage implements Runnable{
 								AGVArray.get(noOfAGV-1).setLastCommunicationTime(System.currentTimeMillis());
 								//outputStream.write(myToolKit.HexString2Bytes("AAC0FFEEBB"));
 							}
-						}					
+						}
+						
+						if(message.startsWith("CC")){
+							noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
+							int state = Integer.parseInt(message.substring(4, 6), 16);
+							AGVArray.get(noOfAGV-1).setAGVState(state);
+						}
 					}else {
 						Thread.sleep(10);
 					}					

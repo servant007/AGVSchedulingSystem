@@ -27,6 +27,7 @@ import schedulingSystem.component.AGVCar;
 import schedulingSystem.component.AGVCar.Orientation;
 import schedulingSystem.component.ConflictDetection;
 import schedulingSystem.component.Dijkstra;
+import schedulingSystem.component.Edge;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Main;
 import schedulingSystem.component.Node;
@@ -248,10 +249,18 @@ public class SchedulingGui extends JPanel{
 	public void getGuiInstance(Main main, SchedulingGui schedulingGui, SetingGui setingGui, GraphingGui graphingGui){
 		schedulingGuiBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				System.out.println(dijkstra.findRoute(18, 17).getRoute()+"endNode:"+dijkstra.findRoute(18, 17).getEndNode());
-				System.out.println(myToolKit.routeToOrientation(graph,dijkstra.findRoute(18, 17).getRoute(), new AGVCar()));
-				try{					
-					
+				//System.out.println(dijkstra.findRoute(18, 17).getRoute()+"endNode:"+dijkstra.findRoute(18, 17).getEndNode());
+				//System.out.println(myToolKit.routeToOrientation(graph,dijkstra.findRoute(18, 17).getRoute(), new AGVCar()));
+				try{
+					String str = "";
+					for(int i = 0; i < conflictDetection.getConflictNodeArray().size(); i++){
+						if(conflictDetection.getConflictNodeArray().get(i).occupy){
+							str+=(i+1);
+							str+="/";
+						}						
+					}
+					str+="点被占用";
+					stateLabel.setText(str);
 				}catch (Exception e1){
 					e1.printStackTrace();
 				}
@@ -289,35 +298,59 @@ public class SchedulingGui extends JPanel{
 			Node node = graph.searchWideNode(e.getX(), e.getY());
 			if(node != null){
 				for(int i = 0; i < graph.getShipmentNode().size(); i++){
-					if(graph.getShipmentNode().get(i).nodeNum  == node.num){
-						graph.getShipmentNode().get(i).clicked = true;
-						sendingWhichAGV(node.num);
+					if(graph.getShipmentNode().get(i).nodeNum  == node.num && !graph.getShipmentNode().get(i).clicked){
+						if((graph.getShipmentNode().get(i).callAGVNum = sendingWhichAGV(node.num))!=0)
+							graph.getShipmentNode().get(i).clicked = true;
 					}
 				}
 				
 				for(int i = 0; i < graph.getUnloadingNode().size(); i++){
-					if(graph.getUnloadingNode().get(i).nodeNum  == node.num){
-						graph.getUnloadingNode().get(i).clicked = true;
-						sendingWhichAGV(node.num);
+					if(graph.getUnloadingNode().get(i).nodeNum  == node.num && !graph.getUnloadingNode().get(i).clicked){
+						if((graph.getUnloadingNode().get(i).callAGVNum = sendingWhichAGV(node.num))!=0)
+							graph.getUnloadingNode().get(i).clicked = true;
 					}
 				}	
 				
 				for(int i = 0; i < graph.getEmptyCarNode().size(); i++){
-					if(graph.getEmptyCarNode().get(i).nodeNum  == node.num){
-						graph.getEmptyCarNode().get(i).clicked = true;
-						sendingWhichAGV(node.num);
+					if(graph.getEmptyCarNode().get(i).nodeNum  == node.num && !graph.getEmptyCarNode().get(i).clicked){
+						if((graph.getEmptyCarNode().get(i).callAGVNum = sendingWhichAGV(node.num)) != 0)
+							graph.getEmptyCarNode().get(i).clicked = true;
+					}
+				}	
+				
+				for(int i = 0; i < graph.getChargeNode().size(); i++){
+					if(graph.getChargeNode().get(i).nodeNum  == node.num && !graph.getChargeNode().get(i).clicked){
+						if((graph.getChargeNode().get(i).callAGVNum = sendingWhichAGV(node.num)) != 0)
+							graph.getChargeNode().get(i).clicked = true;
 					}
 				}	
 			}
 		}
 	}
 	
-	public void sendingWhichAGV(int endNodeNum){		
+	public int sendingWhichAGV(int endNodeNum){		
+		int returnAGVNum = 0;
+		ArrayList<Integer> noStartNode = new ArrayList<Integer>();
+		ArrayList<Integer> isNotAlived = new ArrayList<Integer>();
+		ArrayList<Integer> isOnMission = new ArrayList<Integer>();
 		ArrayList<Path> pathArray = new ArrayList<Path>();
 		for(int i = 0; i < AGVArray.size(); i++){
-			if(AGVArray.get(i).getStartNode().num!=0 && AGVArray.get(i).isAlived() && !AGVArray.get(i).isOnMission()){
-				pathArray.add(dijkstra.findRoute(AGVArray.get(i).getStartNode().num, endNodeNum));
-				pathArray.get(pathArray.size()-1).setNumOfAGV(i);;
+			
+			if(!AGVArray.get(i).isAlived()){
+				isNotAlived.add(i+1);
+			}else{
+				if(AGVArray.get(i).getStartEdge().endNode.num == 0)
+					noStartNode.add(i+1);
+			}
+				
+			if(AGVArray.get(i).isOnMission())
+				isOnMission.add(i+1);
+			
+			if(AGVArray.get(i).getStartEdge().endNode.num!=0 && AGVArray.get(i).isAlived() && !AGVArray.get(i).isOnMission()){
+				Edge edge = AGVArray.get(i).getStartEdge();
+				System.out.println("startEdge startNode :" + edge.startNode.num + "endNode:" + edge.endNode.num);
+				pathArray.add(dijkstra.findRoute(edge, endNodeNum));
+				pathArray.get(pathArray.size()-1).setNumOfAGV(i+1);;
 			}
 		}
 		
@@ -325,18 +358,47 @@ public class SchedulingGui extends JPanel{
 			int minDis = 65535;
 			int minIndex = 0;
 			for(int i = 0; i < pathArray.size(); i++){
-				if(pathArray.get(i).getRealDis() < minDis){
+				if(pathArray.get(i).getRealDis() < minDis && pathArray.get(i).getRoute().size() > 2){
 					minDis = pathArray.get(i).getRealDis();
 					minIndex = i;
 				}
 			}
 			System.out.println("result:"+pathArray.get(minIndex).getRoute());
-			AGVCar agvCar= AGVArray.get(pathArray.get(minIndex).getNumOfAGV());
+			returnAGVNum = pathArray.get(minIndex).getNumOfAGV();
+			AGVCar agvCar= AGVArray.get(pathArray.get(minIndex).getNumOfAGV()-1);
 			agvCar.getRunnable().SendMessage(myToolKit.routeToOrientation(graph, pathArray.get(minIndex).getRoute(), agvCar));
 			agvCar.setDestinationNode(pathArray.get(minIndex).getEndNode());
+			agvCar.setRoute(pathArray.get(minIndex).getRoute());
 		}else{
 			stateLabel.setText("没有AGV准备好");
 			logger.debug("没有AGV准备好");
 		}
+		stateString = new StringBuffer();
+		if(noStartNode.size()!=0){
+			for(int i = 0; i < noStartNode.size(); i++){
+				stateString.append(noStartNode.get(i));
+				stateString.append(",");
+			}
+			stateString.append("：起始点错误   //");
+		}
+		
+		if(isNotAlived.size()!=0){
+			for(int i = 0; i < isNotAlived.size(); i++){
+				stateString.append(isNotAlived.get(i));
+				stateString.append(",");
+			}
+			stateString.append("：失去连接   //");
+		}
+		
+		if(isOnMission.size()!=0){
+			for(int i = 0; i < isOnMission.size(); i++){
+				stateString.append(isOnMission.get(i));
+				stateString.append(",");
+			}
+			stateString.append("：在执行任务中");
+		}
+		stateLabel.setText(stateString.toString());
+		
+		return returnAGVNum;
 	}
 }

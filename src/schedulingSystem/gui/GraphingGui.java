@@ -28,7 +28,8 @@ import jxl.write.Number;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Main;
 import schedulingSystem.component.Node;
-import schedulingSystem.toolKit.*;;
+import schedulingSystem.toolKit.*;
+import schedulingSystem.toolKit.FunctionDialog.FunctionEnum;;
 
 public class GraphingGui extends JPanel{
 	/**
@@ -245,17 +246,17 @@ public class GraphingGui extends JPanel{
 						FunctionDialog dialog = new FunctionDialog(staticPosition);
 						dialog.getInstance(dialog, true);
 						dialog.setOnActionListener(new FunctionDialogListener(){
-							public void getSeclectFunction(int function, String com,String card, String tag, boolean btnState){
+							public void getSeclectFunction(FunctionEnum function, String com,String card, String tag, boolean btnState){
 								if(com.length() > 0 && card.length() > 0){
-									if(function == 1)
+									if(function == FunctionEnum.SHIPMENT)
 										graph.addShipmentNode(node.num, Integer.parseInt(card), Integer.parseInt(com), tag);
-									else if(function == 2)
+									else if(function == FunctionEnum.UNLOADING)
 										graph.addUnloadingNode(node.num, Integer.parseInt(card), Integer.parseInt(com), tag);
-									else if(function == 3)
+									else if(function == FunctionEnum.EMPTYCAR)
 										graph.addEmptyCarNode(node.num, Integer.parseInt(card),Integer.parseInt(com), tag);
-									else if(function == 4)
+									else if(function == FunctionEnum.CHARGE)
 										graph.addChargeNode(node.num, Integer.parseInt(card),Integer.parseInt(com), tag);
-									else if(function == 5)
+									else if(function == FunctionEnum.TAG)
 										graph.addTagArray(node.x, node.y, com);
 								}
 								System.out.println(com);
@@ -268,9 +269,9 @@ public class GraphingGui extends JPanel{
 						FunctionDialog dialog = new FunctionDialog(node1);
 						dialog.getInstance(dialog, false);
 						dialog.setOnActionListener(new FunctionDialogListener(){
-							public void getSeclectFunction(int function, String str, String str1,String tag,  boolean btnState){
+							public void getSeclectFunction(FunctionEnum function, String str, String str1,String tag,  boolean btnState){
 								if(str.length() > 0){
-									if(function == 4)
+									if(function == FunctionEnum.TAG)
 										graph.addTagArray(node1.x, node1.y, str+str1);
 								}
 								System.out.println(str);

@@ -7,6 +7,7 @@ public class FunctionNode {
 	public Node position;
 	public String tag;
 	public boolean clicked;
+	public int callAGVNum;
 	public FunctionNode(int nodeNum, int cardNum, int communicationNum, String tag){
 		this.nodeNum = nodeNum;
 		this.cardNum = cardNum;
