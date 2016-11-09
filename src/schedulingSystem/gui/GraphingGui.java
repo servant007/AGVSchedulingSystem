@@ -24,12 +24,13 @@ import jxl.Workbook;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.Label;
-import jxl.write.Number;   
+import jxl.write.Number;
+import schedulingSystem.component.FunctionNode.FunctionNodeEnum;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Main;
 import schedulingSystem.component.Node;
 import schedulingSystem.toolKit.*;
-import schedulingSystem.toolKit.FunctionDialog.FunctionEnum;;
+
 
 public class GraphingGui extends JPanel{
 	/**
@@ -222,7 +223,7 @@ public class GraphingGui extends JPanel{
 											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis)
 													,Integer.parseInt(strCard), Integer.parseInt(endCard),twoWay);
 											graph.addEdge(tempEndNode.num, tempStrNode.num, Integer.parseInt(realDis)
-													,Integer.parseInt(strCard), Integer.parseInt(endCard),twoWay);
+													,Integer.parseInt(endCard), Integer.parseInt(strCard),twoWay);
 										}else{
 											graph.addEdge(tempStrNode.num, tempEndNode.num, Integer.parseInt(realDis)
 													,Integer.parseInt(strCard), Integer.parseInt(endCard),twoWay);
@@ -246,18 +247,18 @@ public class GraphingGui extends JPanel{
 						FunctionDialog dialog = new FunctionDialog(staticPosition);
 						dialog.getInstance(dialog, true);
 						dialog.setOnActionListener(new FunctionDialogListener(){
-							public void getSeclectFunction(FunctionEnum function, String com,String card, String tag, boolean btnState){
-								if(com.length() > 0 && card.length() > 0){
-									if(function == FunctionEnum.SHIPMENT)
-										graph.addShipmentNode(node.num, Integer.parseInt(card), Integer.parseInt(com), tag);
-									else if(function == FunctionEnum.UNLOADING)
-										graph.addUnloadingNode(node.num, Integer.parseInt(card), Integer.parseInt(com), tag);
-									else if(function == FunctionEnum.EMPTYCAR)
-										graph.addEmptyCarNode(node.num, Integer.parseInt(card),Integer.parseInt(com), tag);
-									else if(function == FunctionEnum.CHARGE)
-										graph.addChargeNode(node.num, Integer.parseInt(card),Integer.parseInt(com), tag);
-									else if(function == FunctionEnum.TAG)
-										graph.addTagArray(node.x, node.y, com);
+							public void getSeclectFunction(FunctionNodeEnum function, String ip,String com, String tag, boolean btnState){
+								if(com.length() > 0 && ip.length() > 0){
+									if(function == FunctionNodeEnum.SHIPMENT)
+										graph.addFunctionNode(FunctionNodeEnum.SHIPMENT,node.num, ip, Integer.parseInt(com), tag);
+									else if(function == FunctionNodeEnum.UNLOADING)
+										graph.addFunctionNode(FunctionNodeEnum.UNLOADING, node.num, ip, Integer.parseInt(com), tag);
+									else if(function == FunctionNodeEnum.EMPTYCAR)
+										graph.addFunctionNode(FunctionNodeEnum.EMPTYCAR, node.num, ip,Integer.parseInt(com), tag);
+									else if(function == FunctionNodeEnum.CHARGE)
+										graph.addFunctionNode(FunctionNodeEnum.CHARGE, node.num, ip,Integer.parseInt(com), tag);
+									else if(function == FunctionNodeEnum.TAG)
+										graph.addTagNode(FunctionNodeEnum.TAG, node.x, node.y, com);
 								}
 								System.out.println(com);
 							}
@@ -269,10 +270,10 @@ public class GraphingGui extends JPanel{
 						FunctionDialog dialog = new FunctionDialog(node1);
 						dialog.getInstance(dialog, false);
 						dialog.setOnActionListener(new FunctionDialogListener(){
-							public void getSeclectFunction(FunctionEnum function, String str, String str1,String tag,  boolean btnState){
+							public void getSeclectFunction(FunctionNodeEnum function, String str, String str1,String tag,  boolean btnState){
 								if(str.length() > 0){
-									if(function == FunctionEnum.TAG)
-										graph.addTagArray(node1.x, node1.y, str+str1);
+									if(function == FunctionNodeEnum.TAG)
+										graph.addTagNode(FunctionNodeEnum.TAG, node1.x, node1.y, str+str1);
 								}
 								System.out.println(str);
 							}
@@ -392,64 +393,25 @@ public class GraphingGui extends JPanel{
 				wsEdge.addCell(numTwoWay);
 			}
 			
-			WritableSheet wsShipment = wwb.createSheet("shipment", 2);
-			for(int i = 0; i < graph.getShipmentNode().size(); i++){
-				Number numberNode = new Number(0, i, graph.getShipmentNode().get(i).nodeNum);
-				Number numberCard = new Number(1, i, graph.getShipmentNode().get(i).cardNum);
-				Number numberCom = new Number(2, i, graph.getShipmentNode().get(i).communicationNum);
-				Label tagLabel = new Label(3,i,graph.getShipmentNode().get(i).tag);
+			WritableSheet wsShipment = wwb.createSheet("functionNode", 2);
+			for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
+				Number numberNode = new Number(0, i, graph.getFunctionNodeArray().get(i).nodeNum);
+				Label numberCard = new Label(1, i, graph.getFunctionNodeArray().get(i).ip);
+				Number numberCom = new Number(2, i, graph.getFunctionNodeArray().get(i).communicationNum);
+				Label tagLabel = new Label(3,i,graph.getFunctionNodeArray().get(i).tag);
+				Number x = new Number(4, i, graph.getFunctionNodeArray().get(i).x);
+				Number y = new Number(5, i, graph.getFunctionNodeArray().get(i).y);
+				Number ordinal = new Number(6, i, graph.getFunctionNodeArray().get(i).function.ordinal());
 				wsShipment.addCell(numberNode);
 				wsShipment.addCell(numberCard);
 				wsShipment.addCell(numberCom);
 				wsShipment.addCell(tagLabel);
+				wsShipment.addCell(x);
+				wsShipment.addCell(y);
+				wsShipment.addCell(ordinal);
 			}
 			
-			WritableSheet wsUnloading = wwb.createSheet("unloading", 3);
-			for(int i = 0; i < graph.getUnloadingNode().size(); i++){
-				Number numberNode = new Number(0, i, graph.getUnloadingNode().get(i).nodeNum);
-				Number numberCard = new Number(1, i, graph.getUnloadingNode().get(i).cardNum);
-				Number numberCom = new Number(2, i, graph.getUnloadingNode().get(i).communicationNum);
-				Label tagLabel = new Label(3,i,graph.getUnloadingNode().get(i).tag);
-				wsUnloading.addCell(numberNode);
-				wsUnloading.addCell(numberCard);
-				wsUnloading.addCell(numberCom);
-				wsUnloading.addCell(tagLabel);
-			}
 			
-			WritableSheet wsCharge = wwb.createSheet("charge", 4);
-			for(int i = 0; i < graph.getChargeNode().size(); i++){
-				Number numberNode = new Number(0, i, graph.getChargeNode().get(i).nodeNum);
-				Number numberCard = new Number(1, i, graph.getChargeNode().get(i).cardNum);
-				Number numberCom = new Number(2, i, graph.getChargeNode().get(i).communicationNum);
-				Label tagLabel = new Label(3,i,graph.getChargeNode().get(i).tag);
-				wsCharge.addCell(numberNode);
-				wsCharge.addCell(numberCard);
-				wsCharge.addCell(numberCom);
-				wsCharge.addCell(tagLabel);
-			}
-			
-			WritableSheet wsEmptyCar = wwb.createSheet("emptyCar", 5);
-			for(int i = 0; i < graph.getEmptyCarNode().size(); i++){
-				Number numberNode = new Number(0, i, graph.getEmptyCarNode().get(i).nodeNum);
-				Number numberCard = new Number(1, i, graph.getEmptyCarNode().get(i).cardNum);
-				Number numberCom = new Number(2, i, graph.getEmptyCarNode().get(i).communicationNum);
-				Label tagLabel = new Label(3,i,graph.getEmptyCarNode().get(i).tag);
-				wsEmptyCar.addCell(numberNode);
-				wsEmptyCar.addCell(numberCard);
-				wsEmptyCar.addCell(numberCom);
-				wsEmptyCar.addCell(tagLabel);
-				
-			}
-			
-			WritableSheet wsTag = wwb.createSheet("tag", 6);
-			for(int i = 0; i < graph.getTagArray().size(); i++){
-				Number x = new Number(0, i, graph.getTagArray().get(i).position.x);
-				Number y = new Number(1, i, graph.getTagArray().get(i).position.y);
-				Label tag = new Label(2, i, graph.getTagArray().get(i).tag);
-				wsTag.addCell(x);
-				wsTag.addCell(y);
-				wsTag.addCell(tag);
-			}
 			wwb.write();
 			wwb.close();
 		}catch(Exception e){

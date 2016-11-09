@@ -2,7 +2,8 @@ package schedulingSystem.component;
 
 import java.util.ArrayList;
 
-import schedulingSystem.toolKit.HandleReceiveMessage;
+import schedulingSystem.toolKit.MyToolKit;
+import schedulingSystem.toolKit.ReceiveAGVMessage;
 
 public class AGVCar{
 		private int AGVNum;
@@ -12,18 +13,31 @@ public class AGVCar{
 		private int lastCard;
 		public enum Orientation{LEFT,RIGTH,UP,DOWN}
 		private Orientation orientation;
+		public enum State{STOP, FORWARD, BACKWARD, SHIPMENT, UNLOADING, NULL}
+		private State state;
 		private Graph graph;
 		private int electricity;
 		private boolean finishEdge;
 		private long lastCommunicationTime;
-		private HandleReceiveMessage handleReceiveMessage;
+		private ReceiveAGVMessage handleReceiveMessage;
 		private ConflictDetection conflictDetection;
 		private boolean lock = true;
 		private int destinationCard;
+		private ArrayList<State> trigger;
+		private ArrayList<State> triggerCopy;
+		private ArrayList<Integer> multiDestination;
+		private ArrayList<Integer> multiDestinationCopy;
+		private boolean fixRoute;
 		private boolean isOnMission;
 		private String missionString;
+		private MyToolKit myToolKit;
+		private Dijkstra dijkstra;
+		private boolean first;
 		private ArrayList<Edge> routeEdge;
-		private int state;
+		private ArrayList<Integer> routeNode;
+		private ConflictEdge occupyEdge;
+		private ConflictEdge lastOccupyEdge;
+		private boolean firstRouteNode;
 		
 		public AGVCar(){}
 		
@@ -31,24 +45,50 @@ public class AGVCar{
 			this.AGVNum = AGVNum;
 			this.graph = graph;
 			this.conflictDetection = conflictDetection;
+			trigger = new ArrayList<State>();
+			multiDestination = new ArrayList<Integer>();
+			if(graph.getAGVSeting().get(AGVNum-1).length() > 1){
+				fixRoute = true;
+				String[] route = graph.getAGVSeting().get(AGVNum-1).split("/");
+				for(int i = 0; i < route.length; i++){
+					if(i%2 == 0){
+						if(route[i].equals("4")){
+							trigger.add(State.SHIPMENT);
+						}else if(route[i].equals("5")){
+							trigger.add(State.UNLOADING);
+						}
+					}else{
+						multiDestination.add(Integer.parseInt(route[i]));
+					}
+						
+				}
+				
+				triggerCopy = new ArrayList<State>(trigger);
+				multiDestinationCopy = new ArrayList<Integer>(multiDestination);
+			}
+			
+			System.out.println(this.AGVNum + "AGV"+ this.multiDestination + this.trigger);
+			myToolKit = new MyToolKit();
+			dijkstra = new Dijkstra(graph);
 			finishEdge = true;
-			state = 2;
+			state = State.FORWARD;
 			edge = new Edge(new Node(0,0),new Node(0,0));
-			routeEdge = new ArrayList<Edge>();
+			first = true;
+			//routeEdge = new ArrayList<Edge>();
 		}
 
 		public void stepForward(){
-			if(!finishEdge&& (state == 2 || state == 3)){
+			if(!finishEdge&& (state == State.FORWARD || state == State.BACKWARD)){
 				if(edge.startNode.x == edge.endNode.x){
 					if(edge.startNode.y < edge.endNode.y ){
 						if(y < edge.endNode.y){
-							y +=12;
+							y +=10;
 						}else{
 							finishEdge = true;
 						}	
 					}else if(edge.startNode.y > edge.endNode.y ){
 						if(y > edge.endNode.y){
-							y -=12;
+							y -=10;
 						}else{
 							finishEdge = true;
 						}
@@ -56,12 +96,12 @@ public class AGVCar{
 				}else if(edge.startNode.y == edge.endNode.y){
 					if(edge.startNode.x < edge.endNode.x ){
 						if(x < edge.endNode.x)
-							x +=12;
+							x +=10;
 						else
 							finishEdge = true;
 					}else if(edge.startNode.x > edge.endNode.x){
 						if(x > edge.endNode.x)
-							x -=12;
+							x -=10;
 						else
 							finishEdge = true;
 					}
@@ -116,17 +156,27 @@ public class AGVCar{
 			}
 			if(lock){
 				if(foundEnd){
-					checkConflict(cardNum, true, edgeEnd);
+					if(routeNode != null && routeNode.size() > 2){
+						System.out.println(this.AGVNum+"agv查询是否可以通过"+ routeNode.get(1) + "||" + routeNode.get(2) + "边");
+						lastOccupyEdge = occupyEdge;
+						occupyEdge = conflictDetection.checkConflictEdge(this, routeNode.get(1), routeNode.get(2));//根据route
+						routeNode.remove(0);
+					}
 					lock = false;
 				}else if(foundStr){
 					this.edge = edgeStr;
-					//checkConflict(cardNum);
 					lock = true;
 				}
 			}else{
 				if(foundStr){
 					this.edge = edgeStr;
-					checkConflict(cardNum, false, edgeStr);
+
+						if(routeNode != null && lastOccupyEdge != null){
+							conflictDetection.removeOccupyEdge(this, lastOccupyEdge);
+							
+						}
+
+					
 					lock = true;
 				}else if(foundEnd){
 					lock = false;
@@ -138,50 +188,37 @@ public class AGVCar{
 				x = edge.startNode.x;
 				y = edge.startNode.y;
 				judgeOrientation();
+				if(first && fixRoute){
+					first = false;
+					routeNode = dijkstra.findRoute(this.getStartEdge(), this.multiDestination.get(0)).getRoute();
+					this.firstRouteNode = true;
+					this.getRunnable().SendMessage(myToolKit.routeToOrientation(graph
+							, routeNode, this));
+					for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
+						if(this.multiDestination.get(0) == graph.getFunctionNodeArray().get(i).nodeNum)
+							graph.getFunctionNodeArray().get(i).clicked = true;
+					}
+					this.missionString = graph.getNode(multiDestination.get(0)-1).tag;
+					this.isOnMission = true;
+					for(int i = 0 ; i < graph.getEdgeSize(); i++){
+						if(multiDestination.get(0) == graph.getEdge(i).endNode.num){
+							this.destinationCard = graph.getEdge(i).endCardNum;
+						}
+					}
+					this.state = State.FORWARD;
+					trigger.remove(0);
+					multiDestination.remove(0);
+				}
 			}
-			
-			
-			
-			
-			//如果是停止卡则取消闪烁
-			for(int i = 0; i < graph.getShipmentNode().size(); i++){
-				if(graph.getShipmentNode().get(i).callAGVNum == this.AGVNum){
-					if(graph.getShipmentNode().get(i).cardNum  == cardNum){
-						graph.getShipmentNode().get(i).clicked = false;
+
+			for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
+				if(graph.getFunctionNodeArray().get(i).callAGVNum == this.AGVNum){
+					if(cardNum == graph.getStopCard()){
+						graph.getFunctionNodeArray().get(i).clicked = false;
 					}
-				}
-				
+				}				
 			}
-			
-			for(int i = 0; i < graph.getUnloadingNode().size(); i++){
-				if(graph.getUnloadingNode().get(i).callAGVNum == this.AGVNum){
-					if(graph.getUnloadingNode().get(i).cardNum  == cardNum){
-						graph.getUnloadingNode().get(i).clicked = false;
-					}
-				}
-				
-			}	
-			
-			for(int i = 0; i < graph.getEmptyCarNode().size(); i++){
-				if(graph.getEmptyCarNode().get(i).callAGVNum == this.AGVNum){
-					if(graph.getEmptyCarNode().get(i).cardNum  == cardNum){
-						graph.getEmptyCarNode().get(i).clicked = false;
-					}
-				}
-				
-			}	
-			
-			for(int i = 0; i < graph.getChargeNode().size(); i++){
-				if(graph.getChargeNode().get(i).callAGVNum == this.AGVNum){
-					if(graph.getChargeNode().get(i).cardNum  == cardNum){
-						graph.getChargeNode().get(i).clicked = false;
-					}
-				}
-				
-			}	
-			
-						
-			
+
 			if(lastCard == this.destinationCard&& cardNum == graph.getStopCard())
 				this.isOnMission = false;
 			this.lastCard = cardNum;
@@ -219,11 +256,11 @@ public class AGVCar{
 				return false;
 		}
 		
-		public void setRunnabel(HandleReceiveMessage handleReceiveMessage){
+		public void setRunnabel(ReceiveAGVMessage handleReceiveMessage){
 			this.handleReceiveMessage = handleReceiveMessage;
 		}
 		
-		public HandleReceiveMessage getRunnable(){
+		public ReceiveAGVMessage getRunnable(){
 			return handleReceiveMessage;
 		}
 
@@ -239,14 +276,25 @@ public class AGVCar{
 			return y;
 		}
 		
-		public void setDestinationNode(int nodeNum){
-			System.out.println("destination node:" + nodeNum);
-			this.missionString = graph.getNode(nodeNum-1).tag;
-			this.isOnMission = true;
-			for(int i = 0 ; i < graph.getEdgeSize(); i++){
-				if(nodeNum == graph.getEdge(i).endNode.num){
-					this.destinationCard = graph.getEdge(i).endCardNum;
+		public void setDestinationNode(ArrayList<State> trigger, ArrayList<Integer> destination){
+			this.trigger = trigger;
+			this.multiDestination = destination;
+			if(trigger.get(0) == State.NULL){
+				routeNode = dijkstra.findRoute(this.getStartEdge(), this.multiDestination.get(0)).getRoute();
+				this.firstRouteNode = true;
+				this.getRunnable().SendMessage(myToolKit.routeToOrientation(graph
+						, routeNode, this));
+
+				this.missionString = graph.getNode(multiDestination.get(0)-1).tag;
+				this.isOnMission = true;
+				for(int i = 0 ; i < graph.getEdgeSize(); i++){
+					if(multiDestination.get(0) == graph.getEdge(i).endNode.num){
+						this.destinationCard = graph.getEdge(i).endCardNum;
+					}
 				}
+				this.state = State.FORWARD;
+				trigger.remove(0);
+				multiDestination.remove(0);
 			}
 		}
 		
@@ -258,7 +306,7 @@ public class AGVCar{
 			return missionString;
 		}
 		
-		public void setRoute(ArrayList<Integer> routeNode){
+		public void setRouteEdge(ArrayList<Integer> routeNode){
 			routeEdge.clear();
 			for(int i = 0; i+1 < routeNode.size(); i++){
 				for(int j = 0; j < graph.getEdgeSize(); j++){
@@ -316,6 +364,67 @@ public class AGVCar{
 		}
 		
 		public void setAGVState(int state){
-			this.state = state;
+			if(state == 1){
+				this.state = State.STOP;
+			}else if(state == 2){
+				this.state = State.FORWARD;
+			}else if(state == 3){
+				this.state = State.BACKWARD;
+			}else if(state == 4){
+				if(trigger != null && trigger.size() > 0 && multiDestination != null && multiDestination.size() > 0){
+					if(trigger.get(0) == State.SHIPMENT){
+						triggerDestination();
+					}
+				}else if(fixRoute){
+					multiDestination = new ArrayList<Integer>(multiDestinationCopy);
+					trigger = new ArrayList<State>(triggerCopy);
+					if(trigger.get(0) == State.SHIPMENT){
+						triggerDestination();
+					}
+				}
+			}else if(state == 5){
+				if(trigger != null && trigger.size() > 0 && multiDestination != null && multiDestination.size() > 0){
+					if(trigger.get(0) == State.UNLOADING){
+						triggerDestination();
+					}
+				}else if(fixRoute){
+					multiDestination = multiDestinationCopy;
+					trigger = triggerCopy;
+					if(trigger.get(0) == State.UNLOADING){
+						triggerDestination();
+					}
+				}
+			}
 		}
+		
+		private void triggerDestination(){
+			routeNode = dijkstra.findRoute(this.getStartEdge(), this.multiDestination.get(0)).getRoute();
+			this.firstRouteNode = true;
+			this.getRunnable().SendMessage(myToolKit.routeToOrientation(graph
+					, routeNode, this));
+			//this.setRouteEdge(routeNode);
+			for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
+				if(this.multiDestination.get(0) == graph.getFunctionNodeArray().get(i).nodeNum)
+					graph.getFunctionNodeArray().get(i).clicked = true;
+			}
+			for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
+				if(this.multiDestination.get(0) == graph.getFunctionNodeArray().get(i).nodeNum)
+					graph.getFunctionNodeArray().get(i).clicked = true;
+			}
+			this.missionString = graph.getNode(multiDestination.get(0)-1).tag;
+			this.isOnMission = true;
+			for(int i = 0 ; i < graph.getEdgeSize(); i++){
+				if(multiDestination.get(0) == graph.getEdge(i).endNode.num){
+					this.destinationCard = graph.getEdge(i).endCardNum;
+				}
+			}
+			this.state = State.FORWARD;
+			trigger.remove(0);
+			multiDestination.remove(0);
+		}
+		
+		public boolean getFixRoute(){
+			return this.fixRoute;
+		}
+		
 }

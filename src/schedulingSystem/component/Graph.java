@@ -2,14 +2,13 @@ package schedulingSystem.component;
 
 import java.util.ArrayList;
 
+import schedulingSystem.component.FunctionNode.FunctionNodeEnum;
+
 public class Graph {
 	private ArrayList<Node> nodeArray;
 	private ArrayList<Edge> edgeArray;
-	private ArrayList<FunctionNode> shipmentNodeArray;
-	private ArrayList<FunctionNode> unloadingNodeArray;
-	private ArrayList<FunctionNode> emptyCarNodeArray;
-	private ArrayList<FunctionNode> chargeNodeArray;
-	private ArrayList<FunctionNode> tagArray;
+	private ArrayList<String> AGVSeting;
+	private ArrayList<FunctionNode> functionNodeArray;
 	private ArrayList<Integer> ignoreCard;
 	private int cardQuantity;
 	private int stopCard = 50;
@@ -18,12 +17,8 @@ public class Graph {
 	public Graph(){
 		nodeArray = new ArrayList<Node>();
 		edgeArray = new ArrayList<Edge>();
-		shipmentNodeArray = new ArrayList<FunctionNode>();
-		unloadingNodeArray = new ArrayList<FunctionNode>();
-		emptyCarNodeArray = new ArrayList<FunctionNode>();
-		chargeNodeArray = new ArrayList<FunctionNode>();
-		tagArray = new ArrayList<FunctionNode>();
-
+		functionNodeArray = new ArrayList<FunctionNode>();
+		AGVSeting = new ArrayList<String>();
 	}
 	
 	public void initIgnoreCard(){
@@ -103,49 +98,18 @@ public class Graph {
 	public ArrayList<Edge> getEdgeArray(){
 		return edgeArray;
 	}
-
-	public void addShipmentNode(int nodeNum, int card, int comNum, String tag){
-		shipmentNodeArray.add(new FunctionNode(nodeNum,card, comNum, tag));
+	
+	public void addFunctionNode(FunctionNodeEnum function,int nodeNum, String ip, int comNum, String tag){
+		functionNodeArray.add(new FunctionNode(function, nodeNum,ip, comNum, tag));
 		nodeArray.get(nodeNum-1).tag = tag;
 	}
 	
-	public void addUnloadingNode(int nodeNum, int card, int comNum, String tag){
-		unloadingNodeArray.add(new FunctionNode(nodeNum, card, comNum, tag));
-		nodeArray.get(nodeNum-1).tag = tag;
+	public void addTagNode(FunctionNodeEnum function,int x , int y, String tag){
+		functionNodeArray.add(new FunctionNode(function,x, y, tag));
 	}
 	
-	public void addChargeNode(int nodeNum, int card, int comNum, String tag){
-		chargeNodeArray.add(new FunctionNode(nodeNum, card,comNum, tag));
-		nodeArray.get(nodeNum-1).tag = tag;
-	}
-	
-	public void addEmptyCarNode(int nodeNum, int card, int comNum, String tag){
-		emptyCarNodeArray.add(new FunctionNode(nodeNum, card,comNum, tag));
-		nodeArray.get(nodeNum-1).tag = tag;
-	}
-	
-	public void addTagArray(int x , int y, String tag){
-		tagArray.add(new FunctionNode(new Node(x, y,0), tag));
-	}
-	
-	public ArrayList<FunctionNode> getShipmentNode(){
-		return shipmentNodeArray;
-	}
-	
-	public ArrayList<FunctionNode> getUnloadingNode(){
-		return unloadingNodeArray;
-	}
-	
-	public ArrayList<FunctionNode> getChargeNode(){
-		return chargeNodeArray;
-	}
-	
-	public ArrayList<FunctionNode> getEmptyCarNode(){
-		return emptyCarNodeArray;
-	}
-	
-	public ArrayList<FunctionNode> getTagArray(){
-		return tagArray;
+	public ArrayList<FunctionNode> getFunctionNodeArray(){
+		return functionNodeArray;
 	}
 	
 	public void addEdge(int strNodeNum, int endNodeNum, int dis, int strCardNum, int endCardNum, boolean twoWay){
@@ -198,4 +162,11 @@ public class Graph {
 		return executeCard;
 	}
 	
+	public void addAGVSeting(String seting){
+		AGVSeting.add(seting);
+	}
+	
+	public ArrayList<String> getAGVSeting(){
+		return AGVSeting;
+	}
 }

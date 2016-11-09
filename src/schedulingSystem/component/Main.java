@@ -5,7 +5,8 @@ import java.awt.Frame;
 import javax.swing.JFrame;
 
 import org.apache.log4j.Logger;
-import schedulingSystem.gui.*;;
+import schedulingSystem.gui.*;
+import schedulingSystem.toolKit.MyToolKit;;
 
 public class Main extends JFrame {
 	/**
@@ -16,10 +17,16 @@ public class Main extends JFrame {
 	private SchedulingGui schedulingGui;
 	private SetingGui setingGui;
 	private GraphingGui graphingGui;
+	private Graph graph;
+	private MyToolKit myToolKit;
 	public Main(){
 		super("AGV调度系统");
-		schedulingGui = SchedulingGui.getInstance();
-		setingGui = SetingGui.getInstance();
+		myToolKit = new MyToolKit();
+		graph = new Graph();
+		graph = myToolKit.importNewGraph("C:/Users/agv/Documents/testGraph.xls");
+		graph.initIgnoreCard();
+		schedulingGui = SchedulingGui.getInstance(graph);
+		setingGui = SetingGui.getInstance(graph);
 		graphingGui = GraphingGui.getInstance();
 		graphingGui.getGuiInstance(Main.this, schedulingGui, setingGui, graphingGui);
 		setingGui.getGuiInstance(Main.this, schedulingGui, setingGui, graphingGui);

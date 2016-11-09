@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import schedulingSystem.component.FunctionNode.FunctionNodeEnum;
 import schedulingSystem.component.Node;
 
 public class FunctionDialog extends JDialog{
@@ -22,23 +23,23 @@ public class FunctionDialog extends JDialog{
 	private RoundButton emptyCarBtn;
 	private RoundButton addStringBtn;
 	private RoundButton chargeBtn;
-	public enum FunctionEnum{SHIPMENT, UNLOADING, EMPTYCAR, CHARGE, TAG}
+	//public enum FunctionEnum{SHIPMENT, UNLOADING, EMPTYCAR, CHARGE, TAG}
 	public  void getInstance(FunctionDialog instance, boolean isNotAddString){
 		
-		JPanel shipmentPanel = new JPanel(new GridLayout(5,1,10,10));
-		setPanel(shipmentPanel, FunctionEnum.SHIPMENT, instance);
+		JPanel shipmentPanel = new JPanel(new GridLayout(6,1,10,10));
+		setPanel(shipmentPanel, FunctionNodeEnum.SHIPMENT, instance);
 		
-		JPanel unloadingPanel = new JPanel(new GridLayout(5,1,10,10));
-		setPanel(unloadingPanel, FunctionEnum.UNLOADING, instance);
+		JPanel unloadingPanel = new JPanel(new GridLayout(6,1,10,10));
+		setPanel(unloadingPanel, FunctionNodeEnum.UNLOADING, instance );
 		
-		JPanel emptyCarPanel = new JPanel(new GridLayout(5,1,10,10));
-		setPanel(emptyCarPanel, FunctionEnum.EMPTYCAR, instance);
+		JPanel emptyCarPanel = new JPanel(new GridLayout(6,1,10,10));
+		setPanel(emptyCarPanel, FunctionNodeEnum.EMPTYCAR, instance);
 		
-		JPanel chargePanel = new JPanel(new GridLayout(5,1,10,10));
-		setPanel(chargePanel, FunctionEnum.CHARGE, instance);
+		JPanel chargePanel = new JPanel(new GridLayout(6,1,10,10));
+		setPanel(chargePanel, FunctionNodeEnum.CHARGE, instance);
 
 		JPanel addStringPanel = new JPanel(new GridLayout(4,1,10,10));
-		setPanel(addStringPanel, FunctionEnum.TAG, instance);
+		setPanel(addStringPanel, FunctionNodeEnum.TAG, instance);
 		
 		if(isNotAddString){
 			buttonAddActionListener(shipmentBtn, shipmentPanel, instance);
@@ -82,15 +83,15 @@ public class FunctionDialog extends JDialog{
 		this.functionDialog = listener;
 	}
 	
-	public void setPanel(JPanel panel, FunctionEnum sec, FunctionDialog instance){
+	public void setPanel(JPanel panel, FunctionNodeEnum sec, FunctionDialog instance){
 		panel.setBorder(BorderFactory.createEtchedBorder());
-		MyTextField num = new MyTextField("通讯编号");
-		MyTextField card = new MyTextField("停止卡号");
+		MyTextField ip = new MyTextField("固定IP");
+		MyTextField communication = new MyTextField("通讯编号");
 		MyTextField tag = new MyTextField("功能标记");
 		RoundButton comBtn = new RoundButton("确认");
 		comBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				functionDialog.getSeclectFunction(sec, num.getText(), card.getText(),tag.getText(),true);
+				functionDialog.getSeclectFunction(sec, ip.getText(), communication.getText(),tag.getText(),true);
 				instance.dispose();
 			}
 		});
@@ -102,8 +103,8 @@ public class FunctionDialog extends JDialog{
 			}
 		});
 				
-		panel.add(num);
-		panel.add(card);
+		panel.add(ip);
+		panel.add(communication);
 		panel.add(tag);
 		panel.add(comBtn);
 		panel.add(celBtn);

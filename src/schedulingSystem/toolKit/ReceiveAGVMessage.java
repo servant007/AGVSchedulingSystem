@@ -13,7 +13,7 @@ import schedulingSystem.component.Edge;
 import schedulingSystem.component.Graph;
 import schedulingSystem.gui.SchedulingGui;
 
-public class HandleReceiveMessage implements Runnable{
+public class ReceiveAGVMessage implements Runnable{
 	private static Logger logger = Logger.getLogger(SchedulingGui.class.getName());
 	private InputStream inputStream;
 	private OutputStream outputStream;
@@ -27,7 +27,7 @@ public class HandleReceiveMessage implements Runnable{
 	private boolean oldRunnable;
 	private Graph graph;
 	
-	public HandleReceiveMessage(Socket socket, ArrayList<AGVCar> AGVArray, Graph graph){
+	public ReceiveAGVMessage(Socket socket, ArrayList<AGVCar> AGVArray, Graph graph){
 		myToolKit = new MyToolKit();
 		this.graph = graph;
 		this.AGVArray = AGVArray;
@@ -36,7 +36,6 @@ public class HandleReceiveMessage implements Runnable{
 		try{
 			inputStream = socket.getInputStream();
 			outputStream = socket.getOutputStream();
-			//outputStream.write(myToolKit.HexString2Bytes("AAC0FFEEBB"));
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error(e);
@@ -69,7 +68,6 @@ public class HandleReceiveMessage implements Runnable{
 						if(message.startsWith("AA")&&message.endsWith("BB")){
 							noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
 							if(!oldRunnable){
-								//listener.getAGVNum(noOfAGV);//返回Runnable与哪个AGV通讯
 								AGVArray.get(noOfAGV-1).setRunnabel(this);
 								oldRunnable = true;
 							}
@@ -96,6 +94,7 @@ public class HandleReceiveMessage implements Runnable{
 							int state = Integer.parseInt(message.substring(4, 6), 16);
 							AGVArray.get(noOfAGV-1).setAGVState(state);
 						}
+						
 					}else {
 						Thread.sleep(10);
 					}					

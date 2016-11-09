@@ -22,6 +22,7 @@ import jxl.Sheet;
 import jxl.Workbook;
 import jxl.NumberCell;
 import schedulingSystem.component.AGVCar;
+import schedulingSystem.component.FunctionNode.FunctionNodeEnum;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Node;
 import schedulingSystem.gui.SchedulingGui;
@@ -81,69 +82,44 @@ public class MyToolKit {
 		}
 
 		
-		g.setColor(Color.blue);
-		for(int i = 0; i < graph.getShipmentNode().size(); i++){
-			if(graph.getShipmentNode().get(i).clicked){
-				if(!reverseColor)
-					g.setColor(Color.red);
-				else
-					g.setColor(Color.blue);
-			}
-			else
-				g.setColor(Color.blue);
-			g.fillOval(graph.getNode(graph.getShipmentNode().get(i).nodeNum-1).x-20
-					, graph.getNode(graph.getShipmentNode().get(i).nodeNum-1).y-20, 40, 40);
-		}
-			
-		
-		g.setColor(Color.green);
-		for(int i = 0; i < graph.getUnloadingNode().size(); i++){
-			if(graph.getUnloadingNode().get(i).clicked){
-				if(!reverseColor)
-					g.setColor(Color.red);
-				else
-					g.setColor(Color.green);
-			}
-			else
-				g.setColor(Color.green);
-			g.fillOval(graph.getNode(graph.getUnloadingNode().get(i).nodeNum-1).x-20
-					, graph.getNode(graph.getUnloadingNode().get(i).nodeNum-1).y-20, 40, 40);
-		}
-		
-		g.setColor(Color.ORANGE);
-		for(int i = 0; i < graph.getEmptyCarNode().size(); i++){
-			if(graph.getEmptyCarNode().get(i).clicked){
-				if(!reverseColor)
-					g.setColor(Color.red);
-				else
-					g.setColor(Color.ORANGE);
-			}
-			else
-				g.setColor(Color.ORANGE);
-			g.fillOval(graph.getNode(graph.getEmptyCarNode().get(i).nodeNum-1).x-20
-					, graph.getNode(graph.getEmptyCarNode().get(i).nodeNum-1).y-20, 40, 40);
-		}
-		
-		g.setColor(Color.PINK);
-		for(int i = 0; i < graph.getChargeNode().size(); i++){
-			if(graph.getChargeNode().get(i).clicked){
-				if(!reverseColor)
-					g.setColor(Color.red);
-				else
-					g.setColor(Color.PINK);
-			}
-			else
-				g.setColor(Color.PINK);
-			g.fillOval(graph.getNode(graph.getChargeNode().get(i).nodeNum-1).x-20
-					, graph.getNode(graph.getChargeNode().get(i).nodeNum-1).y-20, 40, 40);
-		}
-		
-		g.setColor(Color.gray);
 		g.setFont(new Font("ËÎÌו", Font.BOLD, 30));
-		for(int i = 0; i < graph.getTagArray().size(); i++)
-			g.drawString(graph.getTagArray().get(i).tag, graph.getTagArray().get(i).position.x
-					, graph.getTagArray().get(i).position.y);
+		for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
+			if(graph.getFunctionNodeArray().get(i).clicked){
+				if(!reverseColor){
+					g.setColor(Color.red);
+				}else{
+					if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.SHIPMENT)
+						g.setColor(Color.BLUE);
+					if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.UNLOADING)
+						g.setColor(Color.GREEN);
+					if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.CHARGE)
+						g.setColor(Color.PINK);
+					if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.EMPTYCAR)
+						g.setColor(Color.ORANGE);
+					if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.TAG)
+						g.setColor(Color.GRAY);
+				}
+			}else{
+				if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.SHIPMENT)
+					g.setColor(Color.BLUE);
+				if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.UNLOADING)
+					g.setColor(Color.GREEN);
+				if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.CHARGE)
+					g.setColor(Color.PINK);
+				if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.EMPTYCAR)
+					g.setColor(Color.ORANGE);
+				if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.TAG)
+					g.setColor(Color.GRAY);
+			}
+			if(graph.getFunctionNodeArray().get(i).function != FunctionNodeEnum.TAG)
+				g.fillOval(graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum-1).x-20
+						, graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum-1).y-20, 40, 40);
+			else
+				g.drawString(graph.getFunctionNodeArray().get(i).tag, graph.getFunctionNodeArray().get(i).x
+						, graph.getFunctionNodeArray().get(i).y);
+		}
 		
+		g.setColor(Color.GRAY);
 		for(int i = 0; i < graph.getEdgeSize(); i++){
 			if(graph.getEdge(i).startNode.y == graph.getEdge(i).endNode.y){
 				if(graph.getEdge(i).startNode.x > graph.getEdge(i).endNode.x){
@@ -200,8 +176,7 @@ public class MyToolKit {
 							if(j == 1)
 								x = Integer.parseInt(str);
 							if(j == 2)
-								y = Integer.parseInt(str);
-							//System.out.println("nodes:"+str);					
+								y = Integer.parseInt(str);			
 					}
 					graph.addImportNode(x, y, num);
 				}
@@ -223,8 +198,7 @@ public class MyToolKit {
 							if(j == 4)
 								endCardNum = Integer.parseInt(str);
 							if(j == 5)
-								twoWay = Integer.parseInt(str);
-							//System.out.println("edges:"+str);						
+								twoWay = Integer.parseInt(str);				
 					}
 					if(twoWay == 1)
 						graph.addEdge(start, end, dis, strCardNum, endCardNum, true);
@@ -232,104 +206,39 @@ public class MyToolKit {
 						graph.addEdge(start, end, dis, strCardNum, endCardNum, false);
 				}
 				
-				Sheet sheetShipment = wb.getSheet("shipment");
-				for(int i = 0; i < sheetShipment.getRows(); i++){
-					int node=0, com=0, card=0;
+				Sheet sheetFunctionNode = wb.getSheet("functionNode");
+				for(int i = 0; i < sheetFunctionNode.getRows(); i++){
+					int node=0, com=0, x = 0, y = 0, ordinal = 0;
+					String ip = "";
 					String tag = "";
-					for(int j = 0; j < 4; j++){
-						Cell cell0 = sheetShipment.getCell(j,i);
+					for(int j = 0; j < 7; j++){
+						Cell cell0 = sheetFunctionNode.getCell(j,i);
 							String str = cell0.getContents();
 							if(j == 0)
 								node = Integer.parseInt(str);
 							if(j == 1)
-								com = Integer.parseInt(str);
+								ip = str;
 							if(j == 2)
-								card = Integer.parseInt(str);
+								com = Integer.parseInt(str);
 							if(j == 3)
 								tag = str;
-							//System.out.println("sheetShipment:"+str);					
-					}
-					graph.addShipmentNode(node, com, card, tag);
-				}
-				
-				
-				
-				Sheet sheetUnloading = wb.getSheet("unloading");
-				for(int i = 0; i < sheetUnloading.getRows(); i++){
-					int node=0, com=0, card=0;
-					String tag = "";
-					for(int j = 0; j < 4; j++){
-						Cell cell0 = sheetUnloading.getCell(j,i);
-							String str = cell0.getContents();
-							if(j == 0)
-								node = Integer.parseInt(str);
-							if(j == 1)
-								com = Integer.parseInt(str);
-							if(j == 2)
-								card = Integer.parseInt(str);
-							if( j == 3)
-								tag = str;
-							
-							//System.out.println("unloading:"+str);					
-					}
-					graph.addUnloadingNode(node, com, card, tag);
-				}
-				
-				
-				Sheet sheetEmptyCar = wb.getSheet("emptyCar");
-				for(int i = 0; i < sheetEmptyCar.getRows(); i++){
-					int node=0, com=0, card=0;
-					String tag = "";
-					for(int j = 0; j < 4; j++){
-						Cell cell0 = sheetEmptyCar.getCell(j,i);
-							String str = cell0.getContents();
-							if(j == 0)
-								node = Integer.parseInt(str);
-							if(j == 1)
-								com = Integer.parseInt(str);
-							if(j == 2)
-								card = Integer.parseInt(str);	
-							if(j == 3)
-								tag = str;
-					}
-					graph.addEmptyCarNode(node, com, card, tag);
-				}
-				
-				Sheet sheetCharge = wb.getSheet("charge");
-				for(int i = 0; i < sheetCharge.getRows(); i++){
-					int node=0, com=0, card=0;
-					String tag = "";
-					for(int j = 0; j < 4; j++){
-						Cell cell0 = sheetCharge.getCell(j,i);
-							String str = cell0.getContents();
-							if(j == 0)
-								node = Integer.parseInt(str);
-							if(j == 1)
-								com = Integer.parseInt(str);
-							if(j == 2)
-								card = Integer.parseInt(str);	
-							if(j == 3)
-								tag = str;
-					}
-					graph.addChargeNode(node, com, card, tag);
-				}
-				
-				Sheet sheetTag = wb.getSheet("tag");
-				for(int i = 0; i < sheetTag.getRows(); i++){
-					int x=0, y=0;
-					String tag = "";
-					for(int j = 0; j < 3; j++){
-						Cell cell0 = sheetTag.getCell(j,i);
-							String str = cell0.getContents();
-							if(j == 0)
+							if(j == 4)
 								x = Integer.parseInt(str);
-							if(j == 1)
+							if(j == 5)
 								y = Integer.parseInt(str);
-							if(j == 2)
-								tag = str;			
+							if(j == 6)
+								ordinal = Integer.parseInt(str);			
 					}
-					graph.addTagArray(x, y, tag);
+					graph.addFunctionNode(FunctionNodeEnum.values()[ordinal],node, ip, com, tag);
 				}
+				
+				Sheet sheetAGVSeting = wb.getSheet("AGVSeting");
+				for(int i = 0; i < sheetAGVSeting.getRows(); i++){
+					Cell cell0 = sheetAGVSeting.getCell(0,i);
+					String seting = cell0.getContents();
+					graph.addAGVSeting(seting);
+				}
+				
 			}			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -340,6 +249,7 @@ public class MyToolKit {
 	
 	
 	public String routeToOrientation(Graph graph, ArrayList<Integer> route, AGVCar agvCar){
+		System.out.println("route:" + route);
 		boolean strNodeFunction = agvCar.getStartEdge().endNode.functionNode;
 		boolean first = true;
 		ArrayList<Node> result = new ArrayList<Node>();

@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 
 import schedulingSystem.component.AGVCar;
 import schedulingSystem.component.AGVCar.Orientation;
+import schedulingSystem.component.AGVCar.State;
 import schedulingSystem.component.ConflictDetection;
 import schedulingSystem.component.Dijkstra;
 import schedulingSystem.component.Edge;
@@ -32,8 +33,9 @@ import schedulingSystem.component.Graph;
 import schedulingSystem.component.Main;
 import schedulingSystem.component.Node;
 import schedulingSystem.component.Path;
-import schedulingSystem.toolKit.HandleReceiveMessage;
+import schedulingSystem.toolKit.ReceiveStationMessage;
 import schedulingSystem.toolKit.MyToolKit;
+import schedulingSystem.toolKit.ReceiveAGVMessage;
 import schedulingSystem.toolKit.RoundButton;
 
 
@@ -44,7 +46,7 @@ public class SchedulingGui extends JPanel{
 	private Dimension panelSize;
 	private int numOfAGV;
 	private ArrayList<AGVCar> AGVArray;
-	private Graph graph;
+	private static Graph graph;
 	private boolean firstInit;
 	private ServerSocket serverSocket;
 	private MyToolKit myToolKit;
@@ -58,7 +60,8 @@ public class SchedulingGui extends JPanel{
 	private Dimension screenSize;
 	private ExecutorService executorService;
 	private Dijkstra dijkstra;
-	private HandleReceiveMessage handleReceiveMessage;
+	private ReceiveAGVMessage receiveAGVMessage;
+	private ReceiveStationMessage receiveStationMessage;
 	private int time500ms;
 	private boolean reverseColor;
 	private ConflictDetection conflictDetection;
@@ -76,7 +79,8 @@ public class SchedulingGui extends JPanel{
 	private Image downImageR;
 	
 	
-	public static SchedulingGui getInstance(){
+	public static  SchedulingGui getInstance(Graph graph1){
+		graph = graph1;
 		if(instance == null){
 			instance = new SchedulingGui();
 		}
@@ -94,14 +98,14 @@ public class SchedulingGui extends JPanel{
 		upImageR = tool.getImage("upImage2.png");
 		downImageR = tool.getImage("downImage2.png");
 		myToolKit = new MyToolKit();
-		graph = new Graph();
-		graph = myToolKit.importNewGraph("C:/testGraph.xls");
-		graph.initIgnoreCard();
+		//graph = new Graph();
+		//graph = myToolKit.importNewGraph("C:/Users/agv/Documents/testGraph.xls");
+		//graph.initIgnoreCard();
 		dijkstra = new Dijkstra(graph);
 		stateString = new StringBuffer();
 		panelSize = new Dimension(0, 0);
 		executorService = Executors.newFixedThreadPool(15);
-		numOfAGV = 10;
+		numOfAGV = graph.getAGVSeting().size();
 		conflictDetection = new ConflictDetection(graph);
 		AGVArray = new ArrayList<AGVCar>();
 		for(int i = 0; i < numOfAGV; i++){
@@ -119,7 +123,7 @@ public class SchedulingGui extends JPanel{
 
 		graphGuiBtn = new RoundButton("管理界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
-		
+		/*
 		importGraphBtn = new RoundButton("导入地图");
 		importGraphBtn.setFont(new Font("宋体",Font.BOLD, 23));
 		importGraphBtn.setBounds(13*screenSize.width/14, 19*screenSize.height/22, screenSize.width/14, screenSize.height/22);
@@ -134,7 +138,7 @@ public class SchedulingGui extends JPanel{
 					AGVArray.add(new AGVCar(i+1, graph, conflictDetection));
 				}
 			}
-		});
+		});*/
 
 		stateLabel = new JLabel();
 		stateLabel.setBounds(0, 22*screenSize.height/25, screenSize.width, screenSize.height/25);
@@ -156,8 +160,21 @@ public class SchedulingGui extends JPanel{
 					try{
 						if(serverSocket != null){
 							socket = serverSocket.accept();
-							handleReceiveMessage = new HandleReceiveMessage(socket, AGVArray, graph);
-							executorService.execute(handleReceiveMessage);
+							for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
+								if(graph.getFunctionNodeArray().get(i).ip.equals(socket.getInetAddress().getHostAddress().toString())){
+									receiveStationMessage = new ReceiveStationMessage(socket, graph, AGVArray, dijkstra, stateLabel, i);
+									executorService.execute(receiveStationMessage);
+								}
+							}
+							
+							if(receiveStationMessage == null){
+								System.out.println("receiveStationMessage == null");
+								receiveAGVMessage = new ReceiveAGVMessage(socket, AGVArray, graph);
+								executorService.execute(receiveAGVMessage);
+							}else{
+								receiveStationMessage = null;
+							}	
+							
 						}else{
 							stateString.append("serverSocket nullPointer//");
 							stateLabel.setText(stateString.toString());
@@ -183,7 +200,7 @@ public class SchedulingGui extends JPanel{
 		this.add(setingGuiBtn);
 		this.add(graphGuiBtn);
 		this.add(stateLabel);
-		this.add(importGraphBtn);
+		//this.add(importGraphBtn);
 	}//init
 	
 	@Override
@@ -253,13 +270,13 @@ public class SchedulingGui extends JPanel{
 				//System.out.println(myToolKit.routeToOrientation(graph,dijkstra.findRoute(18, 17).getRoute(), new AGVCar()));
 				try{
 					String str = "";
-					for(int i = 0; i < conflictDetection.getConflictNodeArray().size(); i++){
-						if(conflictDetection.getConflictNodeArray().get(i).occupy){
-							str+=(i+1);
+					for(int i = 0; i < conflictDetection.getConflictEdgeArray().size(); i++){
+						if(conflictDetection.getConflictEdgeArray().get(i).occupy){
+							str+=conflictDetection.getConflictEdgeArray().get(i).stratNodeNum + "||" + conflictDetection.getConflictEdgeArray().get(i).endNodeNum +"边";
 							str+="/";
 						}						
 					}
-					str+="点被占用";
+					str+="被占用";
 					stateLabel.setText(str);
 				}catch (Exception e1){
 					e1.printStackTrace();
@@ -297,33 +314,12 @@ public class SchedulingGui extends JPanel{
 		if(e.getButton() == MouseEvent.BUTTON1){
 			Node node = graph.searchWideNode(e.getX(), e.getY());
 			if(node != null){
-				for(int i = 0; i < graph.getShipmentNode().size(); i++){
-					if(graph.getShipmentNode().get(i).nodeNum  == node.num && !graph.getShipmentNode().get(i).clicked){
-						if((graph.getShipmentNode().get(i).callAGVNum = sendingWhichAGV(node.num))!=0)
-							graph.getShipmentNode().get(i).clicked = true;
+				for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
+					if(graph.getFunctionNodeArray().get(i).nodeNum  == node.num && !graph.getFunctionNodeArray().get(i).clicked){
+						if((graph.getFunctionNodeArray().get(i).callAGVNum = sendingWhichAGV(node.num))!=0)
+							graph.getFunctionNodeArray().get(i).clicked = true;
 					}
 				}
-				
-				for(int i = 0; i < graph.getUnloadingNode().size(); i++){
-					if(graph.getUnloadingNode().get(i).nodeNum  == node.num && !graph.getUnloadingNode().get(i).clicked){
-						if((graph.getUnloadingNode().get(i).callAGVNum = sendingWhichAGV(node.num))!=0)
-							graph.getUnloadingNode().get(i).clicked = true;
-					}
-				}	
-				
-				for(int i = 0; i < graph.getEmptyCarNode().size(); i++){
-					if(graph.getEmptyCarNode().get(i).nodeNum  == node.num && !graph.getEmptyCarNode().get(i).clicked){
-						if((graph.getEmptyCarNode().get(i).callAGVNum = sendingWhichAGV(node.num)) != 0)
-							graph.getEmptyCarNode().get(i).clicked = true;
-					}
-				}	
-				
-				for(int i = 0; i < graph.getChargeNode().size(); i++){
-					if(graph.getChargeNode().get(i).nodeNum  == node.num && !graph.getChargeNode().get(i).clicked){
-						if((graph.getChargeNode().get(i).callAGVNum = sendingWhichAGV(node.num)) != 0)
-							graph.getChargeNode().get(i).clicked = true;
-					}
-				}	
 			}
 		}
 	}
@@ -346,7 +342,8 @@ public class SchedulingGui extends JPanel{
 			if(AGVArray.get(i).isOnMission())
 				isOnMission.add(i+1);
 			
-			if(AGVArray.get(i).getStartEdge().endNode.num!=0 && AGVArray.get(i).isAlived() && !AGVArray.get(i).isOnMission()){
+			if(AGVArray.get(i).getStartEdge().endNode.num!=0 && AGVArray.get(i).isAlived() 
+					&& !AGVArray.get(i).isOnMission() && !AGVArray.get(i).getFixRoute()){
 				Edge edge = AGVArray.get(i).getStartEdge();
 				System.out.println("startEdge startNode :" + edge.startNode.num + "endNode:" + edge.endNode.num);
 				pathArray.add(dijkstra.findRoute(edge, endNodeNum));
@@ -366,9 +363,13 @@ public class SchedulingGui extends JPanel{
 			System.out.println("result:"+pathArray.get(minIndex).getRoute());
 			returnAGVNum = pathArray.get(minIndex).getNumOfAGV();
 			AGVCar agvCar= AGVArray.get(pathArray.get(minIndex).getNumOfAGV()-1);
-			agvCar.getRunnable().SendMessage(myToolKit.routeToOrientation(graph, pathArray.get(minIndex).getRoute(), agvCar));
-			agvCar.setDestinationNode(pathArray.get(minIndex).getEndNode());
-			agvCar.setRoute(pathArray.get(minIndex).getRoute());
+			//agvCar.getRunnable().SendMessage(myToolKit.routeToOrientation(graph, pathArray.get(minIndex).getRoute(), agvCar));
+			ArrayList<State> triggerArray = new ArrayList<State>();
+			triggerArray.add(State.NULL);
+			ArrayList<Integer> destinationArray = new ArrayList<Integer>();
+			destinationArray.add(endNodeNum);
+			agvCar.setDestinationNode(triggerArray, destinationArray);
+			//agvCar.setRoute(pathArray.get(minIndex).getRoute());
 		}else{
 			stateLabel.setText("没有AGV准备好");
 			logger.debug("没有AGV准备好");

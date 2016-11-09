@@ -1,7 +1,7 @@
 package schedulingSystem.toolKit;
 
-import schedulingSystem.toolKit.FunctionDialog.FunctionEnum;
+import schedulingSystem.component.FunctionNode.FunctionNodeEnum;
 
 public interface FunctionDialogListener {
-	public void getSeclectFunction(FunctionEnum function, String string, String str,String tag, boolean state);
+	public void getSeclectFunction(FunctionNodeEnum function, String string, String str,String tag, boolean state);
 }

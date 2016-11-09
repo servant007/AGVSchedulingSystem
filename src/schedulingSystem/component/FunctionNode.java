@@ -1,22 +1,28 @@
 package schedulingSystem.component;
 
 public class FunctionNode {
+	public enum FunctionNodeEnum{SHIPMENT, UNLOADING, CHARGE, EMPTYCAR, TAG}
+	public FunctionNodeEnum function;
 	public int nodeNum;
-	public int cardNum;
 	public int communicationNum;
-	public Node position;
 	public String tag;
 	public boolean clicked;
 	public int callAGVNum;
-	public FunctionNode(int nodeNum, int cardNum, int communicationNum, String tag){
+	public String ip;
+	public int x;
+	public int y;
+	
+	public FunctionNode(FunctionNodeEnum function, int nodeNum, String ip, int communicationNum, String tag){
+		this.function = function;
 		this.nodeNum = nodeNum;
-		this.cardNum = cardNum;
+		this.ip = ip;
 		this.communicationNum = communicationNum;
 		this.tag = tag;
 	}
 	
-	public FunctionNode(Node position, String tag){
-		this.position = position;
+	public FunctionNode(FunctionNodeEnum function, int x, int y, String tag){
+		this.x = x;
+		this.y = y;
 		this.tag = tag;
 	}
 }
