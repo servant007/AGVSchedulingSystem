@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
@@ -100,10 +101,10 @@ public class SchedulingGui extends JPanel{
 	}
 	
 	private SchedulingGui(){
-		System.out.println("jisuan:" + String.valueOf((long)20161111^key));
+		System.out.println("jisuan:" + String.valueOf((long)20161112^key));
 		try{
-			FileReader fr = new FileReader(".\\data\\date.txt");
-			BufferedReader br = new BufferedReader(fr);
+			FileReader fr = new FileReader("C:\\Users\\agv\\Documents\\date.txt");
+			BufferedReader br = new BufferedReader(fr);//new InputStreamReader(this.getClass().getResourceAsStream("/date.txt"))
 			password = Long.parseLong(br.readLine());
 			System.out.println(password);
 			br.close();
@@ -151,7 +152,7 @@ public class SchedulingGui extends JPanel{
 		setingGuiBtn = new RoundButton("设置界面");
 		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 
-		graphGuiBtn = new RoundButton("管理界面");
+		graphGuiBtn = new RoundButton("画图界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 
 		stateLabel = new JLabel();
@@ -234,7 +235,7 @@ public class SchedulingGui extends JPanel{
 	public void paint(Graphics g){
 		super.paint(g);
 		if(firstInit){
-			myToolKit.drawGraph(g, graph, reverseColor);
+			myToolKit.drawGraph(g, graph, reverseColor, false);
 			g.setColor(Color.black);
 			g.setFont(new java.awt.Font("Dialog", Font.BOLD, 25));
 			for(int i = 0; i < AGVArray.size(); i++){

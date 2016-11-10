@@ -63,7 +63,7 @@ public class MyToolKit {
 		return buff;
 	}
 	
-	public void drawGraph(Graphics g, Graph graph, boolean reverseColor){		
+	public void drawGraph(Graphics g, Graph graph, boolean reverseColor,  boolean graphGui){		
 		((Graphics2D)g).setStroke(new BasicStroke(6.0f));
 		g.setColor(Color.BLACK);
 		
@@ -112,37 +112,37 @@ public class MyToolKit {
 			}
 		}
 		
-		g.setColor(Color.GRAY);
-		for(int i = 0; i < graph.getEdgeSize(); i++){
-			if(graph.getEdge(i).startNode.y == graph.getEdge(i).endNode.y){
-				if(graph.getEdge(i).startNode.x > graph.getEdge(i).endNode.x){
-					g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x-60, graph.getEdge(i).startNode.y);
-					g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x+60, graph.getEdge(i).endNode.y);
-				}else{
-					g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x+60, graph.getEdge(i).startNode.y);
-					g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x-60, graph.getEdge(i).endNode.y);
+		if(graphGui){
+			g.setColor(Color.GRAY);
+			for(int i = 0; i < graph.getEdgeSize(); i++){
+				if(graph.getEdge(i).startNode.y == graph.getEdge(i).endNode.y){
+					if(graph.getEdge(i).startNode.x > graph.getEdge(i).endNode.x){
+						g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x-60, graph.getEdge(i).startNode.y);
+						g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x+60, graph.getEdge(i).endNode.y);
+					}else{
+						g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x+60, graph.getEdge(i).startNode.y);
+						g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x-60, graph.getEdge(i).endNode.y);
+					}
+					
 				}
-				
-			}
-			if(graph.getEdge(i).startNode.x == graph.getEdge(i).endNode.x){
-				if(graph.getEdge(i).startNode.y > graph.getEdge(i).endNode.y){
-					g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y-60);
-					g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y+60);
-				}else{
-					g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y+60);
-					g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y-60);
+				if(graph.getEdge(i).startNode.x == graph.getEdge(i).endNode.x){
+					if(graph.getEdge(i).startNode.y > graph.getEdge(i).endNode.y){
+						g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y-60);
+						g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y+60);
+					}else{
+						g.drawString(String.valueOf(graph.getEdge(i).strCardNum), graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y+60);
+						g.drawString(String.valueOf(graph.getEdge(i).endCardNum), graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y-60);
+					}	
 				}
-				
 			}
-			
 		}
 		
 		for(int i = 0 ; i < graph.getNodeSize(); i++){
 			g.setColor(Color.YELLOW);
 			g.fillRect(graph.getNode(i).x - 5, graph.getNode(i).y - 5, 10, 10);
 			g.setColor(Color.RED);
-			g.setFont(new Font("ËÎÌו", Font.BOLD, 25));
-			g.drawString(String.valueOf(i+1),graph.getNode(i).x - 5, graph.getNode(i).y - 5);
+			g.setFont(new Font("ËÎÌו", Font.BOLD, 30));
+			g.drawString(String.valueOf(i+1),graph.getNode(i).x + 10, graph.getNode(i).y - 10);
 		}
 	}
 	
@@ -163,7 +163,7 @@ public class MyToolKit {
 			
 			if(file != null){
 				System.out.println(file.getPath());
-				InputStream is = new FileInputStream(file.getPath());
+				InputStream is = new FileInputStream(file.getPath());//this.getClass().getResourceAsStream("/testGraph.xls");
 				Workbook wb = Workbook.getWorkbook(is);
 				
 				Sheet sheetNodes = wb.getSheet("nodes");

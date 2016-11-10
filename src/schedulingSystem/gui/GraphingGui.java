@@ -76,7 +76,7 @@ public class GraphingGui extends JPanel{
 		setingGuiBtn = new RoundButton("设置界面");
 		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
-		graphGuiBtn = new RoundButton("管理界面");
+		graphGuiBtn = new RoundButton("画图界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
 		comfirmBtn = new RoundButton("确认使用");
@@ -88,7 +88,7 @@ public class GraphingGui extends JPanel{
 		importGraphBtn.setBounds(13*screenSize.width/14, 18*screenSize.height/22, screenSize.width/14, screenSize.height/22);
 		importGraphBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				graph = myToolKit.importNewGraph(null);
+				graph = myToolKit.importNewGraph("C:\\Users\\agv\\Documents\\testGraph.xls");
 				countNode = graph.getNodeSize();
 				repaint();
 			}
@@ -313,9 +313,10 @@ public class GraphingGui extends JPanel{
 						dialog.dispose();
 						if(buttonState){
 							try{
+								String path = Thread.currentThread().getContextClassLoader().getResource("testGraph.xls").getPath();
 								graph.setStopCard( Integer.parseInt(stopCard));
 								graph.setExecuteCard(Integer.parseInt(executeCard));
-								File graphExcelFile = new File(".\\data\\testGraph.xls");
+								File graphExcelFile = new File("C:\\Users\\agv\\Documents\\testGraph.xls");
 								graphExcelFile.createNewFile();
 								OutputStream os = new FileOutputStream(graphExcelFile);
 								writeExcel(os, graph);
@@ -352,7 +353,7 @@ public class GraphingGui extends JPanel{
 				, mousePosition.x+10, mousePosition.y - 10);
 
 		
-		myToolKit.drawGraph(g, graph, true);
+		myToolKit.drawGraph(g, graph, true, true);
 	}
 	
 	public void setBtnColor(){
@@ -411,7 +412,12 @@ public class GraphingGui extends JPanel{
 				wsShipment.addCell(y);
 				wsShipment.addCell(ordinal);
 			}
-			wwb.createSheet("AGVSeting", 3);
+			
+			WritableSheet wsSeting = wwb.createSheet("AGVSeting", 3);
+			for(int i = 0; i < graph.getAGVSeting().size(); i++){
+				Label seting = new Label(0,i,graph.getAGVSeting().get(i));
+				wsSeting.addCell(seting);
+			}
 			
 			WritableSheet wscard = wwb.createSheet("cardNum", 4);
 			Number stopCard = new Number(0, 0, graph.getStopCard());

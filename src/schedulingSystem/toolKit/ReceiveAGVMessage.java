@@ -77,7 +77,7 @@ public class ReceiveAGVMessage implements Runnable{
 								int NOOfCard = Integer.parseInt(message.substring(4, 6), 16);
 								
 								if(NOOfCard != lastCard){
-									System.out.println("receive card number:"+NOOfCard);
+									System.out.println(noOfAGV + "AGVreceive card number:"+NOOfCard);
 									AGVArray.get(noOfAGV-1).setLastCard(NOOfCard);
 									int electricity = Integer.parseInt(message.substring(6, 8), 16);
 									AGVArray.get(noOfAGV-1).setElectricity(electricity);

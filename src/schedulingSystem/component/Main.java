@@ -31,7 +31,7 @@ public class Main extends JFrame {
 		this.setIconImage(icon);
 		myToolKit = new MyToolKit();
 		graph = new Graph();
-		graph = myToolKit.importNewGraph(".\\data\\testGraph.xls");
+		graph = myToolKit.importNewGraph("C:\\Users\\agv\\Documents\\testGraph.xls");
 		graph.initIgnoreCard();
 		schedulingGui = SchedulingGui.getInstance(graph);
 		setingGui = SetingGui.getInstance(graph);

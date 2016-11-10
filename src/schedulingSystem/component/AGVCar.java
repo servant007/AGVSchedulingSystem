@@ -7,8 +7,8 @@ import schedulingSystem.toolKit.ReceiveAGVMessage;
 
 public class AGVCar{
 		private int AGVNum;
-		private int x = 150;
-		private int y = 150;
+		private int x = -20;
+		private int y = -20;
 		private Edge edge;
 		private int lastCard;
 		public enum Orientation{LEFT,RIGTH,UP,DOWN}
@@ -285,6 +285,14 @@ public class AGVCar{
 				this.getRunnable().SendMessage(myToolKit.routeToOrientation(graph
 						, routeNode, this));
 
+				for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
+					if(this.multiDestination.get(0) == graph.getFunctionNodeArray().get(i).nodeNum){
+						graph.getFunctionNodeArray().get(i).clicked = true;
+						graph.getFunctionNodeArray().get(i).callAGVNum = this.AGVNum;
+					}
+						
+				}
+				
 				this.missionString = graph.getNode(multiDestination.get(0)-1).tag;
 				this.isOnMission = true;
 				for(int i = 0 ; i < graph.getEdgeSize(); i++){
@@ -383,10 +391,7 @@ public class AGVCar{
 				}
 					
 			}
-			for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
-				if(this.multiDestination.get(0) == graph.getFunctionNodeArray().get(i).nodeNum)
-					graph.getFunctionNodeArray().get(i).clicked = true;
-			}
+
 			this.missionString = graph.getNode(multiDestination.get(0)-1).tag;
 			this.isOnMission = true;
 			for(int i = 0 ; i < graph.getEdgeSize(); i++){
