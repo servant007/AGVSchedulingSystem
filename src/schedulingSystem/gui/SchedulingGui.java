@@ -11,7 +11,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
@@ -41,6 +43,8 @@ import schedulingSystem.toolKit.ReceiveStationMessage;
 import schedulingSystem.toolKit.MyToolKit;
 import schedulingSystem.toolKit.ReceiveAGVMessage;
 import schedulingSystem.toolKit.RoundButton;
+import schedulingSystem.toolKit.SignUpDialog;
+import schedulingSystem.toolKit.SignUpDialogListener;
 
 
 public class SchedulingGui extends JPanel{
@@ -84,6 +88,7 @@ public class SchedulingGui extends JPanel{
 	private long password;
 	private String deadline;
 	private long systemTime; 
+	private int foundAGVNum;
 	
 	
 	public static  SchedulingGui getInstance(Graph graph1){
@@ -168,7 +173,7 @@ public class SchedulingGui extends JPanel{
 					stateLabel.setText(stateString.toString());
 					logger.error(e);
 				}
-				executorService = Executors.newFixedThreadPool(2*numOfAGV);
+				executorService = Executors.newFixedThreadPool(20);
 			}else{
 				stateLabel.setFont(new Font("宋体", Font.BOLD, 30));
 				stateLabel.setForeground(Color.RED);
@@ -180,9 +185,6 @@ public class SchedulingGui extends JPanel{
 			stateLabel.setText("已过期，请注册！");
 		}
 		
-		
-		
-
 		new Thread(new Runnable(){
 			public void run(){
 				while(true){
@@ -336,12 +338,62 @@ public class SchedulingGui extends JPanel{
 	}
 	
 	public void handleFunctionNodeClick(MouseEvent e){
+		foundAGVNum = 0;
 		if(e.getButton() == MouseEvent.BUTTON1){
 			Node node = graph.searchWideNode(e.getX(), e.getY());
 			for(int i = 0; i < AGVArray.size(); i++){
-				//if(AGVArray)
+				if(!AGVArray.get(i).isOnMission()){
+					if(Math.pow(e.getX() - AGVArray.get(i).getX(), 2) + 
+							Math.pow(e.getY() - AGVArray.get(i).getY(), 2) < 1000){
+						foundAGVNum = i+1;
+					}
+				}
 			}
-			if(node != null){
+			if(foundAGVNum != 0){
+				SignUpDialog dialog = new SignUpDialog("AGV路径");
+				dialog.setOnDialogListener(new SignUpDialogListener(){
+					public void getDialogListener(String routeStr, boolean btn){
+						boolean triggerState = true;
+						boolean destinationState = true;
+						boolean foundNode = false;
+						dialog.dispose();
+						if(btn){
+							if(routeStr.length() > 1 && !routeStr.equals("AGV路径")){
+								ArrayList<State> triggerArray = new ArrayList<State>();
+								ArrayList<Integer> destinationArray = new ArrayList<Integer>();
+								String[] route = routeStr.split("/");
+								for(int i = 0; i < route.length; i++){
+									if(i%2 == 0){
+										if(route[i].equals("4")){
+											triggerArray.add(State.SHIPMENT);
+										}else if(route[i].equals("5")){
+											triggerArray.add(State.UNLOADING);
+										}else if(route[i].equals("0")){
+											triggerArray.add(State.NULL);
+										}else{
+											triggerState = false;
+										}
+									}else{
+										for(int j = 0; j < graph.getFunctionNodeArray().size(); j++){
+											if(Integer.parseInt(route[i]) == graph.getFunctionNodeArray().get(j).nodeNum){
+												destinationArray.add(Integer.parseInt(route[i]));
+												foundNode = true;
+											}
+										}
+										if(!foundNode)
+											destinationState = false;
+									}
+								}
+								if(destinationState && triggerState)
+									AGVArray.get(foundAGVNum-1).setDestinationNode(triggerArray, destinationArray);
+								else
+									stateLabel.setText("设置路径错误");
+								
+							}
+						}
+					}
+				});
+			}else if(node != null){
 				for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
 					if(graph.getFunctionNodeArray().get(i).nodeNum  == node.num && !graph.getFunctionNodeArray().get(i).clicked){
 						if((graph.getFunctionNodeArray().get(i).callAGVNum = sendingWhichAGV(node.num))!=0)

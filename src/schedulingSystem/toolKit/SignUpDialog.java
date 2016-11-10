@@ -20,14 +20,14 @@ public class SignUpDialog extends JDialog {
 	private MyTextField stopCard;
 	private SignUpDialogListener dialogListener;
 	
-	public SignUpDialog(){
+	public SignUpDialog(String string){
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setSize(screenSize.width/4, screenSize.height/4);
 		this.setLocation(3*screenSize.width/8, 3*screenSize.height/8);
 
 		JPanel mainPanel = new JPanel(new GridLayout(3,1, 10,10));
 
-		stopCard = new MyTextField("×¢²áÐòÁÐºÅ");
+		stopCard = new MyTextField(string);
 		stopCard.setFont(new Font("ËÎÌå", Font.BOLD ,30));
 		
 

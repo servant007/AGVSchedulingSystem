@@ -125,7 +125,7 @@ public class SetingGui extends JPanel{
 		signUpGraphBtn.setBounds(13*screenSize.width/14, 19*screenSize.height/22, screenSize.width/14, screenSize.height/22);
 		signUpGraphBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				SignUpDialog dialog = new SignUpDialog();
+				SignUpDialog dialog = new SignUpDialog("×¢²áÐòÁÐºÅ");
 				dialog.setOnDialogListener(new SignUpDialogListener(){
 					public void getDialogListener(String password, boolean btn){
 						dialog.dispose();
