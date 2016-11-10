@@ -102,7 +102,7 @@ public class SetingGui extends JPanel{
 				try{
 					InputStream inputStream = new FileInputStream(file.getPath());
 					Workbook wb = Workbook.getWorkbook(inputStream);
-					WritableWorkbook wwb = Workbook.createWorkbook(new File("C:/Users/agv/Documents/testGraph.xls"), wb);
+					WritableWorkbook wwb = Workbook.createWorkbook(new File(".\\data\\testGraph.xls"), wb);
 					wwb.removeSheet(3);
 					WritableSheet wsAGVSeting = wwb.createSheet("AGVSeting", 3);
 					for(int i = 0; i < AGVSeting.size(); i++){				
@@ -114,6 +114,7 @@ public class SetingGui extends JPanel{
 					wb.close();
 				}catch(Exception e1){
 					e1.printStackTrace();
+					logger.error(e);
 				}
 				
 			}
@@ -129,13 +130,14 @@ public class SetingGui extends JPanel{
 					public void getDialogListener(String password, boolean btn){
 						dialog.dispose();
 						if(btn){
-							File file = new File(".\\date\\date.txt");
+							File file = new File(".\\data\\date.txt");
 							try{
 								FileWriter fw = new FileWriter(file);
 								fw.write(password);
 								fw.close();
 							}catch(Exception e1){
 								e1.printStackTrace();
+								logger.error(e);
 							}
 						}
 					}

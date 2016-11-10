@@ -97,7 +97,7 @@ public class SchedulingGui extends JPanel{
 	private SchedulingGui(){
 		System.out.println("jisuan:" + String.valueOf((long)20161111^key));
 		try{
-			FileReader fr = new FileReader(".\\date\\date.txt");
+			FileReader fr = new FileReader(".\\data\\date.txt");
 			BufferedReader br = new BufferedReader(fr);
 			password = Long.parseLong(br.readLine());
 			System.out.println(password);
@@ -129,7 +129,7 @@ public class SchedulingGui extends JPanel{
 		dijkstra = new Dijkstra(graph);
 		stateString = new StringBuffer();
 		panelSize = new Dimension(0, 0);
-		executorService = Executors.newFixedThreadPool(15);
+		
 		numOfAGV = graph.getAGVSeting().size();
 		conflictDetection = new ConflictDetection(graph);
 		AGVArray = new ArrayList<AGVCar>();
@@ -156,7 +156,7 @@ public class SchedulingGui extends JPanel{
 		timer.start();
 		
 		
-		if(deadline.startsWith("201") && Integer.parseInt(deadline.substring(4,5)) < 2 && Integer.parseInt(deadline.substring(6,7)) < 4){
+		if(deadline.startsWith("20") && Integer.parseInt(deadline.substring(4,5)) < 2 && Integer.parseInt(deadline.substring(6,7)) < 4){
 			System.out.println("deadline:"+deadline);
 			if(systemTime < Long.parseLong(deadline)){
 				System.out.println("normal:");
@@ -168,7 +168,7 @@ public class SchedulingGui extends JPanel{
 					stateLabel.setText(stateString.toString());
 					logger.error(e);
 				}
-				
+				executorService = Executors.newFixedThreadPool(2*numOfAGV);
 			}else{
 				stateLabel.setFont(new Font("宋体", Font.BOLD, 30));
 				stateLabel.setForeground(Color.RED);
@@ -338,6 +338,9 @@ public class SchedulingGui extends JPanel{
 	public void handleFunctionNodeClick(MouseEvent e){
 		if(e.getButton() == MouseEvent.BUTTON1){
 			Node node = graph.searchWideNode(e.getX(), e.getY());
+			for(int i = 0; i < AGVArray.size(); i++){
+				//if(AGVArray)
+			}
 			if(node != null){
 				for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
 					if(graph.getFunctionNodeArray().get(i).nodeNum  == node.num && !graph.getFunctionNodeArray().get(i).clicked){
@@ -388,13 +391,11 @@ public class SchedulingGui extends JPanel{
 			System.out.println("result:"+pathArray.get(minIndex).getRoute());
 			returnAGVNum = pathArray.get(minIndex).getNumOfAGV();
 			AGVCar agvCar= AGVArray.get(pathArray.get(minIndex).getNumOfAGV()-1);
-			//agvCar.getRunnable().SendMessage(myToolKit.routeToOrientation(graph, pathArray.get(minIndex).getRoute(), agvCar));
 			ArrayList<State> triggerArray = new ArrayList<State>();
 			triggerArray.add(State.NULL);
 			ArrayList<Integer> destinationArray = new ArrayList<Integer>();
 			destinationArray.add(endNodeNum);
 			agvCar.setDestinationNode(triggerArray, destinationArray);
-			//agvCar.setRoute(pathArray.get(minIndex).getRoute());
 		}else{
 			stateLabel.setText("没有AGV准备好");
 			logger.debug("没有AGV准备好");

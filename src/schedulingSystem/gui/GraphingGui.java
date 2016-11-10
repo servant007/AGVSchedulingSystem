@@ -315,7 +315,7 @@ public class GraphingGui extends JPanel{
 							try{
 								graph.setStopCard( Integer.parseInt(stopCard));
 								graph.setExecuteCard(Integer.parseInt(executeCard));
-								File graphExcelFile = new File("C:/Users/agv/Documents/testGraph.xls");
+								File graphExcelFile = new File(".\\data\\testGraph.xls");
 								graphExcelFile.createNewFile();
 								OutputStream os = new FileOutputStream(graphExcelFile);
 								writeExcel(os, graph);
@@ -411,7 +411,7 @@ public class GraphingGui extends JPanel{
 				wsShipment.addCell(y);
 				wsShipment.addCell(ordinal);
 			}
-			WritableSheet wsAGVSeting = wwb.createSheet("AGVSeting", 3);
+			wwb.createSheet("AGVSeting", 3);
 			
 			WritableSheet wscard = wwb.createSheet("cardNum", 4);
 			Number stopCard = new Number(0, 0, graph.getStopCard());
