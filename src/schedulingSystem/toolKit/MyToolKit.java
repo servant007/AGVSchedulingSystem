@@ -239,6 +239,14 @@ public class MyToolKit {
 					graph.addAGVSeting(seting);
 				}
 				
+				Sheet sheetCardNum = wb.getSheet("cardNum");
+				Cell cell0 = sheetCardNum.getCell(0,0);
+				Cell cell1 = sheetCardNum.getCell(0,1);
+				String stopCard = cell0.getContents();
+				String executeCard = cell1.getContents();
+				graph.setStopCard(Integer.parseInt(stopCard));
+				graph.setExecuteCard(Integer.parseInt(executeCard));
+					
 			}			
 		}catch(Exception e){
 			e.printStackTrace();

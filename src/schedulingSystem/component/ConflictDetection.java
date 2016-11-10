@@ -3,11 +3,9 @@ package schedulingSystem.component;
 import java.util.ArrayList;
 
 public class ConflictDetection {
-	private Graph graph;
 	private ArrayList<ConflictNode> conflictNodeArray;
 	private ArrayList<ConflictEdge> conflictEdgeArray;
 	public ConflictDetection(Graph graph){
-		this.graph = graph;
 		conflictNodeArray = new ArrayList<ConflictNode>();
 		for(int i = 0; i < graph.getNodeSize(); i++)
 			conflictNodeArray.add(new ConflictNode(i+1));
@@ -29,8 +27,6 @@ public class ConflictDetection {
 			}
 		}
 		
-		for(int i = 0; i < conflictEdgeArray.size(); i++)
-			System.out.println(conflictEdgeArray.get(i).stratNodeNum + "||" + conflictEdgeArray.get(i).endNodeNum + "±ß");
 	}
 	
 	public void checkConflict(AGVCar agvCar, int checkNode, int endNode){

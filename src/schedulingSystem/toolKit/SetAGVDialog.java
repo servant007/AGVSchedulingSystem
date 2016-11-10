@@ -18,7 +18,7 @@ public class SetAGVDialog extends JDialog{
 	private static final long serialVersionUID = 1L;
 	private RoundButton comfirmBtn;
 	private RoundButton cancelBtn;
-	private MyTextField agvNum;
+	//private MyTextField agvNum;
 	private MyTextField route;
 	private SetAGVListener dialogListener;
 	private boolean fixRoute;
@@ -28,19 +28,20 @@ public class SetAGVDialog extends JDialog{
 		this.setSize(screenSize.width/4, screenSize.height/4);
 		this.setLocation(3*screenSize.width/8, 3*screenSize.height/8);
 
-		JPanel mainPanel = new JPanel(new GridLayout(5,1, 10,10));
+		JPanel mainPanel = new JPanel(new GridLayout(3,1, 10,10));
 
-		agvNum = new MyTextField("AGV编号");
 		route = new MyTextField("AGV固定路径");
 		
-		JRadioButton twoWayBtn = new JRadioButton("固定路径");
-		twoWayBtn.setFont(new Font("宋体", Font.BOLD, 30));
-		twoWayBtn.addActionListener(new ActionListener(){
+		JPanel fixRoutePanel = new JPanel();
+		JRadioButton fixRouteBtn = new JRadioButton("固定路径");
+		fixRouteBtn.setFont(new Font("宋体", Font.BOLD, 30));
+		fixRouteBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				if(e.getActionCommand().equals("固定路径"))
 					fixRoute = true;
 			}
 		});
+		fixRoutePanel.add(fixRouteBtn);
 		
 		JPanel btnPanel = new JPanel(new GridLayout(1,2,20,20));
 		comfirmBtn = new RoundButton("确认");
@@ -58,15 +59,13 @@ public class SetAGVDialog extends JDialog{
 		});
 		btnPanel.add(comfirmBtn);
 		btnPanel.add(cancelBtn);
-		mainPanel.add(agvNum);
 		mainPanel.add(route);
-		mainPanel.add(twoWayBtn);
+		mainPanel.add(fixRoutePanel);
 		mainPanel.add(btnPanel);
 		this.getContentPane().add(mainPanel);
 		this.setVisible(true);
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		this.setAlwaysOnTop(true);
-		//this.setUndecorated(true);
 	}
 	
 	public void setOnDialogListener(SetAGVListener listener){

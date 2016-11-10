@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -123,6 +124,22 @@ public class SetingGui extends JPanel{
 		signUpGraphBtn.setBounds(13*screenSize.width/14, 19*screenSize.height/22, screenSize.width/14, screenSize.height/22);
 		signUpGraphBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
+				SignUpDialog dialog = new SignUpDialog();
+				dialog.setOnDialogListener(new SignUpDialogListener(){
+					public void getDialogListener(String password, boolean btn){
+						dialog.dispose();
+						if(btn){
+							File file = new File(".\\date\\date.txt");
+							try{
+								FileWriter fw = new FileWriter(file);
+								fw.write(password);
+								fw.close();
+							}catch(Exception e1){
+								e1.printStackTrace();
+							}
+						}
+					}
+				});
 			}
 		});
 		timer = new Timer(100, new TimerListener());

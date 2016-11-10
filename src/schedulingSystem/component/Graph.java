@@ -11,8 +11,8 @@ public class Graph {
 	private ArrayList<FunctionNode> functionNodeArray;
 	private ArrayList<Integer> ignoreCard;
 	private int cardQuantity;
-	private int stopCard = 50;
-	private int executeCard = 61;
+	private int stopCard;
+	private int executeCard;
 	
 	public Graph(){
 		nodeArray = new ArrayList<Node>();
@@ -168,5 +168,13 @@ public class Graph {
 	
 	public ArrayList<String> getAGVSeting(){
 		return AGVSeting;
+	}
+	
+	public void setStopCard(int num){
+		this.stopCard = num;
+	}
+	
+	public void setExecuteCard(int num){
+		this.executeCard = num;
 	}
 }

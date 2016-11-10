@@ -7,8 +7,8 @@ import schedulingSystem.toolKit.ReceiveAGVMessage;
 
 public class AGVCar{
 		private int AGVNum;
-		private int x = -15;
-		private int y = -15;
+		private int x = 150;
+		private int y = 150;
 		private Edge edge;
 		private int lastCard;
 		public enum Orientation{LEFT,RIGTH,UP,DOWN}
@@ -37,7 +37,6 @@ public class AGVCar{
 		private ArrayList<Integer> routeNode;
 		private ConflictEdge occupyEdge;
 		private ConflictEdge lastOccupyEdge;
-		private boolean firstRouteNode;
 		
 		public AGVCar(){}
 		
@@ -191,12 +190,14 @@ public class AGVCar{
 				if(first && fixRoute){
 					first = false;
 					routeNode = dijkstra.findRoute(this.getStartEdge(), this.multiDestination.get(0)).getRoute();
-					this.firstRouteNode = true;
 					this.getRunnable().SendMessage(myToolKit.routeToOrientation(graph
 							, routeNode, this));
 					for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
-						if(this.multiDestination.get(0) == graph.getFunctionNodeArray().get(i).nodeNum)
+						if(this.multiDestination.get(0) == graph.getFunctionNodeArray().get(i).nodeNum){
 							graph.getFunctionNodeArray().get(i).clicked = true;
+							graph.getFunctionNodeArray().get(i).callAGVNum = this.AGVNum;
+						}
+							
 					}
 					this.missionString = graph.getNode(multiDestination.get(0)-1).tag;
 					this.isOnMission = true;
@@ -281,7 +282,6 @@ public class AGVCar{
 			this.multiDestination = destination;
 			if(trigger.get(0) == State.NULL){
 				routeNode = dijkstra.findRoute(this.getStartEdge(), this.multiDestination.get(0)).getRoute();
-				this.firstRouteNode = true;
 				this.getRunnable().SendMessage(myToolKit.routeToOrientation(graph
 						, routeNode, this));
 
@@ -336,31 +336,6 @@ public class AGVCar{
 			}else{
 				conflictDetection.removeOccupy(this, edge.startNode.num);
 			}	
-			/*
-			if(routeEdge.size() != 0){//只有被派遣任务的agv才会检查路径冲突
-				if(cardNum != routeEdge.get(routeEdge.size() - 1).endCardNum){
-					//查询是否是endCard，如果是，检测是否冲突，将结果发送给agv
-					for(int i = 0; i < routeEdge.size(); i++){
-						if(cardNum == routeEdge.get(i).endCardNum){//检测冲突
-							System.out.println(this.AGVNum+"agv查询是否可以通过"+routeEdge.get(i).endNode.num+"点");
-							conflictDetection.checkConflict(this, routeEdge.get(i).endNode.num, 0);//根据route
-						}
-						
-						if(cardNum == routeEdge.get(i).strCardNum){//解除占用
-							//System.out.println(this.AGVNum + "agv查询解除对" + routeEdge.get(i).startNode.num +"点的占用");
-							conflictDetection.removeOccupy(this, routeEdge.get(i).startNode.num);
-						}
-					}
-				}
-			}else{
-				if(foundEnd){
-					System.out.println(this.AGVNum+"agv查询是否可以通过"+edge.endNode.num+"点");
-					conflictDetection.checkConflict(this, edge.endNode.num, 0);//根据route
-				}else{
-					conflictDetection.removeOccupy(this, edge.startNode.num);
-				}	
-				
-			}*/
 		}
 		
 		public void setAGVState(int state){
@@ -399,13 +374,14 @@ public class AGVCar{
 		
 		private void triggerDestination(){
 			routeNode = dijkstra.findRoute(this.getStartEdge(), this.multiDestination.get(0)).getRoute();
-			this.firstRouteNode = true;
 			this.getRunnable().SendMessage(myToolKit.routeToOrientation(graph
 					, routeNode, this));
-			//this.setRouteEdge(routeNode);
 			for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
-				if(this.multiDestination.get(0) == graph.getFunctionNodeArray().get(i).nodeNum)
+				if(this.multiDestination.get(0) == graph.getFunctionNodeArray().get(i).nodeNum){
 					graph.getFunctionNodeArray().get(i).clicked = true;
+					graph.getFunctionNodeArray().get(i).callAGVNum = this.AGVNum;
+				}
+					
 			}
 			for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
 				if(this.multiDestination.get(0) == graph.getFunctionNodeArray().get(i).nodeNum)

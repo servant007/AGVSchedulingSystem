@@ -1,6 +1,10 @@
 package schedulingSystem.component;
 
+import java.awt.AlphaComposite;
 import java.awt.Frame;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 
@@ -19,8 +23,12 @@ public class Main extends JFrame {
 	private GraphingGui graphingGui;
 	private Graph graph;
 	private MyToolKit myToolKit;
+	private Image icon;
 	public Main(){
 		super("AGV调度系统");
+		Toolkit tool = Toolkit.getDefaultToolkit();
+		icon = tool.createImage(getClass().getResource("/logo.png"));
+		this.setIconImage(icon);
 		myToolKit = new MyToolKit();
 		graph = new Graph();
 		graph = myToolKit.importNewGraph("C:/Users/agv/Documents/testGraph.xls");
@@ -42,6 +50,23 @@ public class Main extends JFrame {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		/*
+		new Thread(){
+			public void run(){
+				try{
+					SplashScreen splash = SplashScreen.getSplashScreen();
+					//Graphics2D g = splash.createGraphics();
+					//g.setComposite(AlphaComposite.Clear);
+					splash.setImageURL(Main.class.getResource("/logo.png"));
+					splash.update();
+					Thread.sleep(1000);
+
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}
+		}.start();*/
+		
 		Main main = new Main();
 	}
 

@@ -10,10 +10,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -53,7 +57,6 @@ public class SchedulingGui extends JPanel{
 	private RoundButton schedulingGuiBtn;
 	private RoundButton setingGuiBtn;
 	private RoundButton graphGuiBtn;
-	private RoundButton importGraphBtn;
 	private Timer timer;
 	private JLabel stateLabel;
 	private StringBuffer stateString;
@@ -77,6 +80,10 @@ public class SchedulingGui extends JPanel{
 	private Image rightImageR;
 	private Image upImageR;
 	private Image downImageR;
+	private static long key = 27940871;
+	private long password;
+	private String deadline;
+	private long systemTime; 
 	
 	
 	public static  SchedulingGui getInstance(Graph graph1){
@@ -88,19 +95,37 @@ public class SchedulingGui extends JPanel{
 	}
 	
 	private SchedulingGui(){
-		Toolkit tool = this.getToolkit();
-		leftImageG = tool.getImage("leftImage.png");
-		rightImageG = tool.getImage("rightImage.png");
-		upImageG = tool.getImage("upImage.png");
-		downImageG = tool.getImage("downImage.png");
-		leftImageR = tool.getImage("leftImage2.png");
-		rightImageR = tool.getImage("rightImage2.png");
-		upImageR = tool.getImage("upImage2.png");
-		downImageR = tool.getImage("downImage2.png");
+		System.out.println("jisuan:" + String.valueOf((long)20161111^key));
+		try{
+			FileReader fr = new FileReader(".\\date\\date.txt");
+			BufferedReader br = new BufferedReader(fr);
+			password = Long.parseLong(br.readLine());
+			System.out.println(password);
+			br.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+		Calendar c = Calendar.getInstance();
+		int year = c.get(Calendar.YEAR);
+		int month = c.get(Calendar.MONTH)+1;
+		int date = c.get(Calendar.DATE);
+		systemTime = date + 100*month + 10000*year; 
+		System.out.println(systemTime);
+		deadline = String.valueOf(password^key);
+		
+		
+		
+		Toolkit tool = Toolkit.getDefaultToolkit();
+		leftImageG = tool.createImage(getClass().getResource("/leftImage.png"));
+		rightImageG = tool.createImage(getClass().getResource("/rightImage.png"));
+		upImageG = tool.createImage(getClass().getResource("/upImage.png"));
+		downImageG = tool.createImage(getClass().getResource("/downImage.png"));
+		leftImageR = tool.createImage(getClass().getResource("/leftImage2.png"));
+		rightImageR = tool.createImage(getClass().getResource("/rightImage2.png"));
+		upImageR = tool.createImage(getClass().getResource("/upImage2.png"));
+		downImageR = tool.createImage(getClass().getResource("/downImage2.png"));
 		myToolKit = new MyToolKit();
-		//graph = new Graph();
-		//graph = myToolKit.importNewGraph("C:/Users/agv/Documents/testGraph.xls");
-		//graph.initIgnoreCard();
 		dijkstra = new Dijkstra(graph);
 		stateString = new StringBuffer();
 		panelSize = new Dimension(0, 0);
@@ -123,35 +148,40 @@ public class SchedulingGui extends JPanel{
 
 		graphGuiBtn = new RoundButton("管理界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
-		/*
-		importGraphBtn = new RoundButton("导入地图");
-		importGraphBtn.setFont(new Font("宋体",Font.BOLD, 23));
-		importGraphBtn.setBounds(13*screenSize.width/14, 19*screenSize.height/22, screenSize.width/14, screenSize.height/22);
-		importGraphBtn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				graph = myToolKit.importNewGraph(null);
-				graph.initIgnoreCard();
-				dijkstra = new Dijkstra(graph);
-				conflictDetection = new ConflictDetection(graph);
-				AGVArray = new ArrayList<AGVCar>();
-				for(int i = 0; i < numOfAGV; i++){
-					AGVArray.add(new AGVCar(i+1, graph, conflictDetection));
-				}
-			}
-		});*/
 
 		stateLabel = new JLabel();
 		stateLabel.setBounds(0, 22*screenSize.height/25, screenSize.width, screenSize.height/25);
 		stateLabel.setFont(new Font("宋体", Font.BOLD, 25));
+		timer = new Timer(100, new TimerListener());
+		timer.start();
 		
-		try{
-			serverSocket = new ServerSocket(8001);
-		}catch(Exception e){
-			e.printStackTrace();
-			stateString.append(e.toString()).append("//");
-			stateLabel.setText(stateString.toString());
-			logger.error(e);
+		
+		if(deadline.startsWith("201") && Integer.parseInt(deadline.substring(4,5)) < 2 && Integer.parseInt(deadline.substring(6,7)) < 4){
+			System.out.println("deadline:"+deadline);
+			if(systemTime < Long.parseLong(deadline)){
+				System.out.println("normal:");
+				try{
+					serverSocket = new ServerSocket(8001);
+				}catch(Exception e){
+					e.printStackTrace();
+					stateString.append(e.toString()).append("//");
+					stateLabel.setText(stateString.toString());
+					logger.error(e);
+				}
+				
+			}else{
+				stateLabel.setFont(new Font("宋体", Font.BOLD, 30));
+				stateLabel.setForeground(Color.RED);
+				stateLabel.setText("已过期，请注册！");
+			}
+		}else{
+			stateLabel.setFont(new Font("宋体", Font.BOLD, 30));
+			stateLabel.setForeground(Color.RED);
+			stateLabel.setText("已过期，请注册！");
 		}
+		
+		
+		
 
 		new Thread(new Runnable(){
 			public void run(){
@@ -175,9 +205,6 @@ public class SchedulingGui extends JPanel{
 								receiveStationMessage = null;
 							}	
 							
-						}else{
-							stateString.append("serverSocket nullPointer//");
-							stateLabel.setText(stateString.toString());
 						}
 					}catch(Exception e){
 						e.printStackTrace();
@@ -186,8 +213,7 @@ public class SchedulingGui extends JPanel{
 				}
 			}
 		}).start();
-		timer = new Timer(100, new TimerListener());
-		timer.start();
+		
 		
 		this.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent e){
@@ -200,7 +226,6 @@ public class SchedulingGui extends JPanel{
 		this.add(setingGuiBtn);
 		this.add(graphGuiBtn);
 		this.add(stateLabel);
-		//this.add(importGraphBtn);
 	}//init
 	
 	@Override

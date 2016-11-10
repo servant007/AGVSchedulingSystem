@@ -8,11 +8,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
-public class FileNameDialog extends JDialog{
+public class SignUpDialog extends JDialog {
 	/**
 	 * 
 	 */
@@ -20,38 +18,35 @@ public class FileNameDialog extends JDialog{
 	private RoundButton comfirmBtn;
 	private RoundButton cancelBtn;
 	private MyTextField stopCard;
-	private MyTextField executeCard;
-	private FileNameDialogListener dialogListener;
+	private SignUpDialogListener dialogListener;
 	
-	public FileNameDialog(){
+	public SignUpDialog(){
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setSize(screenSize.width/4, screenSize.height/4);
 		this.setLocation(3*screenSize.width/8, 3*screenSize.height/8);
 
-		JPanel mainPanel = new JPanel(new GridLayout(4,1, 10,10));
+		JPanel mainPanel = new JPanel(new GridLayout(3,1, 10,10));
 
-		stopCard = new MyTextField("停止卡号");
-		executeCard = new MyTextField("执行卡号");
+		stopCard = new MyTextField("注册序列号");
 		stopCard.setFont(new Font("宋体", Font.BOLD ,30));
-		executeCard.setFont(new Font("宋体", Font.BOLD ,30));
 		
 
 		comfirmBtn = new RoundButton("确认");
 		cancelBtn = new RoundButton("取消");
 		comfirmBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				dialogListener.getFileName(stopCard.getText(), executeCard.getText(), true);
+				dialogListener.getDialogListener(stopCard.getText(), true);
 			}
 		});
 		
 		cancelBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				dialogListener.getFileName("","",false);
+				dialogListener.getDialogListener("",false);
 			}
 		});
 
 		mainPanel.add(stopCard);
-		mainPanel.add(executeCard);
+
 		mainPanel.add(comfirmBtn);
 		mainPanel.add(cancelBtn);
 		this.getContentPane().add(mainPanel);
@@ -60,7 +55,7 @@ public class FileNameDialog extends JDialog{
 		this.setAlwaysOnTop(true);
 	}
 	
-	public void setOnDialogListener(FileNameDialogListener listener){
+	public void setOnDialogListener(SignUpDialogListener listener){
 		this.dialogListener = listener;
 	}
 }

@@ -32,7 +32,8 @@ public class ConflictEdge {
 				public void run(){
 					waitQueue.get(0).getRunnable().SendMessage("CC02DD");//move
 				}
-			}, 2000);
+			}, 1000);
+			timer = new Timer();
 			System.out.println("让"+waitQueue.get(0).getAGVNum()+"号agv前进占用" + this.stratNodeNum+ "||" + this.endNodeNum + "边");
 		}
 	}

@@ -309,12 +309,13 @@ public class GraphingGui extends JPanel{
 				FileNameDialog dialog = new FileNameDialog();
 				dialog.setOnDialogListener(new FileNameDialogListener(){
 					@Override
-					public void getFileName(String fileName, boolean buttonState){
+					public void getFileName(String stopCard, String executeCard, boolean buttonState){
 						dialog.dispose();
 						if(buttonState){
 							try{
-								StringBuffer filePath = new StringBuffer();
-								File graphExcelFile = new File(filePath.append("C:/").append(fileName).append(".xls").toString());//
+								graph.setStopCard( Integer.parseInt(stopCard));
+								graph.setExecuteCard(Integer.parseInt(executeCard));
+								File graphExcelFile = new File("C:/Users/agv/Documents/testGraph.xls");
 								graphExcelFile.createNewFile();
 								OutputStream os = new FileOutputStream(graphExcelFile);
 								writeExcel(os, graph);
@@ -410,8 +411,14 @@ public class GraphingGui extends JPanel{
 				wsShipment.addCell(y);
 				wsShipment.addCell(ordinal);
 			}
+			WritableSheet wsAGVSeting = wwb.createSheet("AGVSeting", 3);
 			
-			
+			WritableSheet wscard = wwb.createSheet("cardNum", 4);
+			Number stopCard = new Number(0, 0, graph.getStopCard());
+			Number executeCard = new Number(0, 1, graph.getExecuteCard());
+			wscard.addCell(stopCard);
+			wscard.addCell(executeCard);
+
 			wwb.write();
 			wwb.close();
 		}catch(Exception e){
