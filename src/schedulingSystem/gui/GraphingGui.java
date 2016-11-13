@@ -76,16 +76,16 @@ public class GraphingGui extends JPanel{
 		setingGuiBtn = new RoundButton("设置界面");
 		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
-		graphGuiBtn = new RoundButton("画图界面");
+		graphGuiBtn = new RoundButton("制图界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
 		comfirmBtn = new RoundButton("确认使用");
-		comfirmBtn.setFont(new Font("宋体", Font.BOLD, 23));
-		comfirmBtn.setBounds(13*screenSize.width/14, 19*screenSize.height/22, screenSize.width/14, screenSize.height/22);
+		comfirmBtn.setFont(new Font("宋体", Font.BOLD, 20));
+		comfirmBtn.setBounds(11*screenSize.width/12, 19*screenSize.height/22, screenSize.width/12, screenSize.height/22);
 		
 		importGraphBtn = new RoundButton("导入地图");
-		importGraphBtn.setFont(new Font("宋体", Font.BOLD, 23));
-		importGraphBtn.setBounds(13*screenSize.width/14, 18*screenSize.height/22, screenSize.width/14, screenSize.height/22);
+		importGraphBtn.setFont(new Font("宋体", Font.BOLD, 20));
+		importGraphBtn.setBounds(11*screenSize.width/12, 18*screenSize.height/22, screenSize.width/12, screenSize.height/22);
 		importGraphBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				graph = myToolKit.importNewGraph("C:\\Users\\agv\\Documents\\testGraph.xls");
@@ -258,7 +258,7 @@ public class GraphingGui extends JPanel{
 									else if(function == FunctionNodeEnum.CHARGE)
 										graph.addFunctionNode(FunctionNodeEnum.CHARGE, node.num, ip,Integer.parseInt(com), tag);
 									else if(function == FunctionNodeEnum.TAG)
-										graph.addTagNode(FunctionNodeEnum.TAG, node.x, node.y, com);
+										graph.addTagNode(FunctionNodeEnum.TAG, node.x, node.y, ip);
 								}
 								System.out.println(com);
 							}
@@ -273,7 +273,7 @@ public class GraphingGui extends JPanel{
 							public void getSeclectFunction(FunctionNodeEnum function, String str, String str1,String tag,  boolean btnState){
 								if(str.length() > 0){
 									if(function == FunctionNodeEnum.TAG)
-										graph.addTagNode(FunctionNodeEnum.TAG, node1.x, node1.y, str+str1);
+										graph.addTagNode(FunctionNodeEnum.TAG, node1.x, node1.y, str);
 								}
 								System.out.println(str);
 							}

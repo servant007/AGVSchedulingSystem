@@ -152,7 +152,7 @@ public class SchedulingGui extends JPanel{
 		setingGuiBtn = new RoundButton("设置界面");
 		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 
-		graphGuiBtn = new RoundButton("画图界面");
+		graphGuiBtn = new RoundButton("制图界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 
 		stateLabel = new JLabel();

@@ -101,8 +101,12 @@ public class MyToolKit {
 					g.setColor(Color.GRAY);
 			}
 			if(graph.getFunctionNodeArray().get(i).function != FunctionNodeEnum.TAG){
-				g.fillOval(graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum-1).x-20
-						, graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum-1).y-20, 40, 40);
+				if(graph.getFunctionNodeArray().get(i).nodeNum != 0){
+					g.fillOval(graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum-1).x-20
+							, graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum-1).y-20, 40, 40);
+				}else {
+					g.drawString(graph.getFunctionNodeArray().get(i).tag, graph.getFunctionNodeArray().get(i).x, graph.getFunctionNodeArray().get(i).y);
+				}
 				g.setColor(Color.BLACK);
 				g.drawString(graph.getFunctionNodeArray().get(i).tag, graph.getFunctionNodeArray().get(i).x
 						, graph.getFunctionNodeArray().get(i).y);

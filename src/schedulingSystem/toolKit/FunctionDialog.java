@@ -26,20 +26,20 @@ public class FunctionDialog extends JDialog{
 	//public enum FunctionEnum{SHIPMENT, UNLOADING, EMPTYCAR, CHARGE, TAG}
 	public  void getInstance(FunctionDialog instance, boolean isNotAddString){
 		
-		JPanel shipmentPanel = new JPanel(new GridLayout(6,1,10,10));
+		JPanel shipmentPanel = new JPanel(new GridLayout(5,1,10,10));
 		setPanel(shipmentPanel, FunctionNodeEnum.SHIPMENT, instance);
 		
-		JPanel unloadingPanel = new JPanel(new GridLayout(6,1,10,10));
+		JPanel unloadingPanel = new JPanel(new GridLayout(5,1,10,10));
 		setPanel(unloadingPanel, FunctionNodeEnum.UNLOADING, instance );
 		
-		JPanel emptyCarPanel = new JPanel(new GridLayout(6,1,10,10));
+		JPanel emptyCarPanel = new JPanel(new GridLayout(5,1,10,10));
 		setPanel(emptyCarPanel, FunctionNodeEnum.EMPTYCAR, instance);
 		
-		JPanel chargePanel = new JPanel(new GridLayout(6,1,10,10));
+		JPanel chargePanel = new JPanel(new GridLayout(5,1,10,10));
 		setPanel(chargePanel, FunctionNodeEnum.CHARGE, instance);
 
-		JPanel addStringPanel = new JPanel(new GridLayout(4,1,10,10));
-		setPanel(addStringPanel, FunctionNodeEnum.TAG, instance);
+		JPanel addStringPanel = new JPanel(new GridLayout(3,1,10,10));
+		setPanelTag(addStringPanel, FunctionNodeEnum.TAG, instance);
 		
 		if(isNotAddString){
 			buttonAddActionListener(shipmentBtn, shipmentPanel, instance);
@@ -108,6 +108,31 @@ public class FunctionDialog extends JDialog{
 		panel.add(tag);
 		panel.add(comBtn);
 		panel.add(celBtn);
+	}
+	
+	public void setPanelTag(JPanel panel, FunctionNodeEnum sec, FunctionDialog instance){
+
+		panel.setBorder(BorderFactory.createEtchedBorder());
+		MyTextField tag = new MyTextField("标记信息");
+		RoundButton comBtn = new RoundButton("确认");
+		comBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				functionDialog.getSeclectFunction(sec, tag.getText(), "", "",true);
+				instance.dispose();
+			}
+		});
+		RoundButton celBtn = new RoundButton("取消");
+		celBtn.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				functionDialog.getSeclectFunction(sec, "","", "",false);
+				instance.dispose();
+			}
+		});
+				
+		panel.add(tag);
+		panel.add(comBtn);
+		panel.add(celBtn);
+	
 	}
 	
 	public void buttonAddActionListener(RoundButton btn, JPanel panel, FunctionDialog instance){

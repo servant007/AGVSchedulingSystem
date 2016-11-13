@@ -76,12 +76,12 @@ public class SetingGui extends JPanel{
 		setingGuiBtn = new RoundButton("设置界面");
 		setingGuiBtn.setBounds(screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
-		graphGuiBtn = new RoundButton("画图界面");
+		graphGuiBtn = new RoundButton("制图界面");
 		graphGuiBtn.setBounds(2*screenSize.width/3, 0, screenSize.width/3, screenSize.height/20);
 		
 		setAGVBtn = new RoundButton("设置AGV");
 		setAGVBtn.setFont(new Font("宋体",Font.BOLD, 23));
-		setAGVBtn.setBounds(6*screenSize.width/14, 19*screenSize.height/22, screenSize.width/14, screenSize.height/22);
+		setAGVBtn.setBounds(6*screenSize.width/14, 19*screenSize.height/22, screenSize.width/12, screenSize.height/22);
 		setAGVBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				SetAGVDialog setAGVDialog = new SetAGVDialog();
@@ -102,12 +102,12 @@ public class SetingGui extends JPanel{
 		});
 		
 		stateLabel = new JLabel();
-		stateLabel.setBounds(0, 22*screenSize.height/25, screenSize.width, screenSize.height/25);
+		stateLabel.setBounds(0, 21*screenSize.height/25, screenSize.width, screenSize.height/25);
 		stateLabel.setFont(new Font("宋体", Font.BOLD, 25));
 		
 		confirmBtn = new RoundButton("确认");
 		confirmBtn.setFont(new Font("宋体",Font.BOLD, 23));
-		confirmBtn.setBounds(8*screenSize.width/14, 19*screenSize.height/22, screenSize.width/14, screenSize.height/22);
+		confirmBtn.setBounds(8*screenSize.width/14, 19*screenSize.height/22, screenSize.width/12, screenSize.height/22);
 		confirmBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				//File file = new File(".\\data\\testGraph.xls");
@@ -178,7 +178,7 @@ public class SetingGui extends JPanel{
 		super.paint(g);
 		g.setFont(new Font("Dialog", Font.BOLD, 25));
 		g.drawString("服务电话：13751402059",1*screenSize.width/30, 23*screenSize.height/26);
-		g.drawImage(logo,1*screenSize.width/30, 19*screenSize.height/24, this);
+		g.drawImage(logo,1*screenSize.width/30, 19*screenSize.height/26, this);
 		g.setFont(new Font("宋体", Font.BOLD, 35));
 		g.setColor(Color.BLACK);
 		if(AGVSeting.size() > 0){

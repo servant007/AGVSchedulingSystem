@@ -28,7 +28,7 @@ public class Main extends JFrame {
 		super("AGV调度系统");
 		Toolkit tool = Toolkit.getDefaultToolkit();
 		icon = tool.createImage(getClass().getResource("/logo.png"));
-		this.setIconImage(icon);
+		//this.setIconImage(icon);
 		myToolKit = new MyToolKit();
 		graph = new Graph();
 		graph = myToolKit.importNewGraph("C:\\Users\\agv\\Documents\\testGraph.xls");
