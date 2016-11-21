@@ -52,11 +52,11 @@ public class SchedulingGui extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private static SchedulingGui instance;
 	private static Logger logger = Logger.getLogger(SchedulingGui.class.getName());
-	private Dimension panelSize;
+	//private Dimension panelSize;
 	private int numOfAGV;
 	private ArrayList<AGVCar> AGVArray;
 	private static Graph graph;
-	private boolean firstInit;
+	//private boolean firstInit;
 	private ServerSocket serverSocket;
 	private MyToolKit myToolKit;
 	private RoundButton schedulingGuiBtn;
@@ -101,7 +101,7 @@ public class SchedulingGui extends JPanel{
 	}
 	
 	private SchedulingGui(){
-		System.out.println("jisuan:" + String.valueOf((long)20161112^key));
+		System.out.println("jisuan:" + String.valueOf((long)20161220^key));
 		try{
 			FileReader fr = new FileReader("C:\\Users\\agv\\Documents\\date.txt");
 			BufferedReader br = new BufferedReader(fr);//new InputStreamReader(this.getClass().getResourceAsStream("/date.txt"))
@@ -118,7 +118,7 @@ public class SchedulingGui extends JPanel{
 		int date = c.get(Calendar.DATE);
 		systemTime = date + 100*month + 10000*year; 
 		System.out.println(systemTime);
-		deadline = String.valueOf(password^key);
+		deadline = String.valueOf((password)^key);
 		
 		
 		
@@ -134,7 +134,7 @@ public class SchedulingGui extends JPanel{
 		myToolKit = new MyToolKit();
 		dijkstra = new Dijkstra(graph);
 		stateString = new StringBuffer();
-		panelSize = new Dimension(0, 0);
+		//panelSize = new Dimension(0, 0);
 		
 		numOfAGV = graph.getAGVSeting().size();
 		conflictDetection = new ConflictDetection(graph);
@@ -201,7 +201,7 @@ public class SchedulingGui extends JPanel{
 							}
 							
 							if(receiveStationMessage == null){
-								System.out.println("receiveStationMessage == null");
+								//System.out.println("receiveStationMessage == null");
 								receiveAGVMessage = new ReceiveAGVMessage(socket, AGVArray, graph);
 								executorService.execute(receiveAGVMessage);
 							}else{
@@ -234,40 +234,39 @@ public class SchedulingGui extends JPanel{
 	@Override
 	public void paint(Graphics g){
 		super.paint(g);
-		if(firstInit){
-			myToolKit.drawGraph(g, graph, reverseColor, false);
-			g.setColor(Color.black);
-			g.setFont(new java.awt.Font("Dialog", Font.BOLD, 25));
-			for(int i = 0; i < AGVArray.size(); i++){
-				if(AGVArray.get(i).isAlived()){
-					leftImage = leftImageG;
-					rightImage = rightImageG;
-					upImage = upImageG;
-					downImage = downImageG;
-					
-				}else{
-					leftImage = leftImageR;
-					rightImage = rightImageR;
-					upImage = upImageR;
-					downImage = downImageR;
-				}
-				if(AGVArray.get(i).getOrientation() == Orientation.LEFT){
-					g.drawImage(leftImage,AGVArray.get(i).getX() - 20, AGVArray.get(i).getY() - 17, 40, 34, this);
-					g.drawString(String.valueOf(i+1), AGVArray.get(i).getX(), AGVArray.get(i).getY()+9);
-				}else if(AGVArray.get(i).getOrientation() == Orientation.RIGTH){
-					g.drawImage(rightImage,AGVArray.get(i).getX() - 20, AGVArray.get(i).getY() - 17, 40, 34, this);
-					g.drawString(String.valueOf(i+1), AGVArray.get(i).getX()-10, AGVArray.get(i).getY()+9);
-				}else if(AGVArray.get(i).getOrientation() == Orientation.UP){
-					g.drawImage(upImage,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 20, 34, 40, this);
-					g.drawString(String.valueOf(i+1), AGVArray.get(i).getX()-10, AGVArray.get(i).getY()+10);
-				}else if(AGVArray.get(i).getOrientation() == Orientation.DOWN){
-					g.drawImage(downImage,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 20, 34, 40, this);
-					g.drawString(String.valueOf(i+1), AGVArray.get(i).getX()-5, AGVArray.get(i).getY()+5);
-				}			
-				if(AGVArray.get(i).isOnMission())
-					g.drawString(AGVArray.get(i).getMissionString(), AGVArray.get(i).getX(), AGVArray.get(i).getY()-25);
+		myToolKit.drawGraph(g, graph, reverseColor, false);
+		g.setColor(Color.black);
+		g.setFont(new java.awt.Font("Dialog", Font.BOLD, 25));
+		for(int i = 0; i < AGVArray.size(); i++){
+			if(AGVArray.get(i).isAlived()){
+				leftImage = leftImageG;
+				rightImage = rightImageG;
+				upImage = upImageG;
+				downImage = downImageG;
+				
+			}else{
+				leftImage = leftImageR;
+				rightImage = rightImageR;
+				upImage = upImageR;
+				downImage = downImageR;
 			}
+			if(AGVArray.get(i).getOrientation() == Orientation.LEFT){
+				g.drawImage(leftImage,AGVArray.get(i).getX() - 20, AGVArray.get(i).getY() - 17, 40, 34, this);
+				g.drawString(String.valueOf(i+1), AGVArray.get(i).getX(), AGVArray.get(i).getY()+9);
+			}else if(AGVArray.get(i).getOrientation() == Orientation.RIGTH){
+				g.drawImage(rightImage,AGVArray.get(i).getX() - 20, AGVArray.get(i).getY() - 17, 40, 34, this);
+				g.drawString(String.valueOf(i+1), AGVArray.get(i).getX()-10, AGVArray.get(i).getY()+9);
+			}else if(AGVArray.get(i).getOrientation() == Orientation.UP){
+				g.drawImage(upImage,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 20, 34, 40, this);
+				g.drawString(String.valueOf(i+1), AGVArray.get(i).getX()-10, AGVArray.get(i).getY()+10);
+			}else if(AGVArray.get(i).getOrientation() == Orientation.DOWN){
+				g.drawImage(downImage,AGVArray.get(i).getX() - 17, AGVArray.get(i).getY() - 20, 34, 40, this);
+				g.drawString(String.valueOf(i+1), AGVArray.get(i).getX()-5, AGVArray.get(i).getY()+5);
+			}			
+			if(AGVArray.get(i).isOnMission())
+				g.drawString(AGVArray.get(i).getMissionString(), AGVArray.get(i).getX(), AGVArray.get(i).getY()-25);
 		}
+	
 	}
 	
 	class TimerListener implements ActionListener{
@@ -279,15 +278,9 @@ public class SchedulingGui extends JPanel{
 				reverseColor = !reverseColor;
 			}
 
-			if(!firstInit){
-				panelSize.width = screenSize.width;
-				panelSize.height = screenSize.height;
-				firstInit = true;
-			}else {	
-				for(int i = 0; i < AGVArray.size(); i ++){
-					AGVArray.get(i).stepForward();
-				}
-			}		
+			for(int i = 0; i < AGVArray.size(); i ++){
+				AGVArray.get(i).stepForward();
+			}	
 		}
 	}
 	
@@ -351,7 +344,7 @@ public class SchedulingGui extends JPanel{
 				}
 			}
 			if(foundAGVNum != 0){
-				SignUpDialog dialog = new SignUpDialog("AGV路径");
+				SignUpDialog dialog = new SignUpDialog(foundAGVNum+"AGV路径");
 				dialog.setOnDialogListener(new SignUpDialogListener(){
 					public void getDialogListener(String routeStr, boolean btn){
 						boolean triggerState = true;
@@ -359,7 +352,7 @@ public class SchedulingGui extends JPanel{
 						boolean foundNode = false;
 						dialog.dispose();
 						if(btn){
-							if(routeStr.length() > 1 && !routeStr.equals("AGV路径")){
+							if(routeStr.length() > 1 && !routeStr.equals(foundAGVNum+"AGV路径")){
 								ArrayList<State> triggerArray = new ArrayList<State>();
 								ArrayList<Integer> destinationArray = new ArrayList<Integer>();
 								String[] route = routeStr.split("/");

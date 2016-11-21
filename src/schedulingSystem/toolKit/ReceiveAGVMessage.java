@@ -19,7 +19,7 @@ public class ReceiveAGVMessage implements Runnable{
 	private OutputStream outputStream;
 	private Socket socket;
 	private long lastCommunicationTime;
-	private long reciveDelayTime = 7000;
+	private long reciveDelayTime = 20000;
 	private MyToolKit myToolKit;
 	private ArrayList<AGVCar> AGVArray;
 	private int noOfAGV;
@@ -31,7 +31,7 @@ public class ReceiveAGVMessage implements Runnable{
 		myToolKit = new MyToolKit();
 		this.graph = graph;
 		this.AGVArray = AGVArray;
-		System.out.println("socket connect:"+socket.toString());
+		System.out.println("socket connect agv message:"+socket.toString());
 		this.socket = socket;
 		try{
 			inputStream = socket.getInputStream();
@@ -60,6 +60,7 @@ public class ReceiveAGVMessage implements Runnable{
 			if(System.currentTimeMillis() - lastCommunicationTime < reciveDelayTime){//			
 				try{
 					if(inputStream.available() > 0){
+						System.out.println("间隔时间:"+String.valueOf(System.currentTimeMillis() - lastCommunicationTime));
 						lastCommunicationTime = System.currentTimeMillis();
 						byte[] buff = new byte[5];
 						inputStream.read(buff);
@@ -67,7 +68,7 @@ public class ReceiveAGVMessage implements Runnable{
 						System.out.println(message);
 						if(message.startsWith("AA")&&message.endsWith("BB")){
 							noOfAGV = Integer.parseInt(message.substring(2, 4), 16);
-							if(!oldRunnable){
+							if(!oldRunnable&&(noOfAGV < AGVArray.size())){
 								AGVArray.get(noOfAGV-1).setRunnabel(this);
 								oldRunnable = true;
 							}
@@ -103,6 +104,7 @@ public class ReceiveAGVMessage implements Runnable{
 					logger.error(e);
 				}
 			}else{
+				System.out.println("jiange shijian:"+String.valueOf(System.currentTimeMillis() - lastCommunicationTime));
 				try{
 					if(inputStream != null)
 						inputStream.close();
@@ -115,7 +117,7 @@ public class ReceiveAGVMessage implements Runnable{
 					logger.error(e);
 				}
 				break;//退出while循环
-			}				
+			}
 		}//while
 	}
 }

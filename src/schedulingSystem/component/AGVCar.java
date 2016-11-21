@@ -37,6 +37,8 @@ public class AGVCar{
 		private ArrayList<Integer> routeNode;
 		private ConflictEdge occupyEdge;
 		private ConflictEdge lastOccupyEdge;
+		private int forwordPix;
+		//private long lastTime;
 		
 		public AGVCar(){}
 		
@@ -73,7 +75,6 @@ public class AGVCar{
 			state = State.FORWARD;
 			edge = new Edge(new Node(0,0),new Node(0,0));
 			first = true;
-			//routeEdge = new ArrayList<Edge>();
 		}
 
 		public void stepForward(){
@@ -81,13 +82,13 @@ public class AGVCar{
 				if(edge.startNode.x == edge.endNode.x){
 					if(edge.startNode.y < edge.endNode.y ){
 						if(y < edge.endNode.y){
-							y +=10;
+							y +=forwordPix;
 						}else{
 							finishEdge = true;
 						}	
 					}else if(edge.startNode.y > edge.endNode.y ){
 						if(y > edge.endNode.y){
-							y -=10;
+							y -=forwordPix;
 						}else{
 							finishEdge = true;
 						}
@@ -95,12 +96,12 @@ public class AGVCar{
 				}else if(edge.startNode.y == edge.endNode.y){
 					if(edge.startNode.x < edge.endNode.x ){
 						if(x < edge.endNode.x)
-							x +=10;
+							x +=forwordPix;
 						else
 							finishEdge = true;
 					}else if(edge.startNode.x > edge.endNode.x){
 						if(x > edge.endNode.x)
-							x -=10;
+							x -=forwordPix;
 						else
 							finishEdge = true;
 					}
@@ -186,6 +187,17 @@ public class AGVCar{
 				finishEdge = false;
 				x = edge.startNode.x;
 				y = edge.startNode.y;
+				int time = edge.realDis/60;
+				//System.out.println("time:"+time);
+				if(edge.startNode.x == edge.endNode.x){
+					forwordPix =  Math.abs(edge.startNode.y - edge.endNode.y)/(10*time);
+					if(forwordPix == 0)
+						forwordPix = 1;
+				}else if(edge.startNode.y == edge.endNode.y){
+					forwordPix = Math.abs(edge.startNode.x - edge.endNode.x)/(10*time);
+					if(forwordPix == 0)
+						forwordPix = 1;
+				}
 				judgeOrientation();
 				if(first && fixRoute){
 					first = false;
@@ -251,7 +263,7 @@ public class AGVCar{
 		}
 		
 		public boolean isAlived(){
-			if(System.currentTimeMillis() - lastCommunicationTime < 7000)
+			if(System.currentTimeMillis() - lastCommunicationTime < 20000)
 				return true;
 			else 
 				return false;

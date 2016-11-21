@@ -71,6 +71,17 @@ public class MyToolKit {
 			g.drawLine(graph.getEdge(i).startNode.x, graph.getEdge(i).startNode.y, graph.getEdge(i).endNode.x, graph.getEdge(i).endNode.y);
 		}
 		
+		for(int i = 0 ; i < graph.getNodeSize(); i++){
+			g.setColor(Color.YELLOW);
+			g.fillRect(graph.getNode(i).x - 5, graph.getNode(i).y - 5, 10, 10);
+			if(graphGui){
+				g.setColor(Color.RED);
+				g.setFont(new Font("ËÎÌו", Font.BOLD, 30));
+				g.drawString(String.valueOf(i+1),graph.getNode(i).x + 10, graph.getNode(i).y - 10);
+			}
+			
+		}
+		
 		g.setFont(new Font("ËÎÌו", Font.BOLD, 30));
 		for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
 			if(graph.getFunctionNodeArray().get(i).clicked){
@@ -100,16 +111,24 @@ public class MyToolKit {
 				if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.TAG)
 					g.setColor(Color.GRAY);
 			}
+			
 			if(graph.getFunctionNodeArray().get(i).function != FunctionNodeEnum.TAG){
 				if(graph.getFunctionNodeArray().get(i).nodeNum != 0){
 					g.fillOval(graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum-1).x-20
 							, graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum-1).y-20, 40, 40);
+					g.setColor(Color.BLACK);
+					g.drawString(graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum -1).tag, graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum - 1).x - 30
+							,graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum - 1).y -30);
+					if(!graphGui){
+						g.setColor(Color.RED);
+						g.drawString(String.valueOf(graph.getFunctionNodeArray().get(i).communicationNum), graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum - 1).x-13
+								,graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum - 1).y+10);
+					}
+					
 				}else {
 					g.drawString(graph.getFunctionNodeArray().get(i).tag, graph.getFunctionNodeArray().get(i).x, graph.getFunctionNodeArray().get(i).y);
 				}
-				g.setColor(Color.BLACK);
-				g.drawString(graph.getFunctionNodeArray().get(i).tag, graph.getFunctionNodeArray().get(i).x
-						, graph.getFunctionNodeArray().get(i).y);
+		
 			}else{
 				g.drawString(graph.getFunctionNodeArray().get(i).tag, graph.getFunctionNodeArray().get(i).x
 						, graph.getFunctionNodeArray().get(i).y);
@@ -141,13 +160,7 @@ public class MyToolKit {
 			}
 		}
 		
-		for(int i = 0 ; i < graph.getNodeSize(); i++){
-			g.setColor(Color.YELLOW);
-			g.fillRect(graph.getNode(i).x - 5, graph.getNode(i).y - 5, 10, 10);
-			g.setColor(Color.RED);
-			g.setFont(new Font("ËÎÌו", Font.BOLD, 30));
-			g.drawString(String.valueOf(i+1),graph.getNode(i).x + 10, graph.getNode(i).y - 10);
-		}
+		
 	}
 	
 	

@@ -85,7 +85,7 @@ public class GraphingGui extends JPanel{
 		
 		importGraphBtn = new RoundButton("导入地图");
 		importGraphBtn.setFont(new Font("宋体", Font.BOLD, 20));
-		importGraphBtn.setBounds(11*screenSize.width/12, 18*screenSize.height/22, screenSize.width/12, screenSize.height/22);
+		importGraphBtn.setBounds(10*screenSize.width/12, 19*screenSize.height/22, screenSize.width/12, screenSize.height/22);
 		importGraphBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				graph = myToolKit.importNewGraph("C:\\Users\\agv\\Documents\\testGraph.xls");

@@ -112,10 +112,12 @@ public class SetingGui extends JPanel{
 			public void actionPerformed(ActionEvent e){
 				//File file = new File(".\\data\\testGraph.xls");
 				try{
-					String path = Thread.currentThread().getContextClassLoader().getResource("testGraph.xls").getPath();
-					System.out.println("path:"+ path);
-					stateLabel.setText(path);
-					InputStream inputStream = this.getClass().getResourceAsStream("/testGraph.xls");
+					//String path = Thread.currentThread().getContextClassLoader().getResource("testGraph.xls").getPath();
+					//System.out.println("path:"+ path);
+					//stateLabel.setText(path);
+					File file = new File("C:\\Users\\agv\\Documents\\testGraph.xls");
+					InputStream inputStream = new FileInputStream(file.getPath());
+					//InputStream inputStream = this.getClass().getResourceAsStream("C:\\Users\\agv\\Documents\\testGraph.xls");
 					Workbook wb = Workbook.getWorkbook(inputStream);
 					WritableWorkbook wwb = Workbook.createWorkbook(new File("C:\\Users\\agv\\Documents\\testGraph.xls"), wb);
 					wwb.removeSheet(3);
