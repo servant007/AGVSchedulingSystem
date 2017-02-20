@@ -195,104 +195,43 @@ public class AGVCar{
 
 			if(cardNum != graph.getExecuteCard() && cardNum != graph.getStopCard()){//ÔËÐÐÖÐ²âÊÔ¶Á¿¨¼°ÈÝ´í
 				if(this.routeCard.size() > 0 ){
-					if(cardNum == routeCard.get(0)){
-						this.setEdgeCard(cardNum);
-						routeCard.remove(0);
-						this.removeCount++;
-					}else if(this.routeCard.size() > 1){//¶Á¿¨Òì³£Çé¿ö
-						if(cardNum == this.routeCard.get(1)){
-							if(!this.firstInit){
-								this.setEdgeCard(this.routeCard.get(0));
-								System.out.println(this.AGVNum +"AGVÒÅÂ©"+this.routeCard.get(0));
-								logger.error(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(0));
-								//this.playAudio.continuePlay();
-								logger.debug(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(0));
-								this.ignoreCard.add(this.routeCard.get(0));
-							}
-								
-							this.setEdgeCard(cardNum);						
-							routeCard.remove(0);
-							routeCard.remove(0);
-							this.removeCount++;
-							this.removeCount++;
-						}else if(this.routeCard.size() > 2){
-							if(cardNum == this.routeCard.get(2)){
-								this.setEdgeCard(this.routeCard.get(0));
-								this.setEdgeCard(this.routeCard.get(1));
-								this.setEdgeCard(cardNum);
-								this.ignoreCard.add(this.routeCard.get(0));
-								this.ignoreCard.add(this.routeCard.get(1));
+					boolean isInRouteCard = false;
+					for(int i = 0; i < this.routeCard.size(); i++){
+						if(cardNum == this.routeCard.get(i)){
+							isInRouteCard = true;
+							if(i == 0){//Õý³£Çé¿ö
+								this.setCardInConflictDetection(cardNum);
 								routeCard.remove(0);
+								this.removeCount++;
+							}else if(i == 1 && this.firstInit){//Õý³£Çé¿ö
+								this.setCardInConflictDetection(cardNum);						
 								routeCard.remove(0);
 								routeCard.remove(0);
 								this.removeCount++;
 								this.removeCount++;
-								this.removeCount++;
-								System.out.println(this.AGVNum +"AGVÒÅÂ©"+this.routeCard.get(0));
-								logger.error(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(0));
-								logger.debug(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(0));
-								System.out.println(this.AGVNum +"AGVÒÅÂ©"+this.routeCard.get(1));
-								logger.error(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(1));
-								logger.debug(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(1));
-								//this.playAudio.continuePlay();
-							}else if(this.routeCard.size() > 3){
-								if(cardNum == this.routeCard.get(3)){
-									this.setEdgeCard(this.routeCard.get(0));
-									this.setEdgeCard(this.routeCard.get(1));
-									this.setEdgeCard(this.routeCard.get(2));
-									this.setEdgeCard(cardNum);
-									this.ignoreCard.add(this.routeCard.get(0));
-									this.ignoreCard.add(this.routeCard.get(1));
-									this.ignoreCard.add(this.routeCard.get(2));
-									routeCard.remove(0);
-									routeCard.remove(0);
-									routeCard.remove(0);
-									routeCard.remove(0);
+							}else{//Â©¿¨
+								if(this.routeCard.get(0) %2 !=0)
+									this.setCardInConflictDetection(this.routeCard.get(0));
+								this.setCardInConflictDetection(cardNum);								
+								for(int j = 0; j <= i; j++){
 									System.out.println(this.AGVNum +"AGVÒÅÂ©"+this.routeCard.get(0));
 									logger.error(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(0));
 									logger.debug(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(0));
-									System.out.println(this.AGVNum +"AGVÒÅÂ©"+this.routeCard.get(1));
-									logger.error(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(1));
-									logger.debug(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(1));
-									System.out.println(this.AGVNum +"AGVÒÅÂ©"+this.routeCard.get(2));
-									logger.error(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(2));
-									logger.debug(this.AGVNum + "AGVÒÅÂ©"+this.routeCard.get(2));
-									//this.playAudio.continuePlay();
-								}else{
-									if(cardNum != 161 && cardNum != 162 && cardNum != 163 && cardNum != 164 && cardNum != 165 
-											&& cardNum != 166 && cardNum != 167 && cardNum != 168 && cardNum != 169
-											&& cardNum != 170 && cardNum != 50 && cardNum != 171 && cardNum != 107){
-										System.out.println(this.AGVNum + "ÅÜ³öÔ¤¶¨¹ìµÀ" + cardNum);
-										logger.error(this.AGVNum + "ÅÜ³öÔ¤¶¨¹ìµÀ" + cardNum);
-										this.playAudio.continuePlay();
-									}									
-								}
-							}else{
-								if(cardNum != 161 && cardNum != 162 && cardNum != 163 && cardNum != 164 && cardNum != 165 
-										&& cardNum != 166 && cardNum != 167 && cardNum != 168 && cardNum != 169
-										&& cardNum != 170 && cardNum != 50 && cardNum != 171  && cardNum != 107){
-									System.out.println(this.AGVNum + "ÅÜ³öÔ¤¶¨¹ìµÀ" + cardNum);
-									logger.error(this.AGVNum + "ÅÜ³öÔ¤¶¨¹ìµÀ" + cardNum);
-									this.playAudio.continuePlay();
+									if(j < i)
+										this.ignoreCard.add(this.routeCard.get(0));	
+									routeCard.remove(0);
+									this.removeCount++;
 								}
 							}
-						}else{
-							if(cardNum != 161 && cardNum != 162 && cardNum != 163 && cardNum != 164 && cardNum != 165 
-									&& cardNum != 166 && cardNum != 167 && cardNum != 168 && cardNum != 169
-									&& cardNum != 170 && cardNum != 50 && cardNum != 171  && cardNum != 107){
-								System.out.println(this.AGVNum + "ÅÜ³öÔ¤¶¨¹ìµÀ" + cardNum);
-								logger.error(this.AGVNum + "ÅÜ³öÔ¤¶¨¹ìµÀ" + cardNum);
-								this.playAudio.continuePlay();
-							}
-						}					
-					}else{
-						if(cardNum != 161 && cardNum != 162 && cardNum != 163 && cardNum != 164 && cardNum != 165 
-								&& cardNum != 166 && cardNum != 167 && cardNum != 168 && cardNum != 169
-								&& cardNum != 170 && cardNum != 50 && cardNum != 171 && cardNum != 107){
-							System.out.println(this.AGVNum + "ÅÜ³öÔ¤¶¨¹ìµÀ" + cardNum);
-							logger.error(this.AGVNum + "ÅÜ³öÔ¤¶¨¹ìµÀ" + cardNum);
-							this.playAudio.continuePlay();
+							break;
 						}
+					}
+					if(!isInRouteCard && cardNum != 161 && cardNum != 162 && cardNum != 163 && cardNum != 164 && cardNum != 165 
+							&& cardNum != 166 && cardNum != 167 && cardNum != 168 && cardNum != 169
+							&& cardNum != 170 && cardNum != 50 && cardNum != 171 && cardNum != 107){
+						System.out.println(this.AGVNum + "ÅÜ³öÔ¤¶¨¹ìµÀ" + cardNum);
+						logger.error(this.AGVNum + "ÅÜ³öÔ¤¶¨¹ìµÀ" + cardNum);
+						this.playAudio.continuePlay();
 					}
 				}
 			}		
@@ -303,7 +242,7 @@ public class AGVCar{
 				if(this.routeCard.size() > 0){//revise in 12.18
 					for(Integer r: this.routeCard){
 						this.ignoreCard.add(r);
-						this.setEdgeCard(r);
+						this.setCardInConflictDetection(r);
 					}
 				}
 				
@@ -360,7 +299,7 @@ public class AGVCar{
 			this.lastCard = cardNum;
 		}
 	
-		public void setEdgeCard(int cardNum){
+		public void setCardInConflictDetection(int cardNum){
 			Edge edgeStr = null;
 			Edge edgeEnd = null;
 			for(Edge edge : graph.getEdgeArray()){
@@ -784,7 +723,7 @@ public class AGVCar{
 			this.x = -20;
 			this.y = -20;
 			this.sendSignalToAGV = false;
-			this.receiveAGVMessage.setCancelAGV();
+			this.receiveAGVMessage.deleteFaultedAGV();
 			this.receiveAGVMessage = null;
 			this.AGVStopInNode = -1;
 			this.initReady = false;

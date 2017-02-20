@@ -248,7 +248,7 @@ public class SchedulingGui extends JPanel{
 							
 							if(receiveStationMessage == null){
 								//System.out.println("receiveStationMessage == null");
-								receiveAGVMessage = new ReceiveAGVMessage(socket, AGVArray, graph, onDutyBtnState, playAudio);
+								receiveAGVMessage = new ReceiveAGVMessage(socket, graph, AGVArray, stateLabel, playAudio, onDutyBtnState);
 								executorService.execute(receiveAGVMessage);
 							}else{
 								receiveStationMessage = null;
