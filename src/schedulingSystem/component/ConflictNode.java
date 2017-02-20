@@ -3,6 +3,8 @@ package schedulingSystem.component;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -12,17 +14,17 @@ import schedulingSystem.component.AGVCar.Orientation;
 public class ConflictNode {
 	private static Logger logger = Logger.getLogger(AGVCar.class.getName());
 	private int number;
-	private Timer timer;
+	private ScheduledExecutorService timerPool;
 	public volatile boolean occupy;
 	public volatile ArrayList<AGVCar> waitQueue;
 	private ArrayList<ConflictEdge> conflictEdgeArray;
 
 	
-	public ConflictNode(int number, ArrayList<ConflictEdge> conflictEdgeArray){
+	public ConflictNode(int number, ArrayList<ConflictEdge> conflictEdgeArray, ScheduledExecutorService timerPool){
 		this.conflictEdgeArray = conflictEdgeArray;
 		this.number = number;
-		waitQueue = new ArrayList<AGVCar>();
-		timer = new Timer();
+		this.waitQueue = new ArrayList<AGVCar>();
+		this.timerPool = timerPool;
 	}
 	
 	synchronized public void removeAGV(AGVCar agvCar){
@@ -50,7 +52,7 @@ public class ConflictNode {
 				}
 			}
 			if(!waitConflictEdge){
-				timer.schedule(new TimerTask(){
+				timerPool.schedule(new TimerTask(){
 					public void run(){
 						System.out.println( number + "点让" + waitQueue.get(0).getAGVNum()+"AGV走");
 						logger.debug( number + "点让" + waitQueue.get(0).getAGVNum()+"AGV走");
@@ -59,7 +61,7 @@ public class ConflictNode {
 						else
 							waitQueue.get(0).getRunnable().SendActionMessage("CC06DD");
 					}
-				}, 5000);
+				}, 5000, TimeUnit.MILLISECONDS);
 				logger.debug("没有或防冲突边第一辆，"+"让"+waitQueue.get(0).getAGVNum()+"号agv前进占用"+this.number+"点");
 				//System.out.println("没有或防冲突边第一辆，"+"让"+waitQueue.get(0).getAGVNum()+"号agv前进占用"+this.number+"点");
 			}else{

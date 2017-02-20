@@ -3,6 +3,8 @@ package schedulingSystem.component;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -12,16 +14,16 @@ public class ConflictEdge {
 	private static Logger logger = Logger.getLogger(AGVCar.class.getName());
 	public int stratNodeNum;
 	public int endNodeNum;
-	private Timer timer;
+	private ScheduledExecutorService timerPool;
 	volatile public boolean occupy;
 	volatile public ArrayList<AGVCar> waitQueue;
 	public int waitNodeNum;
 	
-	public ConflictEdge(int start, int end){
+	public ConflictEdge(int start, int end, ScheduledExecutorService timerPool){
 		this.stratNodeNum = start;
 		this.endNodeNum = end;
-		waitQueue = new ArrayList<AGVCar>();
-		timer = new Timer();
+		this.waitQueue = new ArrayList<AGVCar>();
+		this.timerPool = timerPool;
 	}
 	
 	public void removeAGV(AGVCar agvCar, ConflictNode conflictNode){
@@ -39,7 +41,7 @@ public class ConflictEdge {
 			if(conflictNode != null){
 				if(conflictNode.waitQueue.size() > 0){
 					if(conflictNode.waitQueue.get(0).getAGVNum() == waitQueue.get(0).getAGVNum()){//排在防冲突点第一个则走
-						timer.schedule(new TimerTask(){
+						timerPool.schedule(new TimerTask(){
 							public void run(){
 								System.out.println( stratNodeNum+ "||" + endNodeNum + "边让" + waitQueue.get(0).getAGVNum()+"AGV走");
 								logger.debug( stratNodeNum+ "||" + endNodeNum + "边让" + waitQueue.get(0).getAGVNum()+"AGV走");
@@ -48,8 +50,7 @@ public class ConflictEdge {
 								else
 									waitQueue.get(0).getRunnable().SendActionMessage("CC06DD");
 							}
-						}, 2000);
-						timer = new Timer();
+						}, 2000, TimeUnit.MILLISECONDS);
 						logger.debug("防冲突点的第一辆," + "让"+waitQueue.get(0).getAGVNum()+"号agv前进占用" + this.stratNodeNum+ "||" + this.endNodeNum + "边" );
 					}else{
 						logger.debug("不是防冲突点的第一辆,边解除,但不让走, conflictNode waitQuene 0:"+conflictNode.waitQueue.get(0) + "agv:" + waitQueue.get(0).getAGVNum());
@@ -57,7 +58,7 @@ public class ConflictEdge {
 				}
 				
 			}else{
-				timer.schedule(new TimerTask(){
+				timerPool.schedule(new TimerTask(){
 					public void run(){
 						System.out.println( stratNodeNum+ "||" + endNodeNum + "边让" + waitQueue.get(0).getAGVNum()+"AGV走");
 						logger.debug( stratNodeNum+ "||" + endNodeNum + "边让" + waitQueue.get(0).getAGVNum()+"AGV走");
@@ -66,8 +67,7 @@ public class ConflictEdge {
 						else
 							waitQueue.get(0).getRunnable().SendActionMessage("CC06DD");
 					}
-				}, 2000);
-				timer = new Timer();
+				}, 2000, TimeUnit.MILLISECONDS);
 				logger.debug("让"+waitQueue.get(0).getAGVNum()+"号agv前进占用" + this.stratNodeNum+ "||" + this.endNodeNum + "边" );
 			}
 			

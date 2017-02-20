@@ -8,8 +8,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JLabel;
 
@@ -28,7 +30,7 @@ public class ReceiveStationMessage implements Runnable{
 	private MyToolKit myToolKit;
 	private Graph graph;
 	private boolean foundCC;
-	private Timer timer;
+	private ScheduledExecutorService timer;
 	private int n = 0;
 	private int lastN=0;
 	private int ms = 100;
@@ -57,12 +59,12 @@ public class ReceiveStationMessage implements Runnable{
 		requestMaterielArray = new ArrayList<Integer>();
 		requestRecycleArray = new ArrayList<Integer>();
 		this.sendMessageAGVArray = sendMessageAGVArray;
-		timer = new Timer();
+		timer = Executors.newScheduledThreadPool(3);
 		timer.schedule(new TimerTask(){
 			public void run(){
 				clearBuffer = true;
 			}
-		}, 3000);
+		}, 3000, TimeUnit.MILLISECONDS);
 		this.myToolKit = new MyToolKit();
 		System.out.println("socket station:"+socket.toString());
 		logger.debug("socket station:"+socket.toString());
@@ -136,7 +138,7 @@ public class ReceiveStationMessage implements Runnable{
 							//playAudio.continuePlay();
 						}
 					}
-				}, 200*i);
+				}, 200*i, TimeUnit.MILLISECONDS);
 			}
 		}
 	}

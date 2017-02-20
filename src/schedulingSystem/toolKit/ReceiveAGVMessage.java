@@ -6,13 +6,14 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import schedulingSystem.component.AGVCar;
 import schedulingSystem.component.ConflictEdge;
-import schedulingSystem.component.ConflictNode;
 import schedulingSystem.component.Edge;
 import schedulingSystem.component.Graph;
 import schedulingSystem.component.Node;
@@ -34,7 +35,7 @@ public class ReceiveAGVMessage implements Runnable{
 	private Graph graph;
 	private String lastMessage;
 	private int lastSignal;
-	private Timer timer;
+	private ScheduledExecutorService timer;
 	private ArrayList<ConflictEdge> conflictEdgeArray;
 	private boolean clearBuffer;
 	private boolean foundStart;
@@ -47,13 +48,13 @@ public class ReceiveAGVMessage implements Runnable{
 
 	public ReceiveAGVMessage(Socket socket, ArrayList<AGVCar> AGVArray, Graph graph, OnDutyBtn onDutyBtn, PlayAudio playAudio){
 		this.onDutyBtn = onDutyBtn;
-		timer = new Timer();
+		timer = Executors.newScheduledThreadPool(3);
 		this.playAudio = playAudio;
 		timer.schedule(new TimerTask(){
 			public void run(){
 				clearBuffer = true;
 			}
-		}, 3000);		
+		}, 3000, TimeUnit.MILLISECONDS);		
 		this.lastMessage = "";
 		this.myToolKit = new MyToolKit();
 		this.graph = graph;
@@ -255,14 +256,14 @@ public class ReceiveAGVMessage implements Runnable{
 											agvCar.getAGVComVar().sendRouteToAGV = true;
 											AGVArray.get(NOOfAGV - 1).readyToLeft = true;
 										}
-									}, 8000);
-									timer.schedule(new TestAGVFinishStart(AGVArray.get(NOOfAGV -1)), 15000);
+									}, 8000, TimeUnit.MILLISECONDS);
+									timer.schedule(new TestAGVFinishStart(AGVArray.get(NOOfAGV -1)), 15000, TimeUnit.MILLISECONDS);
 									agvCar.getAGVComVar().AGVWiat = false;
 								}else {
 									agvCar.getAGVComVar().sendRouteToAGV = true;
 									this.AGVArray.get(this.NOOfAGV - 1).readyToLeft = true;
 									System.out.println("node开始发送路径指令给" + this.NOOfAGV + "AGV");
-									timer.schedule(new TestAGVFinishStart(AGVArray.get(NOOfAGV -1)), 10000);
+									timer.schedule(new TestAGVFinishStart(AGVArray.get(NOOfAGV -1)), 10000, TimeUnit.MILLISECONDS);
 								}			
 								agvCar.getAGVComVar().conflictNode.occupy = true;
 								agvCar.getAGVComVar().conflictNode.waitQueue.add(AGVArray.get(NOOfAGV - 1));

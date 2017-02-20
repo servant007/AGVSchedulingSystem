@@ -1,8 +1,11 @@
 package schedulingSystem.component;
 
 import java.util.ArrayList;
-import java.util.Timer;
+
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -64,7 +67,7 @@ public class AGVCar{
 		public boolean firstInit;
 		public boolean charging;
 		public int chargeCount;
-		public Timer chargeTimer;
+		public ScheduledExecutorService chargeTimer;
 		public boolean ReadyToOffDuty;
 		public boolean realyOffDuty;
 		public boolean AGVInit;
@@ -87,7 +90,7 @@ public class AGVCar{
 			this.routeNode = new ArrayList<Integer>();
 			this.routeCard = new ArrayList<Integer>();
 			this.ignoreCard = new ArrayList<Integer>();
-			this.chargeTimer = new Timer();
+			this.chargeTimer = Executors.newScheduledThreadPool(2);
 			trigger = new ArrayList<State>();
 			multiDestination = new ArrayList<Integer>();
 			if(graph.getAGVSeting().get(AGVNum-1).length() > 1){
@@ -659,7 +662,7 @@ public class AGVCar{
 						chargeCount--;
 					}
 				}
-			}, 5000);
+			}, 5000, TimeUnit.MILLISECONDS);
 		}
 		
 		public void chargeTime(){
@@ -671,7 +674,7 @@ public class AGVCar{
 			}else if(this.electricity == 3){
 				time = 2400000;
 			}
-			this.chargeTimer.schedule(new ChargeTimerTask(this.AGVStopInNode, this.AGVNum), time);//定时充电
+			this.chargeTimer.schedule(new ChargeTimerTask(this.AGVStopInNode, this.AGVNum), time, TimeUnit.MILLISECONDS);//定时充电
 			this.electricity = 0;
 		}
 		
@@ -902,7 +905,7 @@ public class AGVCar{
 							logger.debug("下班AGVStopInNode = -1");
 						}
 					}
-				}, 2000);
+				}, 2000, TimeUnit.MILLISECONDS);
 			
 			}
 		}

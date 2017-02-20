@@ -1,13 +1,14 @@
 package schedulingSystem.component;
 
 import java.util.ArrayList;
-import java.util.Timer;
+
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
 import schedulingSystem.component.AGVCar.State;
-import schedulingSystem.component.FunctionNode.FunctionNodeEnum;
 import schedulingSystem.toolKit.ReceiveStationMessage;
 
 public class FunctionNode {
@@ -33,9 +34,9 @@ public class FunctionNode {
 	private int stopInEnterPalletAGVNum;
 	private long stopInEnterPalletTime;
 	private boolean stopInEnterPallet;
-	private Timer clearTimer;
+	private ScheduledExecutorService clearTimer;
 	private int minChargeIndex;
-	public FunctionNode(FunctionNodeEnum function, int nodeNum, String ip, int communicationNum, String tag, int i){
+	public FunctionNode(FunctionNodeEnum function, int nodeNum, String ip, int communicationNum, String tag, int i, ScheduledExecutorService timerPool){
 		this.function = function;
 		this.nodeNum = nodeNum;
 		this.ip = ip;
@@ -44,7 +45,7 @@ public class FunctionNode {
 		this.index = i;
 		this.chargingStationRetract = true;
 		this.callAGVNum = -1;
-		clearTimer = new Timer();
+		clearTimer = timerPool;
 	}
 	
 	public FunctionNode(FunctionNodeEnum function, int x, int y, String tag){
@@ -306,7 +307,7 @@ public class FunctionNode {
 									}	
 									minChargeIndex = -1;
 								}
-							}, 5000);	
+							}, 5000, TimeUnit.MILLISECONDS);	
 						}												
 					}
 				}else if(this.stopInEnterPalletAGVNum != AGVArray.get(i).getAGVNum()){

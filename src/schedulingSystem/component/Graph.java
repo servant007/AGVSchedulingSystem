@@ -1,6 +1,8 @@
 package schedulingSystem.component;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import schedulingSystem.component.FunctionNode.FunctionNodeEnum;
 
@@ -14,12 +16,14 @@ public class Graph {
 	private int stopCard;
 	private int executeCard;
 	private int startPointCard = 58;
+	private ScheduledExecutorService timerPool;
 	
 	public Graph(){
 		nodeArray = new ArrayList<Node>();
 		edgeArray = new ArrayList<Edge>();
 		functionNodeArray = new ArrayList<FunctionNode>();
 		AGVSeting = new ArrayList<String>();
+		timerPool = Executors.newScheduledThreadPool(4);
 	}
 	
 	public void initIgnoreCard(){
@@ -102,7 +106,7 @@ public class Graph {
 	}
 	
 	public void addFunctionNode(FunctionNodeEnum function,int nodeNum, String ip, int comNum, String tag){
-		functionNodeArray.add(new FunctionNode(function, nodeNum,ip, comNum, tag, this.functionNodeArray.size()));
+		functionNodeArray.add(new FunctionNode(function, nodeNum,ip, comNum, tag, this.functionNodeArray.size(), timerPool));
 		nodeArray.get(nodeNum-1).tag = tag;
 		nodeArray.get(nodeNum - 1).functionNode = true;
 	}

@@ -1,6 +1,8 @@
 package schedulingSystem.component;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
@@ -11,20 +13,22 @@ public class ConflictDetection {
 	private ArrayList<ConflictEdge> conflictEdgeArray;
 	private ArrayList<ConflictEdge> edgeRockwellArray;
 	private ArrayList<Integer> edgeRockwellAGVNumArray;
+	private ScheduledExecutorService timerPool;
 	private ConflictEdge edgeRockwell;
 	private int edgeRockwellAGVNum;
 	private final ReentrantLock lock1;
 	private final ReentrantLock lock2;
 	private final ReentrantLock lock3;
-	private final ReentrantLock lock4;
+	
 	public ConflictDetection(Graph graph){
 		lock1 = new ReentrantLock();
 		lock2 = new ReentrantLock();
 		lock3 = new ReentrantLock();
-		lock4 = new ReentrantLock();
 		conflictEdgeArray = new ArrayList<ConflictEdge>();
 		edgeRockwellArray = new ArrayList<ConflictEdge>();
 		edgeRockwellAGVNumArray = new ArrayList<Integer>();
+		timerPool = Executors.newScheduledThreadPool(4);
+		
 		boolean found = false;
 		for(int i = 0; i < graph.getEdgeSize(); i++){
 			if(graph.getEdge(i).twoWay){
@@ -35,7 +39,7 @@ public class ConflictDetection {
 					}
 				}
 				if(!found){
-					conflictEdgeArray.add(new ConflictEdge(graph.getEdge(i).startNode.num, graph.getEdge(i).endNode.num));
+					conflictEdgeArray.add(new ConflictEdge(graph.getEdge(i).startNode.num, graph.getEdge(i).endNode.num, timerPool));
 					
 				}else {
 					found = false;
@@ -43,26 +47,26 @@ public class ConflictDetection {
 			}
 		}
 		
-		conflictEdgeArray.add(new ConflictEdge(45, 25));
-		conflictEdgeArray.add(new ConflictEdge(23, 21));
-		conflictEdgeArray.add(new ConflictEdge(19, 17));
-		conflictEdgeArray.add(new ConflictEdge(15, 13));
-		conflictEdgeArray.add(new ConflictEdge(11, 57));
-		conflictEdgeArray.add(new ConflictEdge(58, 28));
-		conflictEdgeArray.add(new ConflictEdge(30, 32));
-		conflictEdgeArray.add(new ConflictEdge(34, 36));
-		conflictEdgeArray.add(new ConflictEdge(38, 40));
-		conflictEdgeArray.add(new ConflictEdge(42, 43));
+		conflictEdgeArray.add(new ConflictEdge(45, 25, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(23, 21, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(19, 17, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(15, 13, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(11, 57, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(58, 28, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(30, 32, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(34, 36, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(38, 40, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(42, 43, timerPool));
 		
-		conflictEdgeArray.add(new ConflictEdge(8, 10));
-		conflictEdgeArray.add(new ConflictEdge(6, 8));
-		conflictEdgeArray.add(new ConflictEdge(4, 6));
-		conflictEdgeArray.add(new ConflictEdge(2, 4));
-		conflictEdgeArray.add(new ConflictEdge(56, 2));
+		conflictEdgeArray.add(new ConflictEdge(8, 10, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(6, 8, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(4, 6, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(2, 4, timerPool));
+		conflictEdgeArray.add(new ConflictEdge(56, 2, timerPool));
 	
 		conflictNodeArray = new ArrayList<ConflictNode>();
 		for(int i = 0; i < graph.getNodeSize(); i++)
-			conflictNodeArray.add(new ConflictNode(i+1, conflictEdgeArray));
+			conflictNodeArray.add(new ConflictNode(i+1, conflictEdgeArray, timerPool));
 	}
 	
 	public void checkConflict(AGVCar agvCar, int checkNode){
