@@ -44,6 +44,7 @@ import schedulingSystem.component.Node;
 import schedulingSystem.component.Path;
 import schedulingSystem.component.PlayAudio;
 import schedulingSystem.toolKit.ReceiveStationMessage;
+import schedulingSystem.toolKit.ManualModel;
 import schedulingSystem.toolKit.MyToolKit;
 import schedulingSystem.toolKit.OnDutyBtn;
 import schedulingSystem.toolKit.ReceiveAGVMessage;
@@ -96,8 +97,9 @@ public class SchedulingGui extends JPanel{
 	private int shipmnetCount;
 	private int minChargeIndex;
 	private OnDutyBtn onDutyBtnState;
+	private ManualModel manualModel;
 	private java.util.Timer clearTimer;
-	public int chargeTime = 300000;
+	public int chargeGap;
 	private PlayAudio playAudio;
 	private  ArrayList<AGVCar> shipmentSendMessageAGVArray;
 	private  ArrayList<AGVCar> unloadingSendMessageAGVArray;
@@ -122,6 +124,7 @@ public class SchedulingGui extends JPanel{
 		charge3SendMessageAGVArray = new ArrayList<AGVCar>();
 		charge4SendMessageAGVArray = new ArrayList<AGVCar>();
 		onDutyBtnState = new OnDutyBtn();
+		manualModel = new ManualModel();
 		clearTimer = new java.util.Timer();
 		playAudio = new PlayAudio();
 		try{
@@ -187,8 +190,8 @@ public class SchedulingGui extends JPanel{
 		stateLabel.setFont(new Font("ËÎÌå", Font.BOLD, 25));
 		timer = new Timer(100, new TimerListener());
 		timer.start();
-		
-		chargeTimer = new Timer(chargeTime, new ChargeTimerListener());
+		this.chargeGap = graph.getChargeGap();
+		chargeTimer = new Timer(chargeGap, new ChargeTimerListener());
 		chargeTimer.start();
 		
 		
@@ -240,7 +243,7 @@ public class SchedulingGui extends JPanel{
 									}else if(socket.getInetAddress().getHostAddress().toString().equals("192.168.0.119")){
 										sendMessageAGVArray = charge4SendMessageAGVArray;
 									}
-									receiveStationMessage = new ReceiveStationMessage(socket, graph, AGVArray, stateLabel, playAudio, sendMessageAGVArray);
+									receiveStationMessage = new ReceiveStationMessage(socket, graph, AGVArray, stateLabel, playAudio, sendMessageAGVArray, manualModel);
 									executorService.execute(receiveStationMessage);
 									break;
 								}
@@ -266,7 +269,7 @@ public class SchedulingGui extends JPanel{
 		
 		this.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent e){
-				//handleFunctionNodeClick(e);
+				handleFunctionNodeClick(e);
 			}
 		});
 	
@@ -296,6 +299,7 @@ public class SchedulingGui extends JPanel{
 				upImage = upImageR;
 				downImage = downImageR;
 			}
+			g.setColor(Color.black);
 			if(AGVArray.get(i).getOrientation() == Orientation.LEFT){
 				g.drawImage(leftImage,AGVArray.get(i).getX() - 20, AGVArray.get(i).getY() - 17, 40, 34, this);
 				g.drawString(String.valueOf(i+1), AGVArray.get(i).getX(), AGVArray.get(i).getY()+9);
@@ -311,6 +315,10 @@ public class SchedulingGui extends JPanel{
 			}			
 			if((AGVArray.get(i).isOnMission() || AGVArray.get(i).realyOffDuty) && AGVArray.get(i).getMissionString() != null)
 				g.drawString(AGVArray.get(i).getMissionString(), AGVArray.get(i).getX(), AGVArray.get(i).getY()-25);
+			else
+				g.drawString("´ý»ú", AGVArray.get(i).getX(), AGVArray.get(i).getY()-25);
+			g.setColor(Color.BLUE);
+			g.drawString(AGVArray.get(i).stateString, AGVArray.get(i).getX(), AGVArray.get(i).getY()+25);			
 		}
 	
 	}
@@ -484,7 +492,8 @@ public class SchedulingGui extends JPanel{
 		if(e.getButton() == MouseEvent.BUTTON1){
 			Node node = graph.searchWideNode(e.getX(), e.getY());
 			for(int i = 0; i < AGVArray.size(); i++){
-				if(!AGVArray.get(i).isOnMission()){
+				if(!AGVArray.get(i).isOnMission() && AGVArray.get(i).initReady
+						&& AGVArray.get(i).getStartEdge().endNode.num!=0 ){
 					if(Math.pow(e.getX() - AGVArray.get(i).getX(), 2) + 
 							Math.pow(e.getY() - AGVArray.get(i).getY(), 2) < 1000){
 						foundAGVNum = i+1;
@@ -506,9 +515,9 @@ public class SchedulingGui extends JPanel{
 								String[] route = routeStr.split("/");
 								for(int i = 0; i < route.length; i++){
 									if(i%2 == 0){
-										if(route[i].equals("4")){
+										if(route[i].equals("1")){
 											triggerArray.add(State.SHIPMENT);
-										}else if(route[i].equals("5")){
+										}else if(route[i].equals("2")){
 											triggerArray.add(State.UNLOADING);
 										}else if(route[i].equals("0")){
 											triggerArray.add(State.NULL);
@@ -674,6 +683,7 @@ public class SchedulingGui extends JPanel{
 				}else if(this.AGVArray.get(i).isOnMission()){
 					this.AGVArray.get(i).setOffDuty();
 				}else if(!this.AGVArray.get(i).isOnMission() && !this.AGVArray.get(i).charging){
+					this.AGVArray.get(i).setOffDuty();
 					this.AGVArray.get(i).AGVOffDuty();
 				}
 			}
@@ -691,18 +701,26 @@ public class SchedulingGui extends JPanel{
 		}, 120000);
 	}
 	
-	public void setChargeTime(int chargeTime, int chargeTimeGep){
-		System.out.println(chargeTime + "'" + chargeTimeGep);
-		this.chargeTime = chargeTime;
+	public void setChargeTime(int chargeDuration, int chargeGep){
+		System.out.println(chargeDuration + "'" + chargeGep);
+		this.chargeGap = chargeGep;
 		this.chargeTimer.stop();
-		chargeTimer = new Timer(this.chargeTime, new ChargeTimerListener());
+		chargeTimer = new Timer(this.chargeGap, new ChargeTimerListener());
 		chargeTimer.start();
 		for(int i = 0; i < this.AGVArray.size(); i++){
-			this.AGVArray.get(i).chargeTimerGep = chargeTimeGep;
+			this.AGVArray.get(i).chargeDuration = chargeDuration;
 		}
 	}
 	
 	public void cancelPlayWaring(){
 		this.playAudio.cancelPlayWaring();
+	}
+	
+	public void setManualModel(boolean state){
+		this.manualModel.state = state;
+	}
+	
+	public boolean getManualModel(){
+		return this.manualModel.state;
 	}
 }

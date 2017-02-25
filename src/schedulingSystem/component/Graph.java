@@ -17,6 +17,8 @@ public class Graph {
 	private int executeCard;
 	private int startPointCard = 58;
 	private ScheduledExecutorService timerPool;
+	private int chargeDuration;
+	private int chargeGap;
 	
 	public Graph(){
 		nodeArray = new ArrayList<Node>();
@@ -191,5 +193,21 @@ public class Graph {
 	
 	public int getStartPointCard(){
 		return this.startPointCard;
+	}
+	
+	public void setChargeDuration(int time){
+		this.chargeDuration = time;
+	}
+	
+	public int getChargeDuration(){
+		return this.chargeDuration;
+	}
+	
+	public void setChargeGap(int time){
+		this.chargeGap = time;
+	}
+	
+	public int getChargeGap(){
+		return this.chargeGap;
 	}
 }

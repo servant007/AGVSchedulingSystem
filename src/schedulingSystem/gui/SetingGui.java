@@ -58,6 +58,7 @@ public class SetingGui extends JPanel{
 	private RoundButton onDutyBtn;
 	private RoundButton setChargeTimeBtn;
 	private RoundButton cancelPlayWaring;
+	private RoundButton switchButton;
 	private ArrayList<String> AGVSeting;
 	private Timer timer;
 	private static Graph graph;
@@ -194,6 +195,11 @@ public class SetingGui extends JPanel{
 				});
 			}
 		});
+		
+		switchButton = new RoundButton("自动模式");
+		switchButton.setFont(new Font("宋体",Font.BOLD, 23));
+		switchButton.setBounds(7*screenSize.width/14, 17*screenSize.height/22, screenSize.width/14, screenSize.height/22);
+		
 		timer = new Timer(100, new TimerListener());
 		timer.start();
 		setBtnColor();
@@ -210,6 +216,7 @@ public class SetingGui extends JPanel{
 		this.add(offDutyBtn);
 		this.add(this.onDutyBtn);
 		this.add(setChargeTimeBtn);
+		this.add(this.switchButton);
 		this.add(this.cancelPlayWaring);
 	}
 	
@@ -253,6 +260,20 @@ public class SetingGui extends JPanel{
 				main.validate();
 			}
 		});
+		
+		switchButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				if(!schedulingGui.getManualModel()){
+					switchButton.setText("手动模式");
+					schedulingGui.setManualModel(true);
+				}else{
+					switchButton.setText("自动模式");
+					schedulingGui.setManualModel(false);
+				}
+				
+				
+			}
+		});
 
 		initConflictDetection.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
@@ -293,14 +314,14 @@ public class SetingGui extends JPanel{
 		
 		offDutyBtn.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				if(!isClickOffDuty){
-					isClickOffDuty = true;
+				if(!isClickOffDuty){					
 					ComfirmedDialog dialog = new ComfirmedDialog("确认下班吗？");
 					dialog.setDialogListener(new FileNameDialogListener(){
 						@Override
 						public void getFileName(String stopCard, String executeCard, boolean buttonState) {
 							dialog.dispose();
 							if(buttonState){
+								isClickOffDuty = true;
 								schedulingGui.offDuty();
 							}
 						}
@@ -310,14 +331,34 @@ public class SetingGui extends JPanel{
 		});
 		
 		setChargeTimeBtn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				FileNameDialog dialog = new FileNameDialog("充电间隔时间（分钟）"+ schedulingGui.chargeTime/60000, "充电多久（分钟）" + schedulingGui.AGVArray.get(0).chargeTimerGep/60000);
+			public void actionPerformed(ActionEvent e){				
+				FileNameDialog dialog = new FileNameDialog("充电多久（分钟）" + schedulingGui.AGVArray.get(0).chargeDuration/60000, "充电间隔时间（分钟）"+ schedulingGui.chargeGap/60000);
 				dialog.setOnDialogListener(new FileNameDialogListener(){
 					@Override
-					public void getFileName(String chargeTime, String chargeTimeGep, boolean buttonState){
+					public void getFileName(String chargeDuration, String chargeGap, boolean buttonState){
 						dialog.dispose();
 						if(buttonState){
-							schedulingGui.setChargeTime(Integer.parseInt(chargeTime)*60000, Integer.parseInt(chargeTimeGep)*60000);;
+							try{
+								File file = new File("C:\\Users\\agv\\Documents\\testGraph.xls");
+								InputStream inputStream = new FileInputStream(file.getPath());
+								//InputStream inputStream = this.getClass().getResourceAsStream("C:\\Users\\agv\\Documents\\testGraph.xls");
+								Workbook wb = Workbook.getWorkbook(inputStream);
+								WritableWorkbook wwb = Workbook.createWorkbook(new File("C:\\Users\\agv\\Documents\\testGraph.xls"), wb);
+								wwb.removeSheet(5);
+								WritableSheet wsAGVSeting = wwb.createSheet("chargeTime", 5);
+								Number duration = new Number(0, 0, Integer.parseInt(chargeDuration)*60000);
+								Number gap = new Number(0, 1, Integer.parseInt(chargeGap)*60000);
+								wsAGVSeting.addCell(duration);
+								wsAGVSeting.addCell(gap);
+
+								wwb.write();
+								wwb.close();
+								wb.close();
+							}catch(Exception e1){
+								e1.printStackTrace();
+								logger.error(e);
+							}
+							schedulingGui.setChargeTime(Integer.parseInt(chargeDuration)*60000, Integer.parseInt(chargeGap)*60000);;
 						}
 					}
 				});

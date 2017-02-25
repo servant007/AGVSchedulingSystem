@@ -45,10 +45,13 @@ public class ConflictEdge {
 							public void run(){
 								System.out.println( stratNodeNum+ "||" + endNodeNum + "边让" + waitQueue.get(0).getAGVNum()+"AGV走");
 								logger.debug( stratNodeNum+ "||" + endNodeNum + "边让" + waitQueue.get(0).getAGVNum()+"AGV走");
-								if(rightOrLeft(waitQueue.get(0)))
+								if(rightOrLeft(waitQueue.get(0))){
 									waitQueue.get(0).getRunnable().SendActionMessage("CC05DD");//有问题如果这台agv在等点解占用，应继续等待
-								else
+									waitQueue.get(0).stateString = "命令AGV运行";
+								}else{
 									waitQueue.get(0).getRunnable().SendActionMessage("CC06DD");
+									waitQueue.get(0).stateString = "命令AGV运行";
+								}									
 							}
 						}, 2000, TimeUnit.MILLISECONDS);
 						logger.debug("防冲突点的第一辆," + "让"+waitQueue.get(0).getAGVNum()+"号agv前进占用" + this.stratNodeNum+ "||" + this.endNodeNum + "边" );
@@ -62,10 +65,13 @@ public class ConflictEdge {
 					public void run(){
 						System.out.println( stratNodeNum+ "||" + endNodeNum + "边让" + waitQueue.get(0).getAGVNum()+"AGV走");
 						logger.debug( stratNodeNum+ "||" + endNodeNum + "边让" + waitQueue.get(0).getAGVNum()+"AGV走");
-						if(rightOrLeft(waitQueue.get(0)))
+						if(rightOrLeft(waitQueue.get(0))){
 							waitQueue.get(0).getRunnable().SendActionMessage("CC05DD");//有问题如果这台agv在等点解占用，应继续等待
-						else
+							waitQueue.get(0).stateString = "命令AGV运行";
+						}else{
 							waitQueue.get(0).getRunnable().SendActionMessage("CC06DD");
+							waitQueue.get(0).stateString = "命令AGV运行";
+						}
 					}
 				}, 2000, TimeUnit.MILLISECONDS);
 				logger.debug("让"+waitQueue.get(0).getAGVNum()+"号agv前进占用" + this.stratNodeNum+ "||" + this.endNodeNum + "边" );

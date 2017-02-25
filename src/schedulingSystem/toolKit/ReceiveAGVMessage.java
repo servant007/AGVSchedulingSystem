@@ -84,37 +84,44 @@ public class ReceiveAGVMessage implements Runnable{
 		if(message.equals("CC01DD")){//停止
 			AGVCar.getAGVComVar().sendStopToAGV = true;
 			AGVCar.getAGVComVar().stopString = message;
-			System.out.println("开始发送停止指令" + this.NOOfAGV + "AGV");
+			AGVCar.stateString += ",开始发送停止指令";
+			//System.out.println("开始发送停止指令" + this.NOOfAGV + "AGV");
 			logger.debug("开始发送停止指令" + this.NOOfAGV + "AGV");
 		}else if(message.equals("CC02DD")){//上料
 			AGVCar.getAGVComVar().sendShipmentToAGV = true;
 			AGVCar.getAGVComVar().shipmentString = message;
-			System.out.println("开始发送上料指令" + this.NOOfAGV + "AGV");
+			AGVCar.stateString += ",开始发送上料指令";
+			//System.out.println("开始发送上料指令" + this.NOOfAGV + "AGV");
 			logger.debug("开始发送上料指令" + this.NOOfAGV + "AGV");
 		}else if(message.equals("CC03DD")){//卸料
 			AGVCar.getAGVComVar().sendUnloadingToAGV = true;
 			AGVCar.getAGVComVar().unloadingString = message;
-			System.out.println("开始发送卸料指令" + this.NOOfAGV + "AGV");
+			AGVCar.stateString += ",开始发送卸料指令";
+			//System.out.println("开始发送卸料指令" + this.NOOfAGV + "AGV");
 			logger.debug("开始发送卸料指令" + this.NOOfAGV + "AGV");
 		}else if(message.equals("CC04DD")){//充电
 			AGVCar.getAGVComVar().sendChargeAGV = true;
 			AGVCar.getAGVComVar().chargeString = message;
-			System.out.println("开始发送充电指令" + this.NOOfAGV + "AGV");
+			AGVCar.stateString += ",开始发送充电指令";
+			//System.out.println("开始发送充电指令" + this.NOOfAGV + "AGV");
 			logger.debug("开始发送充电指令" + this.NOOfAGV + "AGV");
 		}else if(message.equals("CC05DD")||message.equals("CC06DD")){//正走
 			AGVCar.getAGVComVar().sendStartingToAGV = true;
 			AGVCar.getAGVComVar().startString = message;
-			System.out.println("开始发送运行指令" + message + this.NOOfAGV + "AGV");
+			AGVCar.stateString += ",开始发送运行指令";
+			//System.out.println("开始发送运行指令" + message + this.NOOfAGV + "AGV");
 			logger.debug("开始发送运行指令" + message + this.NOOfAGV + "AGV");
 		}else if(message.equals("CC07DD")){//加速
 			AGVCar.getAGVComVar().sendAccessToAGV = true;
 			AGVCar.getAGVComVar().accessString = message;
-			System.out.println("开始发送加速指令" + this.NOOfAGV + "AGV");
+			AGVCar.stateString += ",开始发送加速指令";
+			//System.out.println("开始发送加速指令" + this.NOOfAGV + "AGV");
 			logger.debug("开始发送加速指令" + this.NOOfAGV + "AGV");
 		}else if(message.equals("CC09DD")){
 			AGVCar.getAGVComVar().sendOffDutyToAGV = true;
 			AGVCar.getAGVComVar().offDutyString = message;
-			System.out.println("开始发送下班指令" + this.NOOfAGV + "AGV");
+			AGVCar.stateString += ",开始发送下班指令";
+			//System.out.println("开始发送下班指令" + this.NOOfAGV + "AGV");
 			logger.debug("开始发送下班指令" + this.NOOfAGV + "AGV");
 		}			
 		//System.out.println("开始发送动作指令" + this.NOOfAGV + "AGV");
@@ -135,13 +142,13 @@ public class ReceiveAGVMessage implements Runnable{
 				if((returnEdge.get(0).startNode.num == conflictEdgeArray.get(i).stratNodeNum && returnEdge.get(0).endNode.num == conflictEdgeArray.get(i).endNodeNum)
 						||(returnEdge.get(0).startNode.num == conflictEdgeArray.get(i).endNodeNum && returnEdge.get(0).endNode.num == conflictEdgeArray.get(i).stratNodeNum)){
 					AGVCar.getAGVComVar().conflictEdgeRockwell = conflictEdgeArray.get(i);
-					System.out.println("conflictEdgeRockwell"+ conflictEdgeArray.get(i).endNodeNum + "||" + conflictEdgeArray.get(i).stratNodeNum);
+					//System.out.println("conflictEdgeRockwell"+ conflictEdgeArray.get(i).endNodeNum + "||" + conflictEdgeArray.get(i).stratNodeNum);
 				}
 				if(returnEdge.size() == 2){
 					if((returnEdge.get(1).startNode.num == conflictEdgeArray.get(i).stratNodeNum && returnEdge.get(1).endNode.num == conflictEdgeArray.get(i).endNodeNum)
 							||(returnEdge.get(1).startNode.num == conflictEdgeArray.get(i).endNodeNum && returnEdge.get(1).endNode.num == conflictEdgeArray.get(i).stratNodeNum)){
 						AGVCar.getAGVComVar().conflictEdgeRockwell1 = conflictEdgeArray.get(i);
-						System.out.println("conflictEdgeRockwell1"+ conflictEdgeArray.get(i).endNodeNum + "||" + conflictEdgeArray.get(i).stratNodeNum);
+						//System.out.println("conflictEdgeRockwell1"+ conflictEdgeArray.get(i).endNodeNum + "||" + conflictEdgeArray.get(i).stratNodeNum);
 					}
 				}
 			}
@@ -168,7 +175,7 @@ public class ReceiveAGVMessage implements Runnable{
 				sendMessageToAGV();
 			}catch(Exception e){
 				e.printStackTrace();	
-				System.out.println(this.NOOfAGV + "AGV sendMessageToAGV Exception\n" + e);
+				//System.out.println(this.NOOfAGV + "AGV sendMessageToAGV Exception\n" + e);
 				logger.error(this.NOOfAGV + "AGV sendMessageToAGV Exception\n" + e);
 				logger.debug(this.NOOfAGV + "AGV sendMessageToAGV Exception\n" + e);
 			}
@@ -177,7 +184,7 @@ public class ReceiveAGVMessage implements Runnable{
 				receiveMessageFroAGV();
 			}catch(Exception e){
 				e.printStackTrace();
-				System.out.println(this.NOOfAGV + "AGV receiveMessageFroAGV Exception\n" + e);
+			//	System.out.println(this.NOOfAGV + "AGV receiveMessageFroAGV Exception\n" + e);
 				logger.error(this.NOOfAGV + "AGV receiveMessageFroAGV Exception\n" + e);				
 				logger.debug(this.NOOfAGV + "AGV receiveMessageFroAGV Exception\n" + e);			
 				try{
@@ -229,8 +236,10 @@ public class ReceiveAGVMessage implements Runnable{
 						if(!oldRunnable && (NOOfAGV <= AGVArray.size())){
 							if(AGVArray.get(NOOfAGV-1).getRunnable() != null ){
 								AGVArray.get(NOOfAGV-1).getRunnable().deleteFaultedAGV();
+								AGVArray.get(NOOfAGV-1).stateString = "通讯中断，但自动连上了";
+								logger.error(NOOfAGV + "AGV通讯中断，但自动连上了");
 							}
-							System.out.println(NOOfAGV +"AGV读卡时确定runnable");
+							//System.out.println(NOOfAGV +"AGV读卡时确定runnable");
 							logger.debug(NOOfAGV +"AGV读卡时确定runnable");
 							AGVArray.get(NOOfAGV-1).setRunnabel(this);
 							AGVCar = AGVArray.get(NOOfAGV-1);
@@ -238,7 +247,7 @@ public class ReceiveAGVMessage implements Runnable{
 							this.lastNOOfAGV = this.NOOfAGV;
 						}else{
 							if(this.lastNOOfAGV != this.NOOfAGV){
-								System.out.println(this.NOOfAGV + "||" + this.lastNOOfAGV + "AGV两次NOOfAGV居然不同！！！！！！！！！！");
+								//System.out.println(this.NOOfAGV + "||" + this.lastNOOfAGV + "AGV两次NOOfAGV居然不同！！！！！！！！！！");
 								logger.debug(this.NOOfAGV + "||" + this.lastNOOfAGV + "AGV两次NOOfAGV居然不同！！！！！！！！！！");
 								this.lastNOOfAGV = this.NOOfAGV;
 							}
@@ -283,6 +292,8 @@ public class ReceiveAGVMessage implements Runnable{
 						if(!oldRunnable && NOOfAGV <= AGVArray.size()){
 							if(AGVArray.get(NOOfAGV-1).getRunnable() != null ){
 								AGVArray.get(NOOfAGV-1).getRunnable().deleteFaultedAGV();
+								AGVArray.get(NOOfAGV-1).stateString = "通讯中断，但自动连上了";
+								logger.error(NOOfAGV + "AGV通讯中断，但自动连上了");
 							}
 							AGVArray.get(NOOfAGV-1).setRunnabel(this);
 							AGVCar = AGVArray.get(NOOfAGV-1);
@@ -319,6 +330,7 @@ public class ReceiveAGVMessage implements Runnable{
 									if(!AGVCar.initReady && !this.canNotStop){//直到停止才算初始化完成
 										AGVCar.initReady = true;
 										AGVCar.firstInit = true;
+										AGVCar.stateString = "初始化完成";
 										System.out.println(AGVCar.getAGVNum() + "AGV初始化完成");
 										logger.debug(AGVCar.getAGVNum() + "AGV初始化完成");
 										/*
@@ -403,7 +415,7 @@ public class ReceiveAGVMessage implements Runnable{
 								AGVCar.getAGVComVar().requartSend = false;
 								AGVCar.getAGVComVar().sendRouteToAGV = true;
 								this.AGVArray.get(this.NOOfAGV - 1).readyToLeft = true;
-								System.out.println("conflictEdgeRockwell1开始发送路径指令给" + this.NOOfAGV + "AGV");
+								//System.out.println("conflictEdgeRockwell1开始发送路径指令给" + this.NOOfAGV + "AGV");
 								if(AGVCar.getAGVComVar().AGVWiat){
 									AGVCar.getAGVComVar().AGVWiat = false;
 								}		
@@ -424,6 +436,7 @@ public class ReceiveAGVMessage implements Runnable{
 								AGVCar.getAGVComVar().AGVWiat = true;
 								if(AGVCar.getAGVComVar().firstWait){
 									AGVCar.getAGVComVar().firstWait = false;
+									AGVCar.stateString = "等待前方AGV通过";
 									System.out.println(this.NOOfAGV +"AGV wait conflictEdgeRockwell1");
 								}
 							}
@@ -450,6 +463,7 @@ public class ReceiveAGVMessage implements Runnable{
 								AGVCar.getAGVComVar().AGVWiat = true;
 								if(AGVCar.getAGVComVar().firstWait){
 									AGVCar.getAGVComVar().firstWait = false;
+									AGVCar.stateString = "等待前方AGV通过";
 									System.out.println(this.NOOfAGV +"AGV wait conflictEdgeRockwell");
 								}
 							}
@@ -473,6 +487,7 @@ public class ReceiveAGVMessage implements Runnable{
 								AGVCar.getAGVComVar().AGVWiat = true;
 								if(AGVCar.getAGVComVar().firstWait){
 									AGVCar.getAGVComVar().firstWait = false;
+									AGVCar.stateString = "等待前方AGV通过";
 									System.out.println(this.NOOfAGV +"AGV wait conflictEdgeRoute");
 								}
 							}
@@ -500,6 +515,7 @@ public class ReceiveAGVMessage implements Runnable{
 					}else{
 						AGVCar.getAGVComVar().AGVWiat = true;
 						if(AGVCar.getAGVComVar().firstWait){
+							AGVCar.stateString = "等待前方AGV通过";
 							System.out.println(this.NOOfAGV +"AGV wait node");
 							AGVCar.getAGVComVar().firstWait = false;
 						}
@@ -594,8 +610,8 @@ public class ReceiveAGVMessage implements Runnable{
 						if(!sendMessage.equals("BBBBBB")){
 							outputStream.write(myToolKit.HexString2Bytes(sendMessage));
 						}else{
-							System.out.println(sendMessage + "给//" + this.NOOfAGV + "AGV");
-							System.out.println(">>>>>>>>>>>>>>>>>//>>>>>>>>>>>>>>>>>>>>>");
+							//System.out.println(sendMessage + "给//" + this.NOOfAGV + "AGV");
+							//System.out.println(">>>>>>>>>>>>>>>>>//>>>>>>>>>>>>>>>>>>>>>");
 						}
 						//if(this.sendMessageStr.equals("CC05DD")|| this.sendMessageStr.equals("CC06DD"))
 							//System.out.print(this.sendMessageStr + "给" + this.NOOfAGV + "AGV");
@@ -670,6 +686,7 @@ public class ReceiveAGVMessage implements Runnable{
 			AGVCar.getAGVComVar().sendStopToAGV = false;
 			AGVCar.getAGVComVar().stopString = "BBBBBB";
 			this.canNotStop = true;
+			AGVCar.stateString = "命令AGV停止，但没停下来";
 			System.out.println(this.NOOfAGV + "AGV发送停止，但没停下来");
 			logger.debug(this.NOOfAGV + "AGV发送停止，但没停下来");
 			logger.error(this.NOOfAGV + "AGV发送停止，但没停下来");
@@ -719,7 +736,7 @@ public class ReceiveAGVMessage implements Runnable{
 	}
 	
 	public ArrayList<Edge> getConflictEdgeRockwell(ArrayList<Integer> routeNode){
-		ArrayList<Edge> returnEdge = new ArrayList();
+		ArrayList<Edge> returnEdge = new ArrayList<>();
 		int start = 0, end = 0;
 		int start1 = 0, end1 = 0;
 		if(routeNode.get(0)== 12 && routeNode.get(routeNode.size()-1) == 14){
@@ -736,7 +753,7 @@ public class ReceiveAGVMessage implements Runnable{
 			end = 25;
 		}else if(routeNode.get(0)== 29 && routeNode.get(routeNode.size()-1) == 27){
 			start = 28;
-			end = 11;
+			end = 58;
 		}else if(routeNode.get(0)== 33 && routeNode.get(routeNode.size()-1) == 31){
 			start = 30;
 			end = 32;
@@ -761,7 +778,7 @@ public class ReceiveAGVMessage implements Runnable{
 				end = 25;
 			}else if(routeNode.get(0) == 27){
 				start = 28;
-				end = 11;
+				end = 58;
 			}else if(routeNode.get(0) == 31){
 				start = 30;
 				end = 32;

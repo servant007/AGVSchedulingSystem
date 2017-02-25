@@ -56,10 +56,13 @@ public class ConflictNode {
 					public void run(){
 						System.out.println( number + "点让" + waitQueue.get(0).getAGVNum()+"AGV走");
 						logger.debug( number + "点让" + waitQueue.get(0).getAGVNum()+"AGV走");
-						if(rightOrLeft(waitQueue.get(0)))
+						if(rightOrLeft(waitQueue.get(0))){
 							waitQueue.get(0).getRunnable().SendActionMessage("CC05DD");//move有问题，如果边冲突还在的话
-						else
+							waitQueue.get(0).stateString = "命令AGV运行";
+						}else{
 							waitQueue.get(0).getRunnable().SendActionMessage("CC06DD");
+							waitQueue.get(0).stateString = "命令AGV运行";
+						}							
 					}
 				}, 5000, TimeUnit.MILLISECONDS);
 				logger.debug("没有或防冲突边第一辆，"+"让"+waitQueue.get(0).getAGVNum()+"号agv前进占用"+this.number+"点");

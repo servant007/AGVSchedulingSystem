@@ -71,13 +71,15 @@ public class AGVCar{
 		public boolean ReadyToOffDuty;
 		public boolean realyOffDuty;
 		public boolean AGVInit;
-		public int chargeTimerGep = 180000;
+		public int chargeDuration;
 		public boolean readyToLeft;
 		private PlayAudio playAudio;
 		private AGVComVar agvComVar;
+		public String stateString = " ";
 
 		public AGVCar(int AGVNum, Graph graph, ConflictDetection conflictDetection, PlayAudio playAudio){
 			//this.initReady = true;
+			this.chargeDuration = graph.getChargeDuration();
 			this.AGVInit = true;
 			this.agvComVar = new AGVComVar();
 			this.playAudio = playAudio;
@@ -119,7 +121,7 @@ public class AGVCar{
 			first = true;
 		}
 
-		public void stepForward(){
+		public void stepForward(){			
 			if(!finishEdge&& (state == State.FORWARD || state == State.BACKWARD)){
 				if(edge.startNode.x == edge.endNode.x){
 					if(edge.startNode.y < edge.endNode.y ){
@@ -189,6 +191,7 @@ public class AGVCar{
 			
 			if(this.removeCount == 2 && !this.startInInitNode && cardNum == graph.getExecuteCard()){
 				this.receiveAGVMessage.SendActionMessage("CC07DD");//加速指令
+				this.stateString = "加速";
 				System.out.println("发送加速指令");
 				logger.debug("发送加速指令");
 			}
@@ -231,6 +234,7 @@ public class AGVCar{
 							&& cardNum != 170 && cardNum != 50 && cardNum != 171 && cardNum != 107){
 						System.out.println(this.AGVNum + "跑出预定轨道" + cardNum);
 						logger.error(this.AGVNum + "跑出预定轨道" + cardNum);
+						this.stateString = "跑出预定轨道";
 						this.playAudio.continuePlay();
 					}
 				}
@@ -259,6 +263,7 @@ public class AGVCar{
 									logger.debug(this.AGVNum + "AGV上料");
 								}
 							}
+							
 							if(num < 16){
 								logger.debug(this.AGVNum + "AGV到位");
 								graph.getFunctionNodeArray().get(i).getReceiveStationMessage().SendMessage("CC0"+Integer.toHexString(num)+"07DD", this.AGVNum);//AGV到位
@@ -266,12 +271,13 @@ public class AGVCar{
 								logger.debug(this.AGVNum + "AGV到位");
 								graph.getFunctionNodeArray().get(i).getReceiveStationMessage().SendMessage("CC"+Integer.toHexString(num)+"07DD", this.AGVNum);
 							}
+							this.stateString = "到位，拉空托盘";
 						}else if(graph.getFunctionNodeArray().get(i).function == FunctionNodeEnum.CHARGE){
 							if(!this.ReadyToOffDuty){
 								graph.getFunctionNodeArray().get(i).getReceiveStationMessage().SendMessage("CC01DD", this.AGVNum);//
+								this.stateString = "到达充电桩";
 								System.out.println(this.AGVNum + "AGV到达充电桩");
-								logger.debug(this.AGVNum + "AGV到达充电桩");
-								
+								logger.debug(this.AGVNum + "AGV到达充电桩");								
 							}else{
 								//this.realyOffDuty = true;
 								this.AGVOffDuty();
@@ -443,6 +449,7 @@ public class AGVCar{
 			}else if(state == 3){//AGV上料完成，进托盘完成
 				System.out.println(this.AGVNum + "AGV上料完成，进托盘完成");
 				logger.debug(this.AGVNum + "AGV上料完成，进托盘完成");
+				this.stateString = "上料完成";
 				this.finishShipment = true;
 				this.checkFinishShipment = true;
 				if(this.multiDestination.size() == 0){
@@ -489,6 +496,7 @@ public class AGVCar{
 			}else if(state == 4){//AGV卸料完成
 				System.out.println(this.AGVNum + "AGV卸料完成，出托盘完成");
 				logger.debug(this.AGVNum + "AGV卸料完成，出托盘完成");
+				this.stateString = "卸料完成";
 				this.finishUnloading = true;
 				this.checkFinishUnloading = true;
 				if(this.multiDestination.size() == 0){
@@ -605,7 +613,7 @@ public class AGVCar{
 		}
 		
 		public void chargeTime(){
-			int time = this.chargeTimerGep;
+			int time = this.chargeDuration;
 			if(this.electricity == 1){
 				time = 1200000;
 			}else if(this.electricity == 2){

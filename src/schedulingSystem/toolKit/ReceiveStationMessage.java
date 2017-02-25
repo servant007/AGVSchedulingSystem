@@ -48,9 +48,13 @@ public class ReceiveStationMessage implements Runnable{
 	private int comTag;
 	private PlayAudio playAudio;
 	private long arriveInChargeStationTime;
+	private boolean runCircle;
+	private ManualModel manualMode;
 
 	public ReceiveStationMessage(Socket socket, Graph graph, ArrayList<AGVCar> AGVArray
-			, JLabel stateLabel, PlayAudio playAudio, ArrayList<AGVCar> sendMessageAGVArray){
+			, JLabel stateLabel, PlayAudio playAudio, ArrayList<AGVCar> sendMessageAGVArray, ManualModel manualModel){
+		this.manualMode = manualModel;
+		this.runCircle = true;
 		this.AGVArray = AGVArray;
 		this.socket = socket;
 		this.graph = graph;
@@ -124,27 +128,29 @@ public class ReceiveStationMessage implements Runnable{
 				this.sendMessageAGVArray.add(AGVArray.get(AGVNum-1));
 			//System.out.println(AGVNum + "AGV请求发送！！！！！！！！！！！！！！！！！！！");
 		}else{//AGVNum=0 不循环发
-			System.out.println("不循环发"+message);	
-			logger.debug("不循环发"+message);	
-			for(int i = 0; i < 60; i++){
-				timer.schedule(new TimerTask(){
-					public void run(){
-						try {
-							outputStream.write(myToolKit.HexString2Bytes(message));
-							//System.out.println(message);
-						} catch (IOException e) {							
-							e.printStackTrace();
-							logger.error(e);
-							//playAudio.continuePlay();
+			if(this.runCircle){
+				System.out.println("不循环发"+message);	
+				logger.debug("不循环发"+message);	
+				for(int i = 0; i < 60; i++){
+					timer.schedule(new TimerTask(){
+						public void run(){
+							try {
+								outputStream.write(myToolKit.HexString2Bytes(message));
+								//System.out.println(message);
+							} catch (IOException e) {							
+								e.printStackTrace();
+								logger.error(e);
+								//playAudio.continuePlay();
+							}
 						}
-					}
-				}, 200*i, TimeUnit.MILLISECONDS);
-			}
+					}, 200*i, TimeUnit.MILLISECONDS);
+				}
+			}			
 		}
 	}
 	
 	public void run(){
-		while(true){	
+		while(this.runCircle){	
 			for(int i = 0; i < this.sendMessageAGVArray.size(); i++){
 				if(this.sendMessageAGVArray.get(i).finishShipment || this.sendMessageAGVArray.get(i).finishUnloading){
 					System.out.println(this.sendMessageAGVArray.get(i).getAGVNum()+"AGV关闭发送到位/请求要料/请求进回收托盘信号！！！！！！！！！！！！！！！！！！！！！！！！");
@@ -243,7 +249,7 @@ public class ReceiveStationMessage implements Runnable{
 								}catch(Exception e1){
 									e1.printStackTrace();
 								}
-								break;
+								this.runCircle = false;//结束线程
 							}
 							this.lastCommunicationTime = System.currentTimeMillis();
 						}
@@ -266,11 +272,8 @@ public class ReceiveStationMessage implements Runnable{
 						inputStream.read(endCode);
 						message = myToolKit.printHexString(endCode);
 						
-						if(message.equals("CC")){
+						if(message.equals("CC") && !this.manualMode.state){
 							foundCC = true;
-						}else{
-							System.out.println("station开头数据错误：" + message);
-							logger.debug("station开头数据错误：" + message);
 						}
 					}
 					if(foundCC){
@@ -287,9 +290,7 @@ public class ReceiveStationMessage implements Runnable{
 							//System.out.println( communicationNum + "//"+signal);
 							for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
 								if(communicationNum == graph.getFunctionNodeArray().get(i).communicationNum){
-									if(graph.getFunctionNodeArray().get(i).getReceiveStationMessage() == null){
-										graph.getFunctionNodeArray().get(i).setReceiveStationMessage(this);
-									}
+									graph.getFunctionNodeArray().get(i).setReceiveStationMessage(this);
 									if(signal == 9){
 										if(!graph.getFunctionNodeArray().get(i).responsing)//未派遣
 											this.requestMaterielArray.add(i);
@@ -350,7 +351,7 @@ public class ReceiveStationMessage implements Runnable{
 				}catch(Exception e1){
 					e1.printStackTrace();
 				}
-				break;
+				this.runCircle = false;//结束线程
 			}
 		}
 		stateLabel.setFont(new Font("宋体", Font.BOLD, 30));

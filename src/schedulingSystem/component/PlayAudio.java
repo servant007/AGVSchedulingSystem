@@ -59,7 +59,7 @@ public class PlayAudio {
 				}
 				play = true;
 			}
-		}).start();
+		}, "playAudio").start();
 		
 	}
 	

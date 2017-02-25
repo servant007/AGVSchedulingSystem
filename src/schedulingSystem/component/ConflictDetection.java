@@ -82,6 +82,7 @@ public class ConflictDetection {
 			if(conflictNodeArray.get(checkNode-1).occupy && !nodeCarInWaitQueue){
 				conflictNodeArray.get(checkNode-1).waitQueue.add(agvCar);
 				agvCar.getRunnable().SendActionMessage("CC01DD");//马上停止
+				agvCar.stateString = "命令AGV停止";
 				logger.debug(checkNode + "点被"+ conflictNodeArray.get(checkNode-1).waitQueue.get(0).getAGVNum()+ "AGV占用，让"+agvCar.getAGVNum()+"AGV马上停止");
 				System.out.println(checkNode + "点被"+ conflictNodeArray.get(checkNode-1).waitQueue.get(0).getAGVNum()+ "AGV占用，让"+agvCar.getAGVNum()+"AGV马上停止");
 				
@@ -194,9 +195,11 @@ public class ConflictDetection {
 					if(((start == 9 && end == 10) || (start == 10 && end == 9)) && edge.occupy){
 						edge.waitQueue.add(agvCar);
 						agvCar.getRunnable().SendActionMessage("CC01DD");//马上停止
+						agvCar.stateString = "命令AGV停止";
 					}else{
 						this.edgeRockwell.waitQueue.add(agvCar);
 						agvCar.getRunnable().SendActionMessage("CC01DD");//马上停止
+						agvCar.stateString = "命令AGV停止";
 						logger.debug("edgeRockwell"+edgeRockwell.endNodeNum+"||"+edgeRockwell.stratNodeNum+"让"+agvCar.getAGVNum()+"AGV马上停止."
 									+ "被"+edgeRockwell.waitQueue.get(0)+"AGV占用");
 						System.out.println("edgeRockwell让"+agvCar.getAGVNum()+"AGV马上停止。"+ "被"+edgeRockwell.waitQueue.get(0).getAGVNum()+"AGV占用");
@@ -228,6 +231,7 @@ public class ConflictDetection {
 					edge.waitQueue.add(agvCar);
 					if(agvCar.getRouteNode().get(0) != 9){
 						agvCar.getRunnable().SendActionMessage("CC01DD");//马上停止
+						agvCar.stateString = "命令AGV停止";
 						logger.debug(start + "||" + end + "边被" + edge.waitQueue.get(0).getAGVNum() +"AGV占用,让"+agvCar.getAGVNum()+"AGV马上停止");
 						System.out.println(start + "||" + end + "边被" + edge.waitQueue.get(0).getAGVNum() +"AGV占用,让"+agvCar.getAGVNum()+"AGV马上停止");
 					}

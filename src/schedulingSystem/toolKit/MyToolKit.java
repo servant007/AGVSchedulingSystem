@@ -266,6 +266,14 @@ public class MyToolKit {
 				String executeCard = cell1.getContents();
 				graph.setStopCard(Integer.parseInt(stopCard));
 				graph.setExecuteCard(Integer.parseInt(executeCard));
+				
+				Sheet chargeTime = wb.getSheet("chargeTime");
+				Cell chargeTimeCell0 = chargeTime.getCell(0,0);
+				Cell chargeTimeCell1 = chargeTime.getCell(0,1);
+				String duration = chargeTimeCell0.getContents();
+				String gap = chargeTimeCell1.getContents();
+				graph.setChargeDuration(Integer.parseInt(duration));
+				graph.setChargeGap(Integer.parseInt(gap));
 					
 			}			
 		}catch(Exception e){
