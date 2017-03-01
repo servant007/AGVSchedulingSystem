@@ -78,7 +78,7 @@ public class MyToolKit {
 			if(graphGui){
 				g.setColor(Color.RED);
 				g.setFont(new Font("ËÎÌו", Font.BOLD, 30));
-				g.drawString(String.valueOf(i+1),graph.getNode(i).x + 10, graph.getNode(i).y - 10);
+				g.drawString(String.valueOf(i+1),graph.getNode(i).x + 10, graph.getNode(i).y - 10);//String.valueOf(i+1)
 			}
 			
 		}
@@ -123,7 +123,7 @@ public class MyToolKit {
 							,graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum - 1).y -30);
 					if(!graphGui){
 						g.setColor(Color.RED);
-						g.drawString(String.valueOf(graph.getFunctionNodeArray().get(i).communicationNum), graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum - 1).x-13
+						g.drawString(String.valueOf(graph.getFunctionNodeArray().get(i).nodeNum), graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum - 1).x-13
 								,graph.getNode(graph.getFunctionNodeArray().get(i).nodeNum - 1).y+10);
 					}
 					

@@ -235,7 +235,7 @@ public class AGVCar{
 						System.out.println(this.AGVNum + "跑出预定轨道" + cardNum);
 						logger.error(this.AGVNum + "跑出预定轨道" + cardNum);
 						this.stateString = "跑出预定轨道";
-						this.playAudio.continuePlay();
+						//this.playAudio.continuePlay();
 					}
 				}
 			}		

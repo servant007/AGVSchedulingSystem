@@ -272,7 +272,7 @@ public class ReceiveStationMessage implements Runnable{
 						inputStream.read(endCode);
 						message = myToolKit.printHexString(endCode);
 						
-						if(message.equals("CC") && !this.manualMode.state){
+						if(message.equals("CC")){
 							foundCC = true;
 						}
 					}
@@ -291,7 +291,7 @@ public class ReceiveStationMessage implements Runnable{
 							for(int i = 0; i < graph.getFunctionNodeArray().size(); i++){
 								if(communicationNum == graph.getFunctionNodeArray().get(i).communicationNum){
 									graph.getFunctionNodeArray().get(i).setReceiveStationMessage(this);
-									if(signal == 9){
+									if(signal == 9 && !this.manualMode.state){
 										if(!graph.getFunctionNodeArray().get(i).responsing)//Î´ÅÉÇ²
 											this.requestMaterielArray.add(i);
 										if(System.currentTimeMillis() - this.lastReceiveRequestMaterielTime > 5000 
@@ -301,7 +301,7 @@ public class ReceiveStationMessage implements Runnable{
 											this.requestMaterielArray.clear();
 											this.lastReceiveRequestMaterielTime = System.currentTimeMillis();
 										}
-									}else if(signal == 16){
+									}else if(signal == 16 && !this.manualMode.state){
 										if(!graph.getFunctionNodeArray().get(i).responsing)//Î´ÅÉÇ²
 											this.requestRecycleArray.add(i);
 										if(System.currentTimeMillis() - this.lastReceiveRequestRecycleTime > 5000

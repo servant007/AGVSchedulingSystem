@@ -337,7 +337,7 @@ public class SetingGui extends JPanel{
 					@Override
 					public void getFileName(String chargeDuration, String chargeGap, boolean buttonState){
 						dialog.dispose();
-						if(buttonState){
+						if(buttonState && chargeDuration.length() < 4 && chargeGap.length() < 4){
 							try{
 								File file = new File("C:\\Users\\agv\\Documents\\testGraph.xls");
 								InputStream inputStream = new FileInputStream(file.getPath());

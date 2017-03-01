@@ -7,6 +7,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -76,6 +77,7 @@ public class Main extends JFrame {
 
 	public static void main(String[] args) {
 		new Main();
+		logger.debug("max memory:"+Runtime.getRuntime().maxMemory());
 	}
 
 }

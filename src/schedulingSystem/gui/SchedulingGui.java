@@ -95,7 +95,7 @@ public class SchedulingGui extends JPanel{
 	private int foundAGVNum;
 	private boolean shipment;
 	private int shipmnetCount;
-	private int minChargeIndex;
+	private int minChargeIndex = -1;
 	private OnDutyBtn onDutyBtnState;
 	private ManualModel manualModel;
 	private java.util.Timer clearTimer;
@@ -131,7 +131,7 @@ public class SchedulingGui extends JPanel{
 			FileReader fr = new FileReader("C:\\Users\\agv\\Documents\\date.txt");
 			BufferedReader br = new BufferedReader(fr);//new InputStreamReader(this.getClass().getResourceAsStream("/date.txt"))
 			password = Long.parseLong(br.readLine());
-			System.out.println(password);
+			System.out.println("12:"+((20170318)^key));
 			br.close();
 		}catch(Exception e){
 			e.printStackTrace();

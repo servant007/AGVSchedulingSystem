@@ -201,7 +201,7 @@ public class ConflictDetection {
 						agvCar.getRunnable().SendActionMessage("CC01DD");//马上停止
 						agvCar.stateString = "命令AGV停止";
 						logger.debug("edgeRockwell"+edgeRockwell.endNodeNum+"||"+edgeRockwell.stratNodeNum+"让"+agvCar.getAGVNum()+"AGV马上停止."
-									+ "被"+edgeRockwell.waitQueue.get(0)+"AGV占用");
+									+ "被"+edgeRockwell.waitQueue.get(0).getAGVNum()+"AGV占用");
 						System.out.println("edgeRockwell让"+agvCar.getAGVNum()+"AGV马上停止。"+ "被"+edgeRockwell.waitQueue.get(0).getAGVNum()+"AGV占用");
 					}
 				}else{

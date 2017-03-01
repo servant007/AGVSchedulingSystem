@@ -204,7 +204,7 @@ public class ReceiveAGVMessage implements Runnable{
 		if(!this.deleteFaultedAGV){
 			this.AGVCar.setIsOnMission(true);
 			this.AGVCar.setMissionString("通讯中断");
-			this.playAudio.continuePlay();
+			//this.playAudio.continuePlay();
 			System.out.println(this.NOOfAGV + "AGVsocket 被结束");
 			logger.debug(this.NOOfAGV + "AGVsocket 被结束");
 		}	
